@@ -117,18 +117,8 @@
         </div>
       </div>
 
-      <!-- Header Action Controls -->
+      <!-- Header Action Controls (Minimalist & Clean) -->
       <div class="header-right">
-        <!-- Import CSV Button -->
-        <button type="button" class="btn btn-secondary btn-icon-text" id="btnOpenImportCSV" title="Bulk Import Chapters & Topics via CSV">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          <span>Import CSV</span>
-        </button>
-
         <!-- Upstash Cloud Status -->
         <button type="button" class="btn btn-secondary btn-icon-text cloud-status-btn" id="btnOpenUpstashModal" title="Live Upstash Redis cloud sync">
           <span class="cloud-status-indicator status-offline" id="cloudStatusDot"></span>
@@ -138,33 +128,13 @@
           <span id="cloudStatusLabel">Upstash Cloud</span>
         </button>
 
-        <!-- Master Key Admin -->
-        <button type="button" class="btn btn-secondary btn-icon-text" id="btnOpenMasterKeyModal" title="Regulate users with Master Key (thekey)">
+        <!-- Main Settings Button -->
+        <button type="button" class="btn btn-secondary btn-icon-text" id="btnOpenSettingsModal" title="Open Settings (Cloud, Master Key, CSV Import, Account)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="7.5" cy="15.5" r="5.5"></circle>
-            <path d="m21 2-9.6 9.6"></path>
-            <path d="m15.5 7.5 3 3"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
-          <span>Master Key</span>
-        </button>
-
-        <!-- Log Out -->
-        <button type="button" class="btn btn-ghost btn-icon-text" id="btnLogout" title="Log out to switch user">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
-          </svg>
-          <span>Log Out</span>
-        </button>
-
-        <!-- New Chapter -->
-        <button type="button" class="btn btn-primary btn-icon-text" id="btnOpenAddChapter">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          <span>New Chapter</span>
+          <span>Settings</span>
         </button>
       </div>
     </header>
@@ -176,7 +146,7 @@
       <section class="dashboard-section" aria-label="Peer Study Comparison Overview">
         <div class="stats-grid">
           
-          <!-- Primary User Stats Card -->
+          <!-- 1. Primary User Stats Card (Shahzeb) -->
           <div class="stat-card user-stat-card">
             <div class="stat-header">
               <div class="avatar-with-ring user-ring">
@@ -207,7 +177,38 @@
             </div>
           </div>
 
-          <!-- Peer Gap & Synergy Card -->
+          <!-- 2. Partner Stats Card (Aman) -->
+          <div class="stat-card friend-stat-card">
+            <div class="stat-header">
+              <div class="avatar-with-ring friend-ring">
+                <span class="stat-avatar friend-avatar" id="dashAvatarFriend">AM</span>
+              </div>
+              <div class="stat-title-wrap">
+                <span class="stat-owner-tag" id="dashTagFriend">Partner</span>
+                <h2 class="stat-owner-name" id="dashNameFriend">Aman</h2>
+              </div>
+              <div class="stat-badge friend-badge" id="dashPercentFriendBadge">0%</div>
+            </div>
+
+            <div class="progress-bar-container">
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill fill-friend" id="dashProgressBarFriend" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="stat-footer">
+              <div class="stat-metric">
+                <span class="metric-num" id="dashCountFriend">0 / 0</span>
+                <span class="metric-label">Topics Understood</span>
+              </div>
+              <div class="stat-metric align-right">
+                <span class="metric-num tag-friend-lead" id="dashFriendLead">+0</span>
+                <span class="metric-label">Topics Ahead</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Peer Gap & Synergy Card (After Shahzeb and Aman!) -->
           <div class="stat-card gap-stat-card">
             <div class="gap-card-header">
               <div class="gap-icon">
@@ -256,37 +257,6 @@
             </div>
           </div>
 
-          <!-- Partner Stats Card -->
-          <div class="stat-card friend-stat-card">
-            <div class="stat-header">
-              <div class="avatar-with-ring friend-ring">
-                <span class="stat-avatar friend-avatar" id="dashAvatarFriend">AM</span>
-              </div>
-              <div class="stat-title-wrap">
-                <span class="stat-owner-tag" id="dashTagFriend">Partner</span>
-                <h2 class="stat-owner-name" id="dashNameFriend">Aman</h2>
-              </div>
-              <div class="stat-badge friend-badge" id="dashPercentFriendBadge">0%</div>
-            </div>
-
-            <div class="progress-bar-container">
-              <div class="progress-bar-track">
-                <div class="progress-bar-fill fill-friend" id="dashProgressBarFriend" style="width: 0%"></div>
-              </div>
-            </div>
-
-            <div class="stat-footer">
-              <div class="stat-metric">
-                <span class="metric-num" id="dashCountFriend">0 / 0</span>
-                <span class="metric-label">Topics Understood</span>
-              </div>
-              <div class="stat-metric align-right">
-                <span class="metric-num tag-friend-lead" id="dashFriendLead">+0</span>
-                <span class="metric-label">Topics Ahead</span>
-              </div>
-            </div>
-          </div>
-
         </div>
       </section>
 
@@ -329,6 +299,14 @@
         </div>
 
         <div class="toolbar-actions">
+          <!-- Compact Add Chapter Button for Mobile & Desktop -->
+          <button type="button" class="btn btn-primary btn-sm btn-icon-text" id="btnOpenAddChapter" title="Create a new chapter">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>+ Chapter</span>
+          </button>
           <button type="button" class="btn btn-ghost btn-sm" id="btnToggleAllChapters" title="Expand or collapse all chapters">
             <span id="btnToggleAllText">Collapse All</span>
           </button>
@@ -483,282 +461,308 @@
     </div>
   </div>
 
-  <!-- Modal 3: Master Key Admin & User Regulation -->
-  <div class="modal-overlay hidden" id="modalMasterKeyAdmin" role="dialog" aria-modal="true" aria-labelledby="modalMasterKeyTitle">
-    <div class="modal-card">
+  <!-- Modal 3: Settings Hub (Cloud Sync, Master Key Regulator, Bulk CSV Import, Account) -->
+  <div class="modal-overlay hidden" id="modalSettings" role="dialog" aria-modal="true" aria-labelledby="modalSettingsTitle">
+    <div class="modal-card modal-large settings-hub-card">
       <div class="modal-header">
         <div class="modal-title-with-badge">
-          <span class="badge-tag">Master Key Security</span>
-          <h3 class="modal-title" id="modalMasterKeyTitle">Regulate Users & Keys</h3>
+          <span class="badge-tag">Preferences & Tools</span>
+          <h3 class="modal-title" id="modalSettingsTitle">Settings</h3>
         </div>
-        <button type="button" class="btn-close-modal" id="btnCloseModalMasterKey" aria-label="Close dialog">&times;</button>
+        <button type="button" class="btn-close-modal" id="btnCloseModalSettings" aria-label="Close dialog">&times;</button>
       </div>
 
-      <!-- Verification Step (if not yet unlocked) -->
-      <form id="formVerifyMasterKey" class="modal-form">
-        <p class="modal-subtitle">Enter the Master Key (<code>thekey</code>) to add users, change names, or update passcodes.</p>
-        <div class="form-group">
-          <label for="inputMasterKeyVerify">Master Key <span class="required">*</span></label>
-          <div class="password-input-wrap">
-            <input type="password" id="inputMasterKeyVerify" placeholder="Enter master key (default: thekey)" required autocomplete="off">
-            <button type="button" class="btn-toggle-token" id="btnToggleMasterVerifyKey">Show</button>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" id="btnCancelMasterKeyVerify">Cancel</button>
-          <button type="submit" class="btn btn-primary">Unlock Panel</button>
-        </div>
-      </form>
-
-      <!-- Panel Once Master Key is Unlocked -->
-      <div id="masterKeyAdminPanel" class="hidden">
-        <form id="formSaveUsersAdmin" class="modal-form">
-          <p class="modal-subtitle">Configure the two study partners. Each user gets their own login passcode so they can only check their own progress.</p>
-          
-          <!-- User 1 Config -->
-          <div class="profile-edit-card user-edit-box">
-            <div class="profile-header-sm">
-              <span class="persona-avatar user-avatar" id="adminAvatarUser">SH</span>
-              <h4>User 1 (Primary / You)</h4>
-            </div>
-            <div class="form-row">
-              <div class="form-group flex-2">
-                <label for="adminInputUserName">Name</label>
-                <input type="text" id="adminInputUserName" value="Shahzeb" maxlength="25" required>
-              </div>
-              <div class="form-group flex-1">
-                <label for="adminInputUserPin">Passcode</label>
-                <input type="text" id="adminInputUserPin" value="1234" maxlength="15" required>
-              </div>
-            </div>
-          </div>
-
-          <!-- User 2 Config -->
-          <div class="profile-edit-card friend-edit-box">
-            <div class="profile-header-sm">
-              <span class="persona-avatar friend-avatar" id="adminAvatarFriend">AM</span>
-              <h4>User 2 (Study Partner)</h4>
-            </div>
-            <div class="form-row">
-              <div class="form-group flex-2">
-                <label for="adminInputFriendName">Name</label>
-                <input type="text" id="adminInputFriendName" value="Aman" maxlength="25" required>
-              </div>
-              <div class="form-group flex-1">
-                <label for="adminInputFriendPin">Passcode</label>
-                <input type="text" id="adminInputFriendPin" value="1234" maxlength="15" required>
-              </div>
-            </div>
-          </div>
-
-          <!-- Master Key Configuration -->
-          <div class="form-group">
-            <label for="adminInputMasterKey">Update Master Key</label>
-            <input type="text" id="adminInputMasterKey" value="thekey" maxlength="30" required>
-            <span class="label-hint">Default is <code>thekey</code>. Used to open this admin regulator.</span>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" id="btnCloseMasterAdmin">Close</button>
-            <button type="submit" class="btn btn-primary">Save & Apply Changes</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal 4: Upstash Redis Cloud Sync -->
-  <div class="modal-overlay hidden" id="modalUpstash" role="dialog" aria-modal="true" aria-labelledby="modalUpstashTitle">
-    <div class="modal-card modal-large">
-      <div class="modal-header">
-        <div class="upstash-modal-title-wrap">
-          <div class="upstash-brand-row">
-            <span class="upstash-logo-badge">⚡ Upstash Redis</span>
-            <span class="badge-tag live-cloud-tag">Cloud Sync</span>
-          </div>
-          <h3 class="modal-title" id="modalUpstashTitle">Live Remote Sync Setup</h3>
-        </div>
-        <button type="button" class="btn-close-modal" id="btnCloseModalUpstash" aria-label="Close dialog">&times;</button>
+      <!-- Settings Hub Navigation Tabs -->
+      <div class="settings-tabs-nav" role="tablist">
+        <button type="button" class="settings-tab-btn active" id="settingsTabCloud" data-target="settingsPanelCloud" role="tab" aria-selected="true">
+          <span>⚡ Cloud Sync</span>
+        </button>
+        <button type="button" class="settings-tab-btn" id="settingsTabMaster" data-target="settingsPanelMaster" role="tab" aria-selected="false">
+          <span>🔑 Master Key</span>
+        </button>
+        <button type="button" class="settings-tab-btn" id="settingsTabCsv" data-target="settingsPanelCsv" role="tab" aria-selected="false">
+          <span>📥 Import CSV</span>
+        </button>
+        <button type="button" class="settings-tab-btn" id="settingsTabAccount" data-target="settingsPanelAccount" role="tab" aria-selected="false">
+          <span>👤 Account</span>
+        </button>
       </div>
 
-      <div class="upstash-modal-body">
-        
-        <!-- Live Connection Status Banner -->
-        <div class="cloud-status-banner status-banner-disconnected" id="upstashStatusBanner">
-          <div class="banner-status-left">
-            <span class="status-pulse-dot" id="bannerStatusDot"></span>
-            <div>
-              <span class="banner-status-title" id="bannerStatusTitle">Cloud Sync Disconnected</span>
-              <span class="banner-status-sub" id="bannerStatusSub">Currently storing progress locally in your browser.</span>
+      <div class="settings-panels-container">
+        <!-- Panel 1: Upstash Cloud Sync -->
+        <div class="settings-panel active" id="settingsPanelCloud" role="tabpanel">
+          <!-- Live Connection Status Banner -->
+          <div class="cloud-status-banner status-banner-disconnected" id="upstashStatusBanner">
+            <div class="banner-status-left">
+              <span class="status-pulse-dot" id="bannerStatusDot"></span>
+              <div>
+                <span class="banner-status-title" id="bannerStatusTitle">Cloud Sync Disconnected</span>
+                <span class="banner-status-sub" id="bannerStatusSub">Currently storing progress locally in your browser.</span>
+              </div>
             </div>
-          </div>
-          <span class="banner-last-sync" id="bannerLastSyncText">—</span>
-        </div>
-
-        <form id="formUpstash" class="modal-form-inline">
-          <div class="form-group">
-            <label for="inputUpstashUrl">
-              <span>Upstash REST URL</span> <span class="required">*</span>
-            </label>
-            <input type="url" id="inputUpstashUrl" placeholder="https://flowing-zebra-12345.upstash.io" autocomplete="off" spellcheck="false" required>
+            <span class="banner-last-sync" id="bannerLastSyncText">—</span>
           </div>
 
-          <div class="form-group">
-            <label for="inputUpstashToken">
-              <span>Upstash REST Token</span> <span class="required">*</span>
-            </label>
-            <div class="password-input-wrap">
-              <input type="password" id="inputUpstashToken" placeholder="AXXXXXXXXXXXXX..." autocomplete="off" spellcheck="false" required>
-              <button type="button" class="btn-toggle-token" id="btnToggleTokenVisibility">Show</button>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group flex-2">
-              <label for="inputUpstashRoom">
-                <span>Shared Room / Pair Key</span>
-                <span class="label-hint">(Both you and your partner must use the same key)</span>
+          <form id="formUpstash" class="modal-form-inline">
+            <div class="form-group">
+              <label for="inputUpstashUrl">
+                <span>Upstash REST URL</span> <span class="required">*</span>
               </label>
-              <input type="text" id="inputUpstashRoom" value="study-duo-room-1" placeholder="e.g. duo-dsa-track" maxlength="40">
+              <input type="url" id="inputUpstashUrl" placeholder="https://flowing-zebra-12345.upstash.io" autocomplete="off" spellcheck="false" required>
             </div>
-            <div class="form-group flex-1">
-              <label for="selectSyncInterval">Auto-Poll Rate</label>
-              <select id="selectSyncInterval">
-                <option value="5000">Every 5 seconds</option>
-                <option value="10000" selected>Every 10 seconds</option>
-                <option value="30000">Every 30 seconds</option>
-                <option value="manual">Manual only</option>
-              </select>
+
+            <div class="form-group">
+              <label for="inputUpstashToken">
+                <span>Upstash REST Token</span> <span class="required">*</span>
+              </label>
+              <div class="password-input-wrap">
+                <input type="password" id="inputUpstashToken" placeholder="AXXXXXXXXXXXXX..." autocomplete="off" spellcheck="false" required>
+                <button type="button" class="btn-toggle-token" id="btnToggleTokenVisibility">Show</button>
+              </div>
             </div>
+
+            <div class="form-row">
+              <div class="form-group flex-2">
+                <label for="inputUpstashRoom">
+                  <span>Shared Room / Pair Key</span>
+                  <span class="label-hint">(Both you and your partner must use the same key)</span>
+                </label>
+                <input type="text" id="inputUpstashRoom" value="study-duo-room-1" placeholder="e.g. duo-dsa-track" maxlength="40">
+              </div>
+              <div class="form-group flex-1">
+                <label for="selectSyncInterval">Auto-Poll Rate</label>
+                <select id="selectSyncInterval">
+                  <option value="5000">Every 5 seconds</option>
+                  <option value="10000" selected>Every 10 seconds</option>
+                  <option value="30000">Every 30 seconds</option>
+                  <option value="manual">Manual only</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="sync-toggles-box">
+              <label class="custom-checkbox">
+                <input type="checkbox" id="checkUpstashAutoSync" checked>
+                <span class="checkmark user-check"></span>
+                <span class="check-label"><strong>Real-time push:</strong> Automatically save to Upstash whenever I mark or edit a topic</span>
+              </label>
+            </div>
+
+            <div class="upstash-actions-grid">
+              <button type="submit" class="btn btn-primary" id="btnConnectUpstash">
+                <span>⚡ Connect & Sync</span>
+              </button>
+              <button type="button" class="btn btn-secondary" id="btnPushToUpstash" title="Force overwrite cloud with your local state">
+                <span>⬆️ Push Local to Cloud</span>
+              </button>
+              <button type="button" class="btn btn-secondary" id="btnPullFromUpstash" title="Fetch latest from cloud">
+                <span>⬇️ Pull from Cloud</span>
+              </button>
+              <button type="button" class="btn btn-secondary" id="btnCopyFriendCloudInvite" title="Copy an invite link with this room & credentials for your partner">
+                <span>🔗 Copy Partner Invite Link</span>
+              </button>
+              <button type="button" class="btn btn-ghost text-danger" id="btnDisconnectUpstash">
+                <span>Disconnect</span>
+              </button>
+            </div>
+          </form>
+
+          <details class="upstash-guide-accordion">
+            <summary class="guide-summary">
+              <span>ℹ️ How to get your free Upstash Redis credentials</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </summary>
+            <div class="guide-content">
+              <ol>
+                <li>Create a free account at <a href="https://console.upstash.com" target="_blank" rel="noopener noreferrer">console.upstash.com</a>.</li>
+                <li>Click <strong>"Create Database"</strong>, choose Redis, pick the region closest to you, and click <strong>Create</strong>.</li>
+                <li>Scroll down to the <strong>"REST API"</strong> section on your database dashboard.</li>
+                <li>Click on the <strong>JavaScript / Fetch</strong> tab.</li>
+                <li>Copy the <code>UPSTASH_REDIS_REST_URL</code> and <code>UPSTASH_REDIS_REST_TOKEN</code>.</li>
+              </ol>
+            </div>
+          </details>
+          <div class="modal-footer" style="margin-top: 1.25rem;">
+            <button type="button" class="btn btn-secondary" id="btnCloseUpstash">Close</button>
           </div>
-
-          <div class="sync-toggles-box">
-            <label class="custom-checkbox">
-              <input type="checkbox" id="checkUpstashAutoSync" checked>
-              <span class="checkmark user-check"></span>
-              <span class="check-label"><strong>Real-time push:</strong> Automatically save to Upstash whenever I mark or edit a topic</span>
-            </label>
-          </div>
-
-          <div class="upstash-actions-grid">
-            <button type="submit" class="btn btn-primary" id="btnConnectUpstash">
-              <span>⚡ Connect & Sync</span>
-            </button>
-            <button type="button" class="btn btn-secondary" id="btnPushToUpstash" title="Force overwrite cloud with your local state">
-              <span>⬆️ Push Local to Cloud</span>
-            </button>
-            <button type="button" class="btn btn-secondary" id="btnPullFromUpstash" title="Fetch latest from cloud">
-              <span>⬇️ Pull from Cloud</span>
-            </button>
-            <button type="button" class="btn btn-secondary" id="btnCopyFriendCloudInvite" title="Copy an invite link with this room & credentials for your partner">
-              <span>🔗 Copy Partner Invite Link</span>
-            </button>
-            <button type="button" class="btn btn-ghost text-danger" id="btnDisconnectUpstash">
-              <span>Disconnect</span>
-            </button>
-          </div>
-        </form>
-
-        <details class="upstash-guide-accordion">
-          <summary class="guide-summary">
-            <span>ℹ️ How to get your free Upstash Redis credentials</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-          </summary>
-          <div class="guide-content">
-            <ol>
-              <li>Create a free account at <a href="https://console.upstash.com" target="_blank" rel="noopener noreferrer">console.upstash.com</a>.</li>
-              <li>Click <strong>"Create Database"</strong>, choose Redis, pick the region closest to you, and click <strong>Create</strong>.</li>
-              <li>Scroll down to the <strong>"REST API"</strong> section on your database dashboard.</li>
-              <li>Click on the <strong>JavaScript / Fetch</strong> tab.</li>
-              <li>Copy the <code>UPSTASH_REDIS_REST_URL</code> and <code>UPSTASH_REDIS_REST_TOKEN</code>.</li>
-            </ol>
-          </div>
-        </details>
-
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="btnCloseUpstash">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal 5: Bulk Import Chapters & Topics via CSV -->
-  <div class="modal-overlay hidden" id="modalImportCSV" role="dialog" aria-modal="true" aria-labelledby="modalImportCSVTitle">
-    <div class="modal-card modal-large">
-      <div class="modal-header">
-        <div class="modal-title-with-badge">
-          <span class="badge-tag">Bulk Syllabus Import</span>
-          <h3 class="modal-title" id="modalImportCSVTitle">Import Chapters & Topics (CSV)</h3>
-        </div>
-        <button type="button" class="btn-close-modal" id="btnCloseModalCSV" aria-label="Close dialog">&times;</button>
-      </div>
-
-      <div class="modal-form">
-        <p class="modal-subtitle">
-          Add your entire syllabus at once instead of adding topics one by one! Upload a <code>.csv</code> file or paste CSV text directly.
-        </p>
-
-        <!-- CSV File Upload & Template Download -->
-        <div class="csv-upload-zone" id="csvDropZone">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          <span class="csv-zone-title">Tap to select CSV file</span>
-          <span class="csv-zone-sub">Supports Excel / Google Sheets exported .csv</span>
-          <input type="file" id="fileCsvInput" accept=".csv,.txt" class="hidden">
         </div>
 
-        <div class="csv-template-row">
-          <button type="button" class="btn btn-ghost btn-sm" id="btnDownloadCsvTemplate">
-            <span>📥 Download Sample CSV Template</span>
-          </button>
-          <button type="button" class="btn btn-ghost btn-sm" id="btnFillSampleCsv">
-            <span>📝 Paste Sample Data</span>
-          </button>
+        <!-- Panel 2: Master Key Regulator -->
+        <div class="settings-panel hidden" id="settingsPanelMaster" role="tabpanel">
+          <!-- Verification Step (if not yet unlocked) -->
+          <form id="formVerifyMasterKey" class="modal-form">
+            <p class="modal-subtitle">Enter the Master Key (<code>thekey</code>) to add users, change names, or update passcodes.</p>
+            <div class="form-group">
+              <label for="inputMasterKeyVerify">Master Key <span class="required">*</span></label>
+              <div class="password-input-wrap">
+                <input type="password" id="inputMasterKeyVerify" placeholder="Enter master key (default: thekey)" required autocomplete="off">
+                <button type="button" class="btn-toggle-token" id="btnToggleMasterVerifyKey">Show</button>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" id="btnCancelMasterKeyVerify">Cancel</button>
+              <button type="submit" class="btn btn-primary">Unlock Panel</button>
+            </div>
+          </form>
+
+          <!-- Panel Once Master Key is Unlocked -->
+          <div id="masterKeyAdminPanel" class="hidden">
+            <form id="formSaveUsersAdmin" class="modal-form">
+              <p class="modal-subtitle">Configure the two study partners. Each user gets their own login passcode so they can only check their own progress.</p>
+              
+              <!-- User 1 Config -->
+              <div class="profile-edit-card user-edit-box">
+                <div class="profile-header-sm">
+                  <span class="persona-avatar user-avatar" id="adminAvatarUser">SH</span>
+                  <h4>User 1 (Primary / You)</h4>
+                </div>
+                <div class="form-row">
+                  <div class="form-group flex-2">
+                    <label for="adminInputUserName">Name</label>
+                    <input type="text" id="adminInputUserName" value="Shahzeb" maxlength="25" required>
+                  </div>
+                  <div class="form-group flex-1">
+                    <label for="adminInputUserPin">Passcode</label>
+                    <input type="text" id="adminInputUserPin" value="1234" maxlength="15" required>
+                  </div>
+                </div>
+              </div>
+
+              <!-- User 2 Config -->
+              <div class="profile-edit-card friend-edit-box">
+                <div class="profile-header-sm">
+                  <span class="persona-avatar friend-avatar" id="adminAvatarFriend">AM</span>
+                  <h4>User 2 (Study Partner)</h4>
+                </div>
+                <div class="form-row">
+                  <div class="form-group flex-2">
+                    <label for="adminInputFriendName">Name</label>
+                    <input type="text" id="adminInputFriendName" value="Aman" maxlength="25" required>
+                  </div>
+                  <div class="form-group flex-1">
+                    <label for="adminInputFriendPin">Passcode</label>
+                    <input type="text" id="adminInputFriendPin" value="1234" maxlength="15" required>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Master Key Configuration -->
+              <div class="form-group">
+                <label for="adminInputMasterKey">Update Master Key</label>
+                <input type="text" id="adminInputMasterKey" value="thekey" maxlength="30" required>
+                <span class="label-hint">Default is <code>thekey</code>. Used to open this admin regulator.</span>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btnCloseMasterAdmin">Close</button>
+                <button type="submit" class="btn btn-primary">Save & Apply Changes</button>
+              </div>
+            </form>
+          </div>
         </div>
 
-        <!-- Direct CSV Text Paste Area -->
-        <div class="form-group">
-          <label for="textCsvInput">
-            <span>Or Paste CSV Text Directly:</span>
-          </label>
-          <textarea id="textCsvInput" rows="6" placeholder="Chapter,Topic,Difficulty,EstHours,Notes
+        <!-- Panel 3: Bulk CSV Syllabus Import -->
+        <div class="settings-panel hidden" id="settingsPanelCsv" role="tabpanel">
+          <div class="modal-form">
+            <p class="modal-subtitle">
+              Add your entire syllabus at once instead of adding topics one by one! Upload a <code>.csv</code> file or paste CSV text directly.
+            </p>
+
+            <!-- CSV File Upload & Template Download -->
+            <div class="csv-upload-zone" id="csvDropZone">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span class="csv-zone-title">Tap to select CSV file</span>
+              <span class="csv-zone-sub">Supports Excel / Google Sheets exported .csv</span>
+              <input type="file" id="fileCsvInput" accept=".csv,.txt" class="hidden">
+            </div>
+
+            <div class="csv-template-row">
+              <button type="button" class="btn btn-ghost btn-sm" id="btnDownloadCsvTemplate">
+                <span>📥 Download Sample CSV Template</span>
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm" id="btnFillSampleCsv">
+                <span>📝 Paste Sample Data</span>
+              </button>
+            </div>
+
+            <!-- Direct CSV Text Paste Area -->
+            <div class="form-group">
+              <label for="textCsvInput">
+                <span>Or Paste CSV Text Directly:</span>
+              </label>
+              <textarea id="textCsvInput" rows="5" placeholder="Chapter,Topic,Difficulty,EstHours,Notes
 Dynamic Programming,0/1 Knapsack,Medium,3,Standard 2D DP
 Dynamic Programming,Longest Common Subsequence,Medium,2.5,Matrix transition
 Graph Theory,Breadth First Search,Easy,1.5,Queue traversal
 Graph Theory,Dijkstra Algorithm,Hard,3,Priority Queue"></textarea>
-          <span class="label-hint">Columns supported: <code>Chapter, Topic, Difficulty, EstHours, Notes</code> (Only <code>Chapter, Topic</code> are required).</span>
-        </div>
+              <span class="label-hint">Columns supported: <code>Chapter, Topic, Difficulty, EstHours, Notes</code> (Only <code>Chapter, Topic</code> are required).</span>
+            </div>
 
-        <!-- Import Mode Toggle -->
-        <div class="import-options-card">
-          <span class="sub-label">Import Mode:</span>
-          <div class="radio-pill-group">
-            <label class="custom-radio">
-              <input type="radio" name="csvImportMode" value="append" checked>
-              <span>Append to existing chapters</span>
-            </label>
-            <label class="custom-radio">
-              <input type="radio" name="csvImportMode" value="replace">
-              <span class="text-danger">Replace all existing chapters</span>
-            </label>
+            <!-- Import Mode Toggle -->
+            <div class="import-options-card">
+              <span class="sub-label">Import Mode:</span>
+              <div class="radio-pill-group">
+                <label class="custom-radio">
+                  <input type="radio" name="csvImportMode" value="append" checked>
+                  <span>Append to existing chapters</span>
+                </label>
+                <label class="custom-radio">
+                  <input type="radio" name="csvImportMode" value="replace">
+                  <span class="text-danger">Replace all existing chapters</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Preview Count Badge -->
+            <div class="csv-parsed-summary hidden" id="csvParsedSummary">
+              <span class="summary-icon">✅</span>
+              <span id="csvSummaryText">Parsed 0 chapters and 0 topics</span>
+            </div>
+
+            <div class="modal-footer" style="margin-top: 1.25rem;">
+              <button type="button" class="btn btn-secondary" id="btnCancelCSV">Cancel</button>
+              <button type="button" class="btn btn-primary" id="btnExecuteCsvImport">
+                <span>Import All Topics</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Preview Count Badge -->
-        <div class="csv-parsed-summary hidden" id="csvParsedSummary">
-          <span class="summary-icon">✅</span>
-          <span id="csvSummaryText">Parsed 0 chapters and 0 topics</span>
-        </div>
-      </div>
+        <!-- Panel 4: Account & Switch User -->
+        <div class="settings-panel hidden" id="settingsPanelAccount" role="tabpanel">
+          <div class="modal-form">
+            <p class="modal-subtitle">Manage your active session and study identity.</p>
 
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="btnCancelCSV">Cancel</button>
-        <button type="button" class="btn btn-primary" id="btnExecuteCsvImport">
-          <span>Import All Topics</span>
-        </button>
+            <div class="account-session-card">
+              <div class="account-session-header">
+                <span class="persona-avatar user-avatar" id="settingsAccountUserAvatar">SH</span>
+                <div>
+                  <h4 id="settingsAccountUserName">Logged In User</h4>
+                  <span class="account-badge">Active Session</span>
+                </div>
+              </div>
+              <p class="account-notice-text">
+                🔒 <strong>Restricted Marking:</strong> You can only mark completion for your own topics. Your study partner must log in to their account to mark theirs.
+              </p>
+            </div>
+
+            <div class="modal-footer" style="margin-top: 1.5rem; justify-content: flex-start;">
+              <button type="button" class="btn btn-danger btn-icon-text" id="btnLogout" title="Log out to switch user">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                <span>Switch User / Log Out</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>

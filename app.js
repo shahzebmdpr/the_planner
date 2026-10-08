@@ -353,8 +353,21 @@ class AmanStudyTrackerApp {
     this.labelInitialSelf = document.getElementById('labelInitialSelf');
     this.modalTopicTitle = document.getElementById('modalTopicTitle');
 
-    // Master Key Admin Modal
-    this.modalMasterKeyAdmin = document.getElementById('modalMasterKeyAdmin');
+    // Unified Settings Hub Modal Elements
+    this.modalSettings = document.getElementById('modalSettings');
+    this.btnCloseModalSettings = document.getElementById('btnCloseModalSettings');
+    this.btnOpenSettingsModal = document.getElementById('btnOpenSettingsModal');
+    this.settingsTabBtns = document.querySelectorAll('.settings-tab-btn');
+    this.settingsPanels = document.querySelectorAll('.settings-panel');
+    this.settingsAccountUserName = document.getElementById('settingsAccountUserName');
+    this.settingsAccountUserAvatar = document.getElementById('settingsAccountUserAvatar');
+
+    // Compatibility references
+    this.modalMasterKeyAdmin = this.modalSettings;
+    this.modalUpstash = this.modalSettings;
+    this.modalImportCSV = this.modalSettings;
+
+    // Master Key Admin Form Elements
     this.btnCloseModalMasterKey = document.getElementById('btnCloseModalMasterKey');
     this.formVerifyMasterKey = document.getElementById('formVerifyMasterKey');
     this.inputMasterKeyVerify = document.getElementById('inputMasterKeyVerify');
@@ -374,7 +387,6 @@ class AmanStudyTrackerApp {
     // Upstash Cloud Sync Elements
     this.cloudStatusDot = document.getElementById('cloudStatusDot');
     this.cloudStatusLabel = document.getElementById('cloudStatusLabel');
-    this.modalUpstash = document.getElementById('modalUpstash');
     this.btnCloseModalUpstash = document.getElementById('btnCloseModalUpstash');
     this.btnCloseUpstash = document.getElementById('btnCloseUpstash');
     this.upstashStatusBanner = document.getElementById('upstashStatusBanner');
@@ -398,7 +410,6 @@ class AmanStudyTrackerApp {
     // Bulk CSV Import Modal Elements
     this.btnOpenImportCSV = document.getElementById('btnOpenImportCSV');
     this.btnEmptyImportCSV = document.getElementById('btnEmptyImportCSV');
-    this.modalImportCSV = document.getElementById('modalImportCSV');
     this.btnCloseModalCSV = document.getElementById('btnCloseModalCSV');
     this.btnCancelCSV = document.getElementById('btnCancelCSV');
     this.csvDropZone = document.getElementById('csvDropZone');
@@ -454,16 +465,46 @@ class AmanStudyTrackerApp {
       this.openMasterKeyModal();
     });
 
+    // Settings Hub Modal Events
+    if (this.btnOpenSettingsModal) {
+      this.btnOpenSettingsModal.addEventListener('click', () => this.openSettingsModal('settingsPanelCloud'));
+    }
+    if (this.btnCloseModalSettings) {
+      this.btnCloseModalSettings.addEventListener('click', () => this.modalSettings.classList.add('hidden'));
+    }
+    if (this.settingsTabBtns) {
+      this.settingsTabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-target');
+          this.switchSettingsTab(target);
+        });
+      });
+    }
+
     // Header Logout & Master Key
-    this.btnLogout.addEventListener('click', () => this.handleLogout());
-    this.btnOpenMasterKeyModal.addEventListener('click', () => this.openMasterKeyModal());
+    if (this.btnLogout) {
+      this.btnLogout.addEventListener('click', () => this.handleLogout());
+    }
+    if (this.btnOpenMasterKeyModal) {
+      this.btnOpenMasterKeyModal.addEventListener('click', () => this.openMasterKeyModal());
+    }
 
     // Master Key Modal
-    this.btnCloseModalMasterKey.addEventListener('click', () => this.modalMasterKeyAdmin.classList.add('hidden'));
-    this.btnCancelMasterKeyVerify.addEventListener('click', () => this.modalMasterKeyAdmin.classList.add('hidden'));
-    this.btnCloseMasterAdmin.addEventListener('click', () => this.modalMasterKeyAdmin.classList.add('hidden'));
-    this.formVerifyMasterKey.addEventListener('submit', (e) => this.handleVerifyMasterKey(e));
-    this.formSaveUsersAdmin.addEventListener('submit', (e) => this.handleSaveUsersAdmin(e));
+    if (this.btnCloseModalMasterKey) {
+      this.btnCloseModalMasterKey.addEventListener('click', () => this.modalSettings.classList.add('hidden'));
+    }
+    if (this.btnCancelMasterKeyVerify) {
+      this.btnCancelMasterKeyVerify.addEventListener('click', () => this.modalSettings.classList.add('hidden'));
+    }
+    if (this.btnCloseMasterAdmin) {
+      this.btnCloseMasterAdmin.addEventListener('click', () => this.modalSettings.classList.add('hidden'));
+    }
+    if (this.formVerifyMasterKey) {
+      this.formVerifyMasterKey.addEventListener('submit', (e) => this.handleVerifyMasterKey(e));
+    }
+    if (this.formSaveUsersAdmin) {
+      this.formSaveUsersAdmin.addEventListener('submit', (e) => this.handleSaveUsersAdmin(e));
+    }
 
     this.btnToggleMasterVerifyKey.addEventListener('click', () => {
       const isPass = this.inputMasterKeyVerify.type === 'password';
@@ -667,14 +708,53 @@ class AmanStudyTrackerApp {
   }
 
   handleLogout() {
+    if (this.modalSettings) {
+      this.modalSettings.classList.add('hidden');
+    }
     this.currentAuthUser = null;
     localStorage.removeItem(AUTH_USER_KEY);
     this.updateAuthUI();
     this.showToast('Logged out.', 'info');
   }
 
+  // ===================================================================
+  // Settings Hub System
+  // ===================================================================
+  switchSettingsTab(targetId) {
+    if (!this.settingsTabBtns || !this.settingsPanels) return;
+    this.settingsTabBtns.forEach(btn => {
+      const isTarget = btn.getAttribute('data-target') === targetId;
+      btn.classList.toggle('active', isTarget);
+      btn.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+    });
+    this.settingsPanels.forEach(panel => {
+      const isTarget = panel.id === targetId;
+      panel.classList.toggle('active', isTarget);
+      panel.classList.toggle('hidden', !isTarget);
+    });
+  }
+
+  openSettingsModal(tabId = 'settingsPanelCloud') {
+    if (!this.modalSettings) return;
+    this.switchSettingsTab(tabId);
+    this.modalSettings.classList.remove('hidden');
+    this.updateSettingsAccountUI();
+  }
+
+  updateSettingsAccountUI() {
+    if (!this.currentAuthUser) return;
+    const u = this.state.profiles[this.currentAuthUser];
+    if (this.settingsAccountUserName) {
+      this.settingsAccountUserName.textContent = u ? u.name : 'Learner';
+    }
+    if (this.settingsAccountUserAvatar) {
+      this.settingsAccountUserAvatar.textContent = u ? (u.initials || u.name.slice(0, 2).toUpperCase()) : 'ME';
+      this.settingsAccountUserAvatar.className = `persona-avatar ${this.currentAuthUser === 'user' ? 'user-avatar' : 'friend-avatar'}`;
+    }
+  }
+
   openMasterKeyModal() {
-    this.modalMasterKeyAdmin.classList.remove('hidden');
+    this.openSettingsModal('settingsPanelMaster');
     if (this.isMasterUnlocked) {
       this.formVerifyMasterKey.classList.add('hidden');
       this.masterKeyAdminPanel.classList.remove('hidden');
@@ -1548,7 +1628,7 @@ class AmanStudyTrackerApp {
     this.selectSyncInterval.value = String(this.upstash.pollInterval || 10000);
     this.checkUpstashAutoSync.checked = !!this.upstash.autoSync;
     this.updateUpstashStatusUI();
-    this.modalUpstash.classList.remove('hidden');
+    this.openSettingsModal('settingsPanelCloud');
   }
 
   async handleConnectUpstash(e) {
@@ -1820,8 +1900,7 @@ class AmanStudyTrackerApp {
   // ===================================================================
 
   openCsvModal() {
-    if (!this.modalImportCSV) return;
-    this.modalImportCSV.classList.remove('hidden');
+    this.openSettingsModal('settingsPanelCsv');
     if (this.textCsvInput) {
       this.updateCsvParsedPreview();
       this.textCsvInput.focus();
