@@ -1532,6 +1532,487 @@ class StudyTrackerApp {
   }
 
   // ===================================================================
+  // Upstash Redis Cloud Sync Methods
+  // ===================================================================
+  loadUpstashConfig() {
+    try {
+      const saved = localStorage.getItem(UPSTASH_CONFIG_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return Object.assign({
+          url: '',
+          token: '',
+          roomId: 'study-duo-room-1',
+          pollInterval: 10000,
+          autoSync: true,
+          isConnected: false,
+          lastSyncedAt: null
+        }, parsed);
+      }
+    } catch (e) {
+      console.warn('Failed to load Upstash config', e);
+    }
+    return {
+      url: '',
+      token: '',
+      roomId: 'study-duo-room-1',
+      pollInterval: 10000,
+      autoSync: true,
+      isConnected: false,
+      lastSyncedAt: null
+    };
+  }
+
+  saveUpstashConfig() {
+    try {
+      localStorage.setItem(UPSTASH_CONFIG_KEY, JSON.stringify(this.upstash));
+    } catch (e) {
+      console.error('Failed to save Upstash config', e);
+    }
+    this.updateUpstashStatusUI();
+  }
+
+  initUpstash() {
+    // Populate form fields
+    if (this.inputUpstashUrl) this.inputUpstashUrl.value = this.upstash.url || '';
+    if (this.inputUpstashToken) this.inputUpstashToken.value = this.upstash.token || '';
+    if (this.inputUpstashRoom) this.inputUpstashRoom.value = this.upstash.roomId || 'study-duo-room-1';
+    if (this.selectSyncInterval) this.selectSyncInterval.value = String(this.upstash.pollInterval || 10000);
+    if (this.checkUpstashAutoSync) this.checkUpstashAutoSync.checked = !!this.upstash.autoSync;
+
+    this.updateUpstashStatusUI();
+
+    // Auto-detect Vercel server-side API proxy
+    this.detectVercelAPI();
+
+    // If previously connected, resume polling and pull updates
+    if (this.upstash.isConnected && (this.upstash.useServerProxy || (this.upstash.url && this.upstash.token))) {
+      this.startSyncPolling();
+      this.pullFromUpstash(false);
+    }
+  }
+
+  /**
+   * Check if the Vercel /api/sync endpoint is available and configured.
+   * If so, enable server-side proxy mode (no client-side credentials needed).
+   */
+  async detectVercelAPI() {
+    try {
+      const res = await fetch('/api/sync?room=' + encodeURIComponent(this.upstash.roomId || 'study-duo-room-1'));
+      if (res.ok) {
+        const data = await res.json();
+        if (data.configured) {
+          this.upstash.useServerProxy = true;
+          this.upstash.isConnected = true;
+          this.upstash.lastSyncedAt = Date.now();
+          this.saveUpstashConfig();
+          this.startSyncPolling();
+          this.pullFromUpstash(false);
+          this.showToast('Auto-connected to Upstash via Vercel!', 'success');
+        }
+      }
+    } catch (e) {
+      // Not on Vercel or API not available — that's fine, user can connect manually
+    }
+  }
+
+  updateUpstashStatusUI(syncState = null) {
+    const isConn = !!this.upstash.isConnected;
+
+    // Header indicator
+    if (this.cloudStatusDot) {
+      this.cloudStatusDot.className = 'cloud-status-indicator ' + 
+        (syncState === 'syncing' ? 'status-syncing' : (isConn ? 'status-connected' : 'status-offline'));
+    }
+    if (this.cloudStatusLabel) {
+      this.cloudStatusLabel.textContent = syncState === 'syncing' 
+        ? 'Syncing...' 
+        : (isConn ? 'Cloud Live 🟢' : 'Upstash Cloud');
+    }
+
+    // Modal banner
+    if (this.upstashStatusBanner) {
+      this.upstashStatusBanner.className = 'cloud-status-banner ' + 
+        (isConn ? 'status-banner-connected' : 'status-banner-disconnected');
+    }
+    if (this.bannerStatusTitle) {
+      this.bannerStatusTitle.textContent = isConn 
+        ? `Connected to Room: ${this.upstash.roomId || 'Default'}` 
+        : 'Cloud Sync Disconnected';
+    }
+    if (this.bannerStatusSub) {
+      this.bannerStatusSub.textContent = isConn 
+        ? 'Live bidirectional sync with Upstash Redis active.' 
+        : 'Currently storing progress locally in browser.';
+    }
+    if (this.bannerLastSyncText) {
+      if (this.upstash.lastSyncedAt) {
+        const timeStr = new Date(this.upstash.lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        this.bannerLastSyncText.textContent = `Synced: ${timeStr}`;
+      } else {
+        this.bannerLastSyncText.textContent = isConn ? 'Synced just now' : '—';
+      }
+    }
+  }
+
+  openUpstashModal() {
+    this.inputUpstashUrl.value = this.upstash.url || '';
+    this.inputUpstashToken.value = this.upstash.token || '';
+    this.inputUpstashRoom.value = this.upstash.roomId || 'study-duo-room-1';
+    this.selectSyncInterval.value = String(this.upstash.pollInterval || 10000);
+    this.checkUpstashAutoSync.checked = !!this.upstash.autoSync;
+    this.updateUpstashStatusUI();
+    this.modalUpstash.classList.remove('hidden');
+  }
+
+  toggleTokenVisibility() {
+    const isPassword = this.inputUpstashToken.type === 'password';
+    this.inputUpstashToken.type = isPassword ? 'text' : 'password';
+    this.btnToggleTokenVisibility.textContent = isPassword ? 'Hide' : 'Show';
+  }
+
+  cleanUpstashUrl(url) {
+    if (!url) return '';
+    let cleaned = url.trim();
+    if (cleaned.endsWith('/')) {
+      cleaned = cleaned.slice(0, -1);
+    }
+    return cleaned;
+  }
+
+  async handleConnectUpstash(e) {
+    e.preventDefault();
+    const url = this.cleanUpstashUrl(this.inputUpstashUrl.value);
+    const token = this.inputUpstashToken.value.trim();
+    const roomId = this.inputUpstashRoom.value.trim() || 'study-duo-room-1';
+    const pollIntervalVal = this.selectSyncInterval.value;
+    const pollInterval = pollIntervalVal === 'manual' ? null : parseInt(pollIntervalVal, 10);
+    const autoSync = this.checkUpstashAutoSync.checked;
+
+    // If server proxy is available, use that instead of direct credentials
+    if (this.upstash.useServerProxy) {
+      this.upstash.roomId = roomId;
+      this.upstash.pollInterval = pollInterval;
+      this.upstash.autoSync = autoSync;
+      this.upstash.isConnected = true;
+      this.upstash.lastSyncedAt = Date.now();
+      this.saveUpstashConfig();
+      this.startSyncPolling();
+      await this.pullFromUpstash(false);
+      this.updateUpstashStatusUI();
+      this.showToast('Connected via server API!', 'success');
+      this.modalUpstash.classList.add('hidden');
+      return;
+    }
+
+    if (!url || !token) {
+      this.showToast('Please provide both Upstash URL and Token.', 'info');
+      return;
+    }
+
+    this.updateUpstashStatusUI('syncing');
+    this.showToast('Connecting to Upstash Redis...', 'info');
+
+    try {
+      // Test REST connection with PING
+      const testRes = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(['PING'])
+      });
+
+      if (!testRes.ok) {
+        throw new Error(`Upstash returned HTTP ${testRes.status}: ${testRes.statusText}`);
+      }
+
+      const pingData = await testRes.json();
+      if (pingData.error) {
+        throw new Error(pingData.error);
+      }
+
+      // Connection succeeded! Update config
+      this.upstash.url = url;
+      this.upstash.token = token;
+      this.upstash.roomId = roomId;
+      this.upstash.pollInterval = pollInterval;
+      this.upstash.autoSync = autoSync;
+      this.upstash.isConnected = true;
+      this.upstash.useServerProxy = false;
+      this.upstash.lastSyncedAt = Date.now();
+      this.saveUpstashConfig();
+
+      // Check if remote data already exists for this room
+      const getRes = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(['GET', `peertrack:${roomId}`])
+      });
+
+      const getData = await getRes.json();
+      if (getData.result) {
+        try {
+          const remoteObj = JSON.parse(getData.result);
+          if (remoteObj.state && remoteObj.state.chapters) {
+            const pullRemote = confirm(
+              `Found an existing study syllabus in Upstash for room "${roomId}"!\n\n` +
+              `Click OK to load the remote cloud syllabus,\n` +
+              `or Cancel to overwrite the cloud with your current local syllabus.`
+            );
+
+            if (pullRemote) {
+              this.state = remoteObj.state;
+              this.lastRemoteUpdatedAt = remoteObj.updatedAt || Date.now();
+              this.saveStateLocallyWithoutPush();
+              this.showToast('Loaded shared syllabus from Upstash cloud!', 'success');
+            } else {
+              await this.pushToUpstash(false);
+              this.showToast('Pushed current syllabus to Upstash cloud!', 'success');
+            }
+          } else {
+            await this.pushToUpstash(false);
+          }
+        } catch (parseErr) {
+          await this.pushToUpstash(false);
+        }
+      } else {
+        // No existing room data, push current state
+        await this.pushToUpstash(false);
+      }
+
+      this.startSyncPolling();
+      this.updateUpstashStatusUI();
+      this.showToast('Connected to Upstash Redis Cloud!', 'success');
+      this.modalUpstash.classList.add('hidden');
+    } catch (err) {
+      console.error('Upstash connection error:', err);
+      this.upstash.isConnected = false;
+      this.updateUpstashStatusUI();
+      alert(`Could not connect to Upstash Redis:\n${err.message}\n\nPlease check your REST URL and Token.`);
+    }
+  }
+
+  async pushToUpstash(notify = true) {
+    if (!this.upstash.isConnected) {
+      if (notify) this.showToast('Connect Upstash first to sync to cloud.', 'info');
+      return;
+    }
+
+    this.updateUpstashStatusUI('syncing');
+
+    try {
+      const payload = {
+        state: this.state,
+        updatedAt: Date.now(),
+        sender: this.state.profiles.user.name
+      };
+
+      let res;
+      if (this.upstash.useServerProxy) {
+        // Use Vercel server-side API proxy (credentials in env vars)
+        res = await fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ room: this.upstash.roomId, payload })
+        });
+      } else {
+        // Direct Upstash REST call (credentials in browser)
+        res = await fetch(this.upstash.url, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${this.upstash.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(['SET', `peertrack:${this.upstash.roomId}`, JSON.stringify(payload)])
+        });
+      }
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
+      this.upstash.lastSyncedAt = Date.now();
+      this.saveUpstashConfig();
+      this.updateUpstashStatusUI();
+
+      if (notify) {
+        this.showToast('Pushed latest study progress to Upstash!', 'success');
+      }
+    } catch (err) {
+      console.warn('Failed to push to Upstash', err);
+      this.updateUpstashStatusUI();
+      if (notify) {
+        this.showToast('Failed to push to cloud: ' + err.message, 'info');
+      }
+    }
+  }
+
+  async pullFromUpstash(notify = true) {
+    if (!this.upstash.isConnected || this.isSyncing) {
+      return;
+    }
+
+    this.isSyncing = true;
+
+    try {
+      let data;
+      if (this.upstash.useServerProxy) {
+        // Use Vercel server-side API proxy
+        const res = await fetch('/api/sync?room=' + encodeURIComponent(this.upstash.roomId));
+        if (res.ok) {
+          data = await res.json();
+          // Server returns { configured, result } where result is the raw string
+          if (data.result) {
+            data = { result: data.result };
+          }
+        }
+      } else {
+        // Direct Upstash REST call
+        const res = await fetch(this.upstash.url, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${this.upstash.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(['GET', `peertrack:${this.upstash.roomId}`])
+        });
+        if (res.ok) {
+          data = await res.json();
+        }
+      }
+
+      if (data && data.result) {
+        const remote = JSON.parse(data.result);
+        // Only apply if remote was updated after our last known pull
+        if (remote && remote.state && remote.updatedAt) {
+          const isNewer = remote.updatedAt > (this.lastRemoteUpdatedAt || 0);
+          const isDifferent = JSON.stringify(remote.state) !== JSON.stringify(this.state);
+
+          if (isNewer && isDifferent) {
+            this.state = remote.state;
+            this.lastRemoteUpdatedAt = remote.updatedAt;
+            this.saveStateLocallyWithoutPush();
+            this.showToast(`Updated from study buddy (${remote.sender || 'Cloud'})!`, 'info');
+          }
+        }
+      }
+      this.upstash.lastSyncedAt = Date.now();
+      this.updateUpstashStatusUI();
+      if (notify) {
+        this.showToast('Synced latest data from Upstash Cloud.', 'success');
+      }
+    } catch (err) {
+      console.warn('Failed to pull from Upstash', err);
+    } finally {
+      this.isSyncing = false;
+      this.updateUpstashStatusUI();
+    }
+  }
+
+  triggerAutoPush() {
+    clearTimeout(this.autoPushTimer);
+    this.autoPushTimer = setTimeout(() => {
+      this.pushToUpstash(false);
+    }, 400);
+  }
+
+  startSyncPolling() {
+    this.stopSyncPolling();
+    if (!this.upstash.pollInterval || this.upstash.pollInterval < 1000) {
+      return;
+    }
+    this.syncPollTimer = setInterval(() => {
+      // Only poll when the window/document is visible to save requests
+      if (!document.hidden && this.upstash.isConnected) {
+        this.pullFromUpstash(false);
+      }
+    }, this.upstash.pollInterval);
+  }
+
+  stopSyncPolling() {
+    if (this.syncPollTimer) {
+      clearInterval(this.syncPollTimer);
+      this.syncPollTimer = null;
+    }
+  }
+
+  disconnectUpstash() {
+    if (confirm('Disconnect from Upstash Cloud? Your data will remain safely stored locally in your browser.')) {
+      this.stopSyncPolling();
+      this.upstash.isConnected = false;
+      this.saveUpstashConfig();
+      this.updateUpstashStatusUI();
+      this.showToast('Disconnected from Upstash Cloud.', 'info');
+    }
+  }
+
+  copyCloudInviteLink() {
+    if (!this.upstash.url || !this.upstash.token) {
+      alert('Please connect your Upstash URL and Token first before copying an invite link.');
+      return;
+    }
+
+    try {
+      const inviteData = {
+        url: this.upstash.url,
+        token: this.upstash.token,
+        roomId: this.upstash.roomId || 'study-duo-room-1'
+      };
+      const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(inviteData)))));
+      const inviteUrl = `${window.location.origin}${window.location.pathname}#cloud=${encoded}`;
+
+      navigator.clipboard.writeText(inviteUrl).then(() => {
+        this.showToast('Copied Cloud Room invite link! Send it to your friend.', 'success');
+      }).catch(() => {
+        prompt('Copy this invite link for your friend:', inviteUrl);
+      });
+    } catch (err) {
+      console.error('Failed to create invite link', err);
+    }
+  }
+
+  checkUrlForCloudPayload() {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#cloud=')) {
+      try {
+        const encoded = hash.replace('#cloud=', '');
+        const jsonStr = decodeURIComponent(escape(atob(decodeURIComponent(encoded))));
+        const parsed = JSON.parse(jsonStr);
+
+        if (parsed.url && parsed.token && parsed.roomId) {
+          const accept = confirm(
+            `Your study buddy invited you to join Upstash Cloud Room: "${parsed.roomId}"!\n\n` +
+            `Would you like to connect and sync your study tracker live?`
+          );
+
+          if (accept) {
+            this.upstash.url = parsed.url;
+            this.upstash.token = parsed.token;
+            this.upstash.roomId = parsed.roomId;
+            this.upstash.isConnected = true;
+            this.upstash.autoSync = true;
+            // Switch persona to friend by default
+            this.state.activePersona = 'friend';
+            this.saveUpstashConfig();
+            this.saveStateLocallyWithoutPush();
+            this.startSyncPolling();
+            this.pullFromUpstash(true);
+            this.showToast(`Connected to room "${parsed.roomId}"! Welcome!`, 'success');
+            history.replaceState(null, document.title, window.location.pathname);
+          }
+        }
+      } catch (err) {
+        console.warn('Invalid cloud invite hash', err);
+      }
+    }
+  }
+
+  // ===================================================================
   // Celebration Confetti
   // ===================================================================
   triggerConfetti() {
