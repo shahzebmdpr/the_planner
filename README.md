@@ -6,6 +6,18 @@ Syncs in real-time across devices via **Upstash Redis** (serverless) and deploys
 
 ---
 
+## 🔐 User Authentication & Master Key Regulation
+
+- **Study Partners**: Pre-configured for **Shahzeb** and **Aman** (default passcodes: `1234`).
+- **Master Key**: `thekey` — unlocks the regulator panel to add users, change usernames, or update passcodes.
+- **Anti-Tampering Lock**: 
+  - When **Aman** logs in, Aman can **only** check/uncheck his own topics. Shahzeb's checkmarks are locked (`🔒`) and cannot be altered by Aman.
+  - When **Shahzeb** logs in, Shahzeb can **only** check/uncheck his own topics. Aman's checkmarks are locked (`🔒`) and cannot be altered by Shahzeb.
+  - Your ticked items remain 100% safe and un-disturbed!
+
+
+---
+
 ## 🚀 How to Deploy on Vercel via GitHub (Safely)
 
 Your `.env` file with secret keys will **never** be pushed to GitHub because `.gitignore` excludes it. Instead, you'll add the Upstash credentials securely directly inside the Vercel dashboard.

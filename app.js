@@ -1,18 +1,21 @@
 /**
- * PeerTrack — Dual Study & Topic Gap Analyzer
- * Collaborative tracker for chapters & sub-topics between two learners.
+ * PeerTrack — Minimalist Duo Study & Knowledge Gap Tracker
+ * Collaborative tracker for chapters & sub-topics between two learners
+ * with Master Key regulation and locked progress checkmarks.
  */
 
 // ===================================================================
-// Default Seed Datasets
+// Default Seed Dataset
 // ===================================================================
 
 const SEED_DATA_DSA = {
   profiles: {
-    user: { id: 'user', name: 'Alex', initials: 'ME' },
-    friend: { id: 'friend', name: 'Sam', initials: 'FR' }
+    user: { id: 'user', name: 'Shahzeb', initials: 'SH', pin: '1234' },
+    friend: { id: 'friend', name: 'Aman', initials: 'AM', pin: '1234' }
   },
-  activePersona: 'user',
+  auth: {
+    masterKey: 'thekey'
+  },
   chapters: [
     {
       id: 'chap-dp',
@@ -61,15 +64,15 @@ const SEED_DATA_DSA = {
     },
     {
       id: 'chap-graphs',
-      title: 'Graph Theory & Networks',
+      title: 'Graph Theory & Traversal',
       category: 'Algorithms',
-      description: 'Breadth/depth searches, shortest paths, minimum spanning trees and flow.',
-      color: 'cyan',
+      description: 'Shortest paths, minimum spanning trees, cycle detection, and topological sorting.',
+      color: 'emerald',
       topics: [
         {
           id: 'top-g-1',
-          title: 'Breadth-First Search & 2D Grid Shortest Path',
-          notes: 'Queue-based traversal; guarantees shortest unweighted paths.',
+          title: 'BFS & Shortest Path in Unweighted Graph',
+          notes: 'Queue-based traversal with visited set and level tracker.',
           difficulty: 'Easy',
           estHours: 1.5,
           userLearned: true,
@@ -77,8 +80,8 @@ const SEED_DATA_DSA = {
         },
         {
           id: 'top-g-2',
-          title: "Dijkstra's Algorithm with Min-Heap",
-          notes: 'Greedy non-negative edge relaxation with priority queue O((V + E) log V).',
+          title: "Dijkstra's Algorithm (Priority Queue)",
+          notes: 'Non-negative edge weights using min-heap. Time: O((V + E) log V).',
           difficulty: 'Medium',
           estHours: 3,
           userLearned: true,
@@ -86,8 +89,8 @@ const SEED_DATA_DSA = {
         },
         {
           id: 'top-g-3',
-          title: 'Topological Sort (Kahn’s Algorithm & DFS)',
-          notes: 'Track in-degrees of DAG vertices; detect cycles when queue empties early.',
+          title: 'Topological Sort (Kahn’s & DFS)',
+          notes: 'DAG ordering using in-degree array or post-order reverse DFS.',
           difficulty: 'Medium',
           estHours: 2,
           userLearned: false,
@@ -95,9 +98,9 @@ const SEED_DATA_DSA = {
         },
         {
           id: 'top-g-4',
-          title: 'Disjoint Set Union (DSU) with Path Compression',
-          notes: 'Find and Union with rank heuristic; virtually O(1) amortized alpha(n).',
-          difficulty: 'Hard',
+          title: 'Disjoint Set Union (DSU with Path Compression)',
+          notes: 'Find and union with rank. Nearly O(1) amortized alpha(N).',
+          difficulty: 'Medium',
           estHours: 2.5,
           userLearned: false,
           friendLearned: false
@@ -108,116 +111,34 @@ const SEED_DATA_DSA = {
       id: 'chap-trees',
       title: 'Binary Trees & BST',
       category: 'Data Structures',
-      description: 'Recursive divide-and-conquer, traversals, and self-balancing concepts.',
-      color: 'emerald',
+      description: 'Tree traversals, binary search tree properties, and tree DP.',
+      color: 'amber',
       topics: [
         {
           id: 'top-t-1',
-          title: 'Inorder, Preorder, Postorder Traversals',
-          notes: 'Both recursive and iterative using call-stack emulation.',
-          difficulty: 'Easy',
-          estHours: 1,
+          title: 'Lowest Common Ancestor (LCA)',
+          notes: 'Recursive check if target nodes reside in left/right subtrees.',
+          difficulty: 'Medium',
+          estHours: 2,
           userLearned: true,
           friendLearned: true
         },
         {
           id: 'top-t-2',
-          title: 'Lowest Common Ancestor (LCA)',
-          notes: 'In BST use values (left/right split); in generic Binary Tree check both subtrees.',
-          difficulty: 'Medium',
-          estHours: 2,
+          title: 'Serialize and Deserialize Binary Tree',
+          notes: 'Preorder traversal with null indicators or level order with queue.',
+          difficulty: 'Hard',
+          estHours: 3.5,
           userLearned: false,
-          friendLearned: true
+          friendLearned: false
         },
         {
           id: 'top-t-3',
-          title: 'Binary Search Tree Validation & Balancing',
-          notes: 'Must ensure each node is within range (minVal, maxVal).',
-          difficulty: 'Medium',
-          estHours: 2,
-          userLearned: true,
-          friendLearned: false
-        }
-      ]
-    }
-  ]
-};
-
-const SEED_DATA_WEBDEV = {
-  profiles: {
-    user: { id: 'user', name: 'Alex', initials: 'ME' },
-    friend: { id: 'friend', name: 'Sam', initials: 'FR' }
-  },
-  activePersona: 'user',
-  chapters: [
-    {
-      id: 'chap-web-front',
-      title: 'Modern Frontend Architecture',
-      category: 'Frontend',
-      description: 'Component lifecycles, state stores, hydration and CSS performance.',
-      color: 'indigo',
-      topics: [
-        {
-          id: 'top-wf-1',
-          title: 'DOM Event Delegation & Event Bubbling',
-          notes: 'Capturing vs target vs bubbling phases. Synthetic events under the hood.',
+          title: 'Diameter of Binary Tree',
+          notes: 'Longest path between any two nodes. Compute height while updating max.',
           difficulty: 'Easy',
-          estHours: 2,
+          estHours: 1,
           userLearned: true,
-          friendLearned: true
-        },
-        {
-          id: 'top-wf-2',
-          title: 'React Concurrent Mode & Server Components (RSC)',
-          notes: 'Streaming HTML, React Suspense boundary, and zero-bundle server logic.',
-          difficulty: 'Hard',
-          estHours: 4,
-          userLearned: false,
-          friendLearned: true
-        },
-        {
-          id: 'top-wf-3',
-          title: 'Web Core Vitals (LCP, FID/INP, CLS)',
-          notes: 'Optimizing font rendering, image sizes, and main-thread blocking tasks.',
-          difficulty: 'Medium',
-          estHours: 2,
-          userLearned: true,
-          friendLearned: false
-        }
-      ]
-    },
-    {
-      id: 'chap-web-back',
-      title: 'Backend Systems & API Design',
-      category: 'Backend',
-      description: 'REST, GraphQL, authentication protocols, and caching layers.',
-      color: 'rose',
-      topics: [
-        {
-          id: 'top-wb-1',
-          title: 'OAuth2 & JWT Token Rotation',
-          notes: 'Short-lived access token + HttpOnly secure cookie refresh tokens.',
-          difficulty: 'Medium',
-          estHours: 3,
-          userLearned: true,
-          friendLearned: false
-        },
-        {
-          id: 'top-wb-2',
-          title: 'Redis Caching & Cache Invalidation Strategies',
-          notes: 'Cache-aside, write-through, TTL and cache stampede protection.',
-          difficulty: 'Medium',
-          estHours: 3,
-          userLearned: false,
-          friendLearned: true
-        },
-        {
-          id: 'top-wb-3',
-          title: 'PostgreSQL Indexing (B-Tree, GIN) & Query Tuning',
-          notes: 'EXPLAIN ANALYZE, composite indexes, and index selectivity.',
-          difficulty: 'Hard',
-          estHours: 4,
-          userLearned: false,
           friendLearned: false
         }
       ]
@@ -225,80 +146,19 @@ const SEED_DATA_WEBDEV = {
   ]
 };
 
-const SEED_DATA_ML = {
-  profiles: {
-    user: { id: 'user', name: 'Alex', initials: 'ME' },
-    friend: { id: 'friend', name: 'Sam', initials: 'FR' }
-  },
-  activePersona: 'user',
-  chapters: [
-    {
-      id: 'chap-ml-math',
-      title: 'Mathematics for Machine Learning',
-      category: 'Foundations',
-      description: 'Linear algebra, matrix decomposition, gradients, and probability.',
-      color: 'purple',
-      topics: [
-        {
-          id: 'top-mlm-1',
-          title: 'Eigenvalues & Singular Value Decomposition (SVD)',
-          notes: 'Dimension reduction, PCA projections, and matrix rank estimation.',
-          difficulty: 'Hard',
-          estHours: 4,
-          userLearned: false,
-          friendLearned: true
-        },
-        {
-          id: 'top-mlm-2',
-          title: 'Multivariate Calculus & Chain Rule',
-          notes: 'Jacobians and Hessians for deep neural network gradient backpropagation.',
-          difficulty: 'Medium',
-          estHours: 3,
-          userLearned: true,
-          friendLearned: true
-        }
-      ]
-    },
-    {
-      id: 'chap-ml-deep',
-      title: 'Transformers & Large Language Models',
-      category: 'Deep Learning',
-      description: 'Self-attention, positional embeddings, decoding strategies and RAG.',
-      color: 'cyan',
-      topics: [
-        {
-          id: 'top-mld-1',
-          title: 'Multi-Head Scaled Dot-Product Attention',
-          notes: 'Attention(Q, K, V) = softmax(QK^T / sqrt(d_k)) * V.',
-          difficulty: 'Hard',
-          estHours: 4,
-          userLearned: true,
-          friendLearned: false
-        },
-        {
-          id: 'top-mld-2',
-          title: 'Retrieval Augmented Generation (RAG)',
-          notes: 'Vector embeddings, chunking strategies, hybrid search, and reranking.',
-          difficulty: 'Medium',
-          estHours: 3,
-          userLearned: false,
-          friendLearned: true
-        }
-      ]
-    }
-  ]
-};
+const STORAGE_KEY = 'peertrack_collaborative_planner_v2';
+const UPSTASH_STORAGE_KEY = 'peertrack_upstash_config_v2';
+const AUTH_USER_KEY = 'peertrack_auth_user';
 
 // ===================================================================
-// App State Management
+// Main Application Class
 // ===================================================================
 
-const STORAGE_KEY = 'peertrack_study_planner_state_v1';
-const UPSTASH_CONFIG_KEY = 'peertrack_upstash_config_v1';
-
-class StudyTrackerApp {
+class PeerTrackApp {
   constructor() {
     this.state = this.loadState();
+    this.currentAuthUser = localStorage.getItem(AUTH_USER_KEY); // 'user' or 'friend'
+    this.isMasterUnlocked = false;
     this.activeFilter = 'all';
     this.searchQuery = '';
     this.collapsedChapters = new Set();
@@ -308,31 +168,62 @@ class StudyTrackerApp {
     this.lastLocalUpdatedAt = Date.now();
     this.lastRemoteUpdatedAt = 0;
     this.isSyncing = false;
+
     this.initElements();
     this.attachEvents();
     this.initUpstash();
-    this.checkUrlForSharePayload();
     this.checkUrlForCloudPayload();
-    this.render();
+
+    // Check auth status
+    if (this.currentAuthUser && this.state.profiles[this.currentAuthUser]) {
+      this.updateAuthUI();
+      this.render();
+    } else {
+      this.currentAuthUser = null;
+      this.renderLoginScreen();
+    }
   }
 
   // Load state from localStorage or use default seed
   loadState() {
+    let state = null;
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.chapters && parsed.profiles) {
-          return parsed;
-        }
+        state = JSON.parse(saved);
       }
     } catch (e) {
       console.warn('Failed to parse saved state:', e);
     }
-    return JSON.parse(JSON.stringify(SEED_DATA_DSA));
+
+    if (!state || !state.chapters || !state.profiles) {
+      state = JSON.parse(JSON.stringify(SEED_DATA_DSA));
+    }
+
+    // Ensure profiles & auth exist
+    if (!state.profiles) state.profiles = {};
+    if (!state.profiles.user) state.profiles.user = { id: 'user', name: 'Shahzeb', initials: 'SH', pin: '1234' };
+    if (!state.profiles.friend) state.profiles.friend = { id: 'friend', name: 'Aman', initials: 'AM', pin: '1234' };
+
+    // Migrate old names if default
+    if (state.profiles.user.name === 'Alex' || !state.profiles.user.name) {
+      state.profiles.user.name = 'Shahzeb';
+      state.profiles.user.initials = 'SH';
+    }
+    if (state.profiles.friend.name === 'Sam' || !state.profiles.friend.name) {
+      state.profiles.friend.name = 'Aman';
+      state.profiles.friend.initials = 'AM';
+    }
+    if (!state.profiles.user.pin) state.profiles.user.pin = '1234';
+    if (!state.profiles.friend.pin) state.profiles.friend.pin = '1234';
+
+    if (!state.auth) state.auth = { masterKey: 'thekey' };
+    if (!state.auth.masterKey) state.auth.masterKey = 'thekey';
+
+    return state;
   }
 
-  // Save current state to localStorage and broadcast
+  // Save current state to localStorage and Upstash
   saveState() {
     this.lastLocalUpdatedAt = Date.now();
     try {
@@ -346,7 +237,6 @@ class StudyTrackerApp {
     }
   }
 
-  // Save state from cloud pull without echoing back push
   saveStateLocallyWithoutPush() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
@@ -358,16 +248,31 @@ class StudyTrackerApp {
 
   // DOM Elements initialization
   initElements() {
-    // Header & Persona
-    this.btnPersonaUser = document.getElementById('btnPersonaUser');
-    this.btnPersonaFriend = document.getElementById('btnPersonaFriend');
-    this.avatarUser = document.getElementById('avatarUser');
-    this.avatarFriend = document.getElementById('avatarFriend');
-    this.labelUserName = document.getElementById('labelUserName');
-    this.labelFriendName = document.getElementById('labelFriendName');
+    // Auth & Views
+    this.loginScreen = document.getElementById('loginScreen');
+    this.mainAppLayout = document.getElementById('mainAppLayout');
+    this.formLogin = document.getElementById('formLogin');
+    this.cardSelectUser = document.getElementById('cardSelectUser');
+    this.cardSelectFriend = document.getElementById('cardSelectFriend');
+    this.loginNameUser = document.getElementById('loginNameUser');
+    this.loginNameFriend = document.getElementById('loginNameFriend');
+    this.loginAvatarUser = document.getElementById('loginAvatarUser');
+    this.loginAvatarFriend = document.getElementById('loginAvatarFriend');
+    this.inputLoginPin = document.getElementById('inputLoginPin');
+    this.btnToggleLoginPin = document.getElementById('btnToggleLoginPin');
+    this.btnTriggerMasterFromLogin = document.getElementById('btnTriggerMasterFromLogin');
+
+    // Header Elements
+    this.headerUserName = document.getElementById('headerUserName');
+    this.headerUserAvatar = document.getElementById('headerUserAvatar');
+    this.btnLogout = document.getElementById('btnLogout');
+    this.btnOpenMasterKeyModal = document.getElementById('btnOpenMasterKeyModal');
+    this.btnOpenUpstashModal = document.getElementById('btnOpenUpstashModal');
+    this.btnOpenAddChapter = document.getElementById('btnOpenAddChapter');
 
     // Dashboard Cards
     this.dashAvatarUser = document.getElementById('dashAvatarUser');
+    this.dashTagUser = document.getElementById('dashTagUser');
     this.dashNameUser = document.getElementById('dashNameUser');
     this.dashPercentUserBadge = document.getElementById('dashPercentUserBadge');
     this.dashProgressBarUser = document.getElementById('dashProgressBarUser');
@@ -375,6 +280,7 @@ class StudyTrackerApp {
     this.dashUserLead = document.getElementById('dashUserLead');
 
     this.dashAvatarFriend = document.getElementById('dashAvatarFriend');
+    this.dashTagFriend = document.getElementById('dashTagFriend');
     this.dashNameFriend = document.getElementById('dashNameFriend');
     this.dashPercentFriendBadge = document.getElementById('dashPercentFriendBadge');
     this.dashProgressBarFriend = document.getElementById('dashProgressBarFriend');
@@ -396,22 +302,16 @@ class StudyTrackerApp {
     this.topicSearchInput = document.getElementById('topicSearchInput');
     this.btnClearSearch = document.getElementById('btnClearSearch');
     this.filterPillsContainer = document.getElementById('filterPillsContainer');
+    this.filterLabelFriendOnly = document.getElementById('filterLabelFriendOnly');
+    this.filterLabelUserOnly = document.getElementById('filterLabelUserOnly');
     this.pillCountAll = document.getElementById('pillCountAll');
     this.pillCountFriendOnly = document.getElementById('pillCountFriendOnly');
     this.pillCountUserOnly = document.getElementById('pillCountUserOnly');
     this.pillCountBoth = document.getElementById('pillCountBoth');
     this.pillCountNeither = document.getElementById('pillCountNeither');
-
     this.btnToggleAllChapters = document.getElementById('btnToggleAllChapters');
     this.btnToggleAllText = document.getElementById('btnToggleAllText');
-    this.btnQuickOptions = document.getElementById('btnQuickOptions');
-    this.quickOptionsMenu = document.getElementById('quickOptionsMenu');
-    this.btnLoadDSA = document.getElementById('btnLoadDSA');
-    this.btnLoadWebDev = document.getElementById('btnLoadWebDev');
-    this.btnLoadML = document.getElementById('btnLoadML');
-    this.btnClearAllData = document.getElementById('btnClearAllData');
 
-    // Active filter banner
     this.filterNoticeBanner = document.getElementById('filterNoticeBanner');
     this.filterNoticeText = document.getElementById('filterNoticeText');
     this.btnResetFilter = document.getElementById('btnResetFilter');
@@ -420,12 +320,11 @@ class StudyTrackerApp {
     this.chaptersContainer = document.getElementById('chaptersContainer');
     this.emptyStateContainer = document.getElementById('emptyStateContainer');
     this.btnEmptyAddChapter = document.getElementById('btnEmptyAddChapter');
-    this.btnEmptyLoadSample = document.getElementById('btnEmptyLoadSample');
 
     // Modals
+    // Chapter Modal
     this.modalChapter = document.getElementById('modalChapter');
     this.formChapter = document.getElementById('formChapter');
-    this.btnOpenAddChapter = document.getElementById('btnOpenAddChapter');
     this.btnCloseModalChapter = document.getElementById('btnCloseModalChapter');
     this.btnCancelChapter = document.getElementById('btnCancelChapter');
     this.inputChapterId = document.getElementById('inputChapterId');
@@ -434,6 +333,7 @@ class StudyTrackerApp {
     this.inputChapterCategory = document.getElementById('inputChapterCategory');
     this.modalChapterTitle = document.getElementById('modalChapterTitle');
 
+    // Topic Modal
     this.modalTopic = document.getElementById('modalTopic');
     this.formTopic = document.getElementById('formTopic');
     this.btnCloseModalTopic = document.getElementById('btnCloseModalTopic');
@@ -446,46 +346,28 @@ class StudyTrackerApp {
     this.selectTopicDifficulty = document.getElementById('selectTopicDifficulty');
     this.inputTopicEstTime = document.getElementById('inputTopicEstTime');
     this.checkInitialUserLearned = document.getElementById('checkInitialUserLearned');
-    this.checkInitialFriendLearned = document.getElementById('checkInitialFriendLearned');
-    this.labelInitialUser = document.getElementById('labelInitialUser');
-    this.labelInitialFriend = document.getElementById('labelInitialFriend');
+    this.labelInitialSelf = document.getElementById('labelInitialSelf');
     this.modalTopicTitle = document.getElementById('modalTopicTitle');
 
-    // Settings Modal
-    this.modalSettings = document.getElementById('modalSettings');
-    this.btnSettingsModal = document.getElementById('btnSettingsModal');
-    this.btnCloseModalSettings = document.getElementById('btnCloseModalSettings');
-    this.btnCancelSettings = document.getElementById('btnCancelSettings');
-    this.formSettings = document.getElementById('formSettings');
-    this.inputUserName = document.getElementById('inputUserName');
-    this.inputUserInitials = document.getElementById('inputUserInitials');
-    this.inputFriendName = document.getElementById('inputFriendName');
-    this.inputFriendInitials = document.getElementById('inputFriendInitials');
-    this.settingsPreviewAvatarUser = document.getElementById('settingsPreviewAvatarUser');
-    this.settingsPreviewAvatarFriend = document.getElementById('settingsPreviewAvatarFriend');
-
-    // Share & Sync Modal
-    this.modalShare = document.getElementById('modalShare');
-    this.btnShareModal = document.getElementById('btnShareModal');
-    this.btnCloseModalShare = document.getElementById('btnCloseModalShare');
-    this.btnCloseShare = document.getElementById('btnCloseShare');
-    this.shareUrlInput = document.getElementById('shareUrlInput');
-    this.btnCopyShareUrl = document.getElementById('btnCopyShareUrl');
-    this.btnCopyText = document.getElementById('btnCopyText');
-    this.btnExportJSON = document.getElementById('btnExportJSON');
-    this.fileImportJSON = document.getElementById('fileImportJSON');
-
-    // Comparison Matrix Modal
-    this.modalMatrix = document.getElementById('modalMatrix');
-    this.btnComparisonMatrix = document.getElementById('btnComparisonMatrix');
-    this.btnCloseModalMatrix = document.getElementById('btnCloseModalMatrix');
-    this.btnCloseMatrix = document.getElementById('btnCloseMatrix');
-    this.matrixTableBody = document.getElementById('matrixTableBody');
-    this.thMatrixUser = document.getElementById('thMatrixUser');
-    this.thMatrixFriend = document.getElementById('thMatrixFriend');
+    // Master Key Admin Modal
+    this.modalMasterKeyAdmin = document.getElementById('modalMasterKeyAdmin');
+    this.btnCloseModalMasterKey = document.getElementById('btnCloseModalMasterKey');
+    this.formVerifyMasterKey = document.getElementById('formVerifyMasterKey');
+    this.inputMasterKeyVerify = document.getElementById('inputMasterKeyVerify');
+    this.btnToggleMasterVerifyKey = document.getElementById('btnToggleMasterVerifyKey');
+    this.btnCancelMasterKeyVerify = document.getElementById('btnCancelMasterKeyVerify');
+    this.masterKeyAdminPanel = document.getElementById('masterKeyAdminPanel');
+    this.formSaveUsersAdmin = document.getElementById('formSaveUsersAdmin');
+    this.adminAvatarUser = document.getElementById('adminAvatarUser');
+    this.adminInputUserName = document.getElementById('adminInputUserName');
+    this.adminInputUserPin = document.getElementById('adminInputUserPin');
+    this.adminAvatarFriend = document.getElementById('adminAvatarFriend');
+    this.adminInputFriendName = document.getElementById('adminInputFriendName');
+    this.adminInputFriendPin = document.getElementById('adminInputFriendPin');
+    this.adminInputMasterKey = document.getElementById('adminInputMasterKey');
+    this.btnCloseMasterAdmin = document.getElementById('btnCloseMasterAdmin');
 
     // Upstash Cloud Sync Elements
-    this.btnOpenUpstashModal = document.getElementById('btnOpenUpstashModal');
     this.cloudStatusDot = document.getElementById('cloudStatusDot');
     this.cloudStatusLabel = document.getElementById('cloudStatusLabel');
     this.modalUpstash = document.getElementById('modalUpstash');
@@ -509,16 +391,15 @@ class StudyTrackerApp {
     this.btnCopyFriendCloudInvite = document.getElementById('btnCopyFriendCloudInvite');
     this.btnDisconnectUpstash = document.getElementById('btnDisconnectUpstash');
 
-    // Toast Container & Canvas
+    // Toast Container
     this.toastContainer = document.getElementById('toastContainer');
-    this.confettiCanvas = document.getElementById('confettiCanvas');
   }
 
   // ===================================================================
   // Event Listeners
   // ===================================================================
   attachEvents() {
-    // Tab Sync: Keep changes in sync across open tabs in real-time
+    // Tab Sync
     window.addEventListener('storage', (event) => {
       if (event.key === STORAGE_KEY && event.newValue) {
         try {
@@ -531,9 +412,45 @@ class StudyTrackerApp {
       }
     });
 
-    // Persona switcher
-    this.btnPersonaUser.addEventListener('click', () => this.setActivePersona('user'));
-    this.btnPersonaFriend.addEventListener('click', () => this.setActivePersona('friend'));
+    // Login Form Events
+    this.formLogin.addEventListener('submit', (e) => this.handleLoginSubmit(e));
+
+    this.cardSelectUser.addEventListener('click', () => {
+      this.cardSelectUser.classList.add('selected');
+      this.cardSelectFriend.classList.remove('selected');
+    });
+
+    this.cardSelectFriend.addEventListener('click', () => {
+      this.cardSelectFriend.classList.add('selected');
+      this.cardSelectUser.classList.remove('selected');
+    });
+
+    this.btnToggleLoginPin.addEventListener('click', () => {
+      const isPass = this.inputLoginPin.type === 'password';
+      this.inputLoginPin.type = isPass ? 'text' : 'password';
+      this.btnToggleLoginPin.textContent = isPass ? 'Hide' : 'Show';
+    });
+
+    this.btnTriggerMasterFromLogin.addEventListener('click', () => {
+      this.openMasterKeyModal();
+    });
+
+    // Header Logout & Master Key
+    this.btnLogout.addEventListener('click', () => this.handleLogout());
+    this.btnOpenMasterKeyModal.addEventListener('click', () => this.openMasterKeyModal());
+
+    // Master Key Modal
+    this.btnCloseModalMasterKey.addEventListener('click', () => this.modalMasterKeyAdmin.classList.add('hidden'));
+    this.btnCancelMasterKeyVerify.addEventListener('click', () => this.modalMasterKeyAdmin.classList.add('hidden'));
+    this.btnCloseMasterAdmin.addEventListener('click', () => this.modalMasterKeyAdmin.classList.add('hidden'));
+    this.formVerifyMasterKey.addEventListener('submit', (e) => this.handleVerifyMasterKey(e));
+    this.formSaveUsersAdmin.addEventListener('submit', (e) => this.handleSaveUsersAdmin(e));
+
+    this.btnToggleMasterVerifyKey.addEventListener('click', () => {
+      const isPass = this.inputMasterKeyVerify.type === 'password';
+      this.inputMasterKeyVerify.type = isPass ? 'text' : 'password';
+      this.btnToggleMasterVerifyKey.textContent = isPass ? 'Hide' : 'Show';
+    });
 
     // Dashboard gap cards click to filter
     this.cardFilterFriendAhead.addEventListener('click', () => this.setFilter('friend-only'));
@@ -554,7 +471,7 @@ class StudyTrackerApp {
       this.renderChapters();
     });
 
-    // Keyboard shortcut '/' to search
+    // Keyboard shortcut '/'
     window.addEventListener('keydown', (e) => {
       if (e.key === '/' && document.activeElement !== this.topicSearchInput && !document.querySelector('.modal-overlay:not(.hidden)')) {
         e.preventDefault();
@@ -579,35 +496,17 @@ class StudyTrackerApp {
     this.btnToggleAllChapters.addEventListener('click', () => {
       const allChapterIds = this.state.chapters.map(c => c.id);
       if (this.collapsedChapters.size === allChapterIds.length) {
-        // Expand all
         this.collapsedChapters.clear();
         this.btnToggleAllText.textContent = 'Collapse All';
       } else {
-        // Collapse all
         allChapterIds.forEach(id => this.collapsedChapters.add(id));
         this.btnToggleAllText.textContent = 'Expand All';
       }
       this.renderChapters();
     });
 
-    // Quick Options Dropdown
-    this.btnQuickOptions.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.quickOptionsMenu.classList.toggle('hidden');
-    });
-
-    document.addEventListener('click', () => {
-      this.quickOptionsMenu.classList.add('hidden');
-    });
-
-    this.btnLoadDSA.addEventListener('click', () => this.loadPreset(SEED_DATA_DSA, 'DSA & Algorithms'));
-    this.btnLoadWebDev.addEventListener('click', () => this.loadPreset(SEED_DATA_WEBDEV, 'Full-Stack Web Dev'));
-    this.btnLoadML.addEventListener('click', () => this.loadPreset(SEED_DATA_ML, 'AI & Machine Learning'));
-    this.btnClearAllData.addEventListener('click', () => this.clearAllData());
-
-    // Empty state triggers
+    // Empty state trigger
     this.btnEmptyAddChapter.addEventListener('click', () => this.openAddChapterModal());
-    this.btnEmptyLoadSample.addEventListener('click', () => this.loadPreset(SEED_DATA_DSA, 'DSA & Algorithms'));
 
     // Chapter Modal
     this.btnOpenAddChapter.addEventListener('click', () => this.openAddChapterModal());
@@ -620,29 +519,6 @@ class StudyTrackerApp {
     this.btnCancelTopic.addEventListener('click', () => this.modalTopic.classList.add('hidden'));
     this.formTopic.addEventListener('submit', (e) => this.handleSaveTopic(e));
 
-    // Settings Modal
-    this.btnSettingsModal.addEventListener('click', () => this.openSettingsModal());
-    this.btnCloseModalSettings.addEventListener('click', () => this.modalSettings.classList.add('hidden'));
-    this.btnCancelSettings.addEventListener('click', () => this.modalSettings.classList.add('hidden'));
-    this.formSettings.addEventListener('submit', (e) => this.handleSaveSettings(e));
-    this.inputUserName.addEventListener('input', () => this.updateSettingsPreviews());
-    this.inputUserInitials.addEventListener('input', () => this.updateSettingsPreviews());
-    this.inputFriendName.addEventListener('input', () => this.updateSettingsPreviews());
-    this.inputFriendInitials.addEventListener('input', () => this.updateSettingsPreviews());
-
-    // Share & Sync Modal
-    this.btnShareModal.addEventListener('click', () => this.openShareModal());
-    this.btnCloseModalShare.addEventListener('click', () => this.modalShare.classList.add('hidden'));
-    this.btnCloseShare.addEventListener('click', () => this.modalShare.classList.add('hidden'));
-    this.btnCopyShareUrl.addEventListener('click', () => this.copyShareLink());
-    this.btnExportJSON.addEventListener('click', () => this.exportJSONFile());
-    this.fileImportJSON.addEventListener('change', (e) => this.importJSONFile(e));
-
-    // Comparison Matrix Modal
-    this.btnComparisonMatrix.addEventListener('click', () => this.openMatrixModal());
-    this.btnCloseModalMatrix.addEventListener('click', () => this.modalMatrix.classList.add('hidden'));
-    this.btnCloseMatrix.addEventListener('click', () => this.modalMatrix.classList.add('hidden'));
-
     // Upstash Cloud Sync Modal
     this.btnOpenUpstashModal.addEventListener('click', () => this.openUpstashModal());
     this.btnCloseModalUpstash.addEventListener('click', () => this.modalUpstash.classList.add('hidden'));
@@ -650,71 +526,159 @@ class StudyTrackerApp {
     this.formUpstash.addEventListener('submit', (e) => this.handleConnectUpstash(e));
     this.btnPushToUpstash.addEventListener('click', () => this.pushToUpstash(true));
     this.btnPullFromUpstash.addEventListener('click', () => this.pullFromUpstash(true));
-    this.btnCopyFriendCloudInvite.addEventListener('click', () => this.copyCloudInviteLink());
+    this.btnCopyFriendCloudInvite.addEventListener('click', () => this.copyUpstashInviteLink());
     this.btnDisconnectUpstash.addEventListener('click', () => this.disconnectUpstash());
-    this.btnToggleTokenVisibility.addEventListener('click', () => this.toggleTokenVisibility());
 
-    // Window focus: pull fresh updates when tab becomes active
-    window.addEventListener('focus', () => {
-      if (this.upstash && this.upstash.isConnected) {
-        this.pullFromUpstash(false);
-      }
+    this.btnToggleTokenVisibility.addEventListener('click', () => {
+      const isPass = this.inputUpstashToken.type === 'password';
+      this.inputUpstashToken.type = isPass ? 'text' : 'password';
+      this.btnToggleTokenVisibility.textContent = isPass ? 'Hide' : 'Show';
     });
 
-    // Modal background overlay click to close
-    [this.modalChapter, this.modalTopic, this.modalSettings, this.modalShare, this.modalMatrix, this.modalUpstash].forEach(m => {
-      m.addEventListener('click', (e) => {
-        if (e.target === m) {
-          m.classList.add('hidden');
+    // Close modals on overlay backdrop click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.classList.add('hidden');
         }
       });
     });
   }
 
   // ===================================================================
-  // Persona & Filter Management
+  // Authentication & Master Key Regulation
   // ===================================================================
-  setActivePersona(persona) {
-    this.state.activePersona = persona;
-    this.saveState();
-    const activeName = persona === 'user' ? this.state.profiles.user.name : this.state.profiles.friend.name;
-    this.showToast(`Switched active marker to ${activeName}`, 'info');
+
+  renderLoginScreen() {
+    this.loginScreen.classList.remove('hidden');
+    this.mainAppLayout.classList.add('hidden');
+
+    const u1 = this.state.profiles.user;
+    const u2 = this.state.profiles.friend;
+
+    this.loginNameUser.textContent = u1.name;
+    this.loginAvatarUser.textContent = u1.initials || u1.name.slice(0, 2).toUpperCase();
+
+    this.loginNameFriend.textContent = u2.name;
+    this.loginAvatarFriend.textContent = u2.initials || u2.name.slice(0, 2).toUpperCase();
+
+    this.inputLoginPin.value = '';
+    this.inputLoginPin.focus();
   }
 
-  setFilter(filterKey) {
-    this.activeFilter = filterKey;
-    document.querySelectorAll('.filter-pill').forEach(pill => {
-      pill.classList.toggle('active', pill.getAttribute('data-filter') === filterKey);
-    });
-
-    if (filterKey === 'all') {
-      this.filterNoticeBanner.classList.add('hidden');
-    } else {
-      this.filterNoticeBanner.classList.remove('hidden');
-      const friendName = this.state.profiles.friend.name;
-      const userName = this.state.profiles.user.name;
-
-      let msg = '';
-      if (filterKey === 'friend-only') {
-        msg = `Showing topics ${friendName} understood, but ${userName} hasn't yet (Knowledge Gap).`;
-      } else if (filterKey === 'user-only') {
-        msg = `Showing topics ${userName} understood, but ${friendName} hasn't yet.`;
-      } else if (filterKey === 'both-done') {
-        msg = `Showing topics both ${userName} and ${friendName} have understood.`;
-      } else if (filterKey === 'neither-done') {
-        msg = `Showing topics that neither learner has completed yet.`;
-      }
-      this.filterNoticeText.textContent = msg;
+  updateAuthUI() {
+    if (!this.currentAuthUser) {
+      this.renderLoginScreen();
+      return;
     }
 
-    this.renderChapters();
+    this.loginScreen.classList.add('hidden');
+    this.mainAppLayout.classList.remove('hidden');
+
+    const profile = this.currentAuthUser === 'user' ? this.state.profiles.user : this.state.profiles.friend;
+    this.headerUserName.textContent = `${profile.name} (You)`;
+    this.headerUserAvatar.textContent = profile.initials || profile.name.slice(0, 2).toUpperCase();
+    this.headerUserAvatar.className = `persona-avatar ${this.currentAuthUser === 'user' ? 'user-avatar' : 'friend-avatar'}`;
   }
 
-  closeAllModals() {
-    [this.modalChapter, this.modalTopic, this.modalSettings, this.modalShare, this.modalMatrix, this.modalUpstash].forEach(m => {
-      m.classList.add('hidden');
-    });
-    this.quickOptionsMenu.classList.add('hidden');
+  handleLoginSubmit(e) {
+    e.preventDefault();
+    const chosenUser = document.querySelector('input[name="loginUserChoice"]:checked')?.value || 'user';
+    const enteredPin = this.inputLoginPin.value.trim();
+
+    const targetProfile = this.state.profiles[chosenUser];
+    const expectedPin = targetProfile?.pin || '1234';
+
+    if (enteredPin === expectedPin) {
+      this.currentAuthUser = chosenUser;
+      localStorage.setItem(AUTH_USER_KEY, chosenUser);
+      this.updateAuthUI();
+      this.render();
+      this.showToast(`Logged in as ${targetProfile.name}!`, 'success');
+    } else {
+      this.showToast('Incorrect passcode. Default is "1234", or use Master Key to regulate.', 'warning');
+    }
+  }
+
+  handleLogout() {
+    this.currentAuthUser = null;
+    localStorage.removeItem(AUTH_USER_KEY);
+    this.updateAuthUI();
+    this.showToast('Logged out.', 'info');
+  }
+
+  openMasterKeyModal() {
+    this.modalMasterKeyAdmin.classList.remove('hidden');
+    if (this.isMasterUnlocked) {
+      this.formVerifyMasterKey.classList.add('hidden');
+      this.masterKeyAdminPanel.classList.remove('hidden');
+      this.populateMasterKeyAdmin();
+    } else {
+      this.formVerifyMasterKey.classList.remove('hidden');
+      this.masterKeyAdminPanel.classList.add('hidden');
+      this.inputMasterKeyVerify.value = '';
+      this.inputMasterKeyVerify.focus();
+    }
+  }
+
+  handleVerifyMasterKey(e) {
+    e.preventDefault();
+    const entered = this.inputMasterKeyVerify.value.trim();
+    const expected = this.state.auth?.masterKey || 'thekey';
+
+    if (entered === expected) {
+      this.isMasterUnlocked = true;
+      this.formVerifyMasterKey.classList.add('hidden');
+      this.masterKeyAdminPanel.classList.remove('hidden');
+      this.populateMasterKeyAdmin();
+      this.showToast('Master Key verified! You can now regulate users.', 'success');
+    } else {
+      this.showToast('Invalid Master Key. Default is "thekey"', 'warning');
+    }
+  }
+
+  populateMasterKeyAdmin() {
+    this.adminInputUserName.value = this.state.profiles.user.name;
+    this.adminInputUserPin.value = this.state.profiles.user.pin || '1234';
+    this.adminInputFriendName.value = this.state.profiles.friend.name;
+    this.adminInputFriendPin.value = this.state.profiles.friend.pin || '1234';
+    this.adminInputMasterKey.value = this.state.auth?.masterKey || 'thekey';
+
+    this.adminAvatarUser.textContent = this.state.profiles.user.initials || 'SH';
+    this.adminAvatarFriend.textContent = this.state.profiles.friend.initials || 'AM';
+  }
+
+  handleSaveUsersAdmin(e) {
+    e.preventDefault();
+    const uName = this.adminInputUserName.value.trim();
+    const uPin = this.adminInputUserPin.value.trim();
+    const fName = this.adminInputFriendName.value.trim();
+    const fPin = this.adminInputFriendPin.value.trim();
+    const mKey = this.adminInputMasterKey.value.trim();
+
+    if (!uName || !fName || !uPin || !fPin || !mKey) {
+      this.showToast('All fields are required.', 'warning');
+      return;
+    }
+
+    this.state.profiles.user.name = uName;
+    this.state.profiles.user.initials = uName.slice(0, 2).toUpperCase();
+    this.state.profiles.user.pin = uPin;
+
+    this.state.profiles.friend.name = fName;
+    this.state.profiles.friend.initials = fName.slice(0, 2).toUpperCase();
+    this.state.profiles.friend.pin = fPin;
+
+    if (!this.state.auth) this.state.auth = {};
+    this.state.auth.masterKey = mKey;
+
+    this.saveState();
+    this.modalMasterKeyAdmin.classList.add('hidden');
+    this.renderLoginScreen();
+    if (this.currentAuthUser) {
+      this.updateAuthUI();
+    }
+    this.showToast('Users & Master Key updated and saved!', 'success');
   }
 
   // ===================================================================
@@ -724,10 +688,10 @@ class StudyTrackerApp {
     let totalTopics = 0;
     let userCount = 0;
     let friendCount = 0;
-    let friendOnlyCount = 0; // Friend understood, User didn't
-    let userOnlyCount = 0;   // User understood, Friend didn't
-    let bothCount = 0;       // Both understood
-    let neitherCount = 0;    // Neither
+    let friendOnlyCount = 0;
+    let userOnlyCount = 0;
+    let bothCount = 0;
+    let neitherCount = 0;
 
     this.state.chapters.forEach(chap => {
       (chap.topics || []).forEach(t => {
@@ -778,276 +742,352 @@ class StudyTrackerApp {
 
   updateProfilesUI() {
     const { user, friend } = this.state.profiles;
-    const active = this.state.activePersona || 'user';
+    const isFriendActive = this.currentAuthUser === 'friend';
 
-    // Persona buttons in Header
-    this.labelUserName.textContent = `${user.name} (You)`;
-    this.labelFriendName.textContent = friend.name;
-    this.avatarUser.textContent = user.initials || 'ME';
-    this.avatarFriend.textContent = friend.initials || 'FR';
+    if (isFriendActive) {
+      // Primary card shows Aman ("You")
+      this.dashAvatarUser.textContent = friend.initials || 'AM';
+      this.dashNameUser.textContent = friend.name;
+      this.dashTagUser.textContent = 'You';
 
-    this.btnPersonaUser.classList.toggle('active', active === 'user');
-    this.btnPersonaFriend.classList.toggle('active', active === 'friend');
+      // Secondary card shows Shahzeb ("Partner")
+      this.dashAvatarFriend.textContent = user.initials || 'SH';
+      this.dashNameFriend.textContent = user.name;
+      this.dashTagFriend.textContent = 'Partner';
 
-    // Dashboard avatars & names
-    this.dashAvatarUser.textContent = user.initials || 'ME';
-    this.dashNameUser.textContent = user.name;
-    this.dashAvatarFriend.textContent = friend.initials || 'FR';
-    this.dashNameFriend.textContent = friend.name;
-    this.dashFriendShortName.textContent = friend.name;
-    this.dashFriendShortName2.textContent = friend.name;
+      this.dashFriendShortName.textContent = user.name;
+      this.dashFriendShortName2.textContent = user.name;
 
-    // Initial topic modal labels
-    this.labelInitialUser.textContent = `${user.name} (You)`;
-    this.labelInitialFriend.textContent = friend.name;
+      this.filterLabelFriendOnly.textContent = `${user.name} Understood, I Haven't`;
+      this.filterLabelUserOnly.textContent = `I Understood, ${user.name} Hasn't`;
+    } else {
+      // Primary card shows Shahzeb ("You")
+      this.dashAvatarUser.textContent = user.initials || 'SH';
+      this.dashNameUser.textContent = user.name;
+      this.dashTagUser.textContent = 'You';
 
-    // Matrix headers
-    this.thMatrixUser.textContent = `${user.name} (You)`;
-    this.thMatrixFriend.textContent = `${friend.name} (Friend)`;
+      // Secondary card shows Aman ("Partner")
+      this.dashAvatarFriend.textContent = friend.initials || 'AM';
+      this.dashNameFriend.textContent = friend.name;
+      this.dashTagFriend.textContent = 'Partner';
+
+      this.dashFriendShortName.textContent = friend.name;
+      this.dashFriendShortName2.textContent = friend.name;
+
+      this.filterLabelFriendOnly.textContent = `${friend.name} Understood, I Haven't`;
+      this.filterLabelUserOnly.textContent = `I Understood, ${friend.name} Hasn't`;
+    }
   }
 
   updateStatsUI() {
     const stats = this.getStats();
+    const isFriendActive = this.currentAuthUser === 'friend';
 
-    // User stat card
-    this.dashPercentUserBadge.textContent = `${stats.userPercent}%`;
-    this.dashProgressBarUser.style.width = `${stats.userPercent}%`;
-    this.dashCountUser.textContent = `${stats.userCount} / ${stats.totalTopics}`;
-    this.dashUserLead.textContent = `+${stats.userLead}`;
+    // Adapt stats to current authenticated user
+    const primaryPercent = isFriendActive ? stats.friendPercent : stats.userPercent;
+    const primaryCount = isFriendActive ? stats.friendCount : stats.userCount;
+    const primaryLead = isFriendActive ? stats.friendLead : stats.userLead;
 
-    // Friend stat card
-    this.dashPercentFriendBadge.textContent = `${stats.friendPercent}%`;
-    this.dashProgressBarFriend.style.width = `${stats.friendPercent}%`;
-    this.dashCountFriend.textContent = `${stats.friendCount} / ${stats.totalTopics}`;
-    this.dashFriendLead.textContent = `+${stats.friendLead}`;
+    const partnerPercent = isFriendActive ? stats.userPercent : stats.friendPercent;
+    const partnerCount = isFriendActive ? stats.userCount : stats.friendCount;
+    const partnerLead = isFriendActive ? stats.userLead : stats.friendLead;
 
-    // Knowledge Gap Analyzer card
-    this.countFriendOnly.textContent = stats.friendOnlyCount;
-    this.countUserOnly.textContent = stats.userOnlyCount;
+    // Card 1: Logged-in User
+    this.dashPercentUserBadge.textContent = `${primaryPercent}%`;
+    this.dashProgressBarUser.style.width = `${primaryPercent}%`;
+    this.dashCountUser.textContent = `${primaryCount} / ${stats.totalTopics}`;
+    this.dashUserLead.textContent = `+${primaryLead}`;
+
+    // Card 3: Study Partner
+    this.dashPercentFriendBadge.textContent = `${partnerPercent}%`;
+    this.dashProgressBarFriend.style.width = `${partnerPercent}%`;
+    this.dashCountFriend.textContent = `${partnerCount} / ${stats.totalTopics}`;
+    this.dashFriendLead.textContent = `+${partnerLead}`;
+
+    // Gap Card metrics
+    const partnerOnlyDone = isFriendActive ? stats.userOnlyCount : stats.friendOnlyCount;
+    const selfOnlyDone = isFriendActive ? stats.friendOnlyCount : stats.userOnlyCount;
+
+    this.countFriendOnly.textContent = partnerOnlyDone;
+    this.countUserOnly.textContent = selfOnlyDone;
     this.countBoth.textContent = stats.bothCount;
 
-    // Pill badge counts
+    // Filter pills counters
     this.pillCountAll.textContent = stats.totalTopics;
-    this.pillCountFriendOnly.textContent = stats.friendOnlyCount;
-    this.pillCountUserOnly.textContent = stats.userOnlyCount;
+    this.pillCountFriendOnly.textContent = partnerOnlyDone;
+    this.pillCountUserOnly.textContent = selfOnlyDone;
     this.pillCountBoth.textContent = stats.bothCount;
     this.pillCountNeither.textContent = stats.neitherCount;
-
-    // Empty state visibility
-    const hasChapters = this.state.chapters && this.state.chapters.length > 0;
-    this.emptyStateContainer.classList.toggle('hidden', hasChapters);
   }
 
+  setFilter(filterName) {
+    this.activeFilter = filterName;
+
+    // Update filter pill UI
+    this.filterPillsContainer.querySelectorAll('.filter-pill').forEach(pill => {
+      pill.classList.toggle('active', pill.getAttribute('data-filter') === filterName);
+    });
+
+    // Update banner
+    if (filterName === 'all') {
+      this.filterNoticeBanner.classList.add('hidden');
+    } else {
+      this.filterNoticeBanner.classList.remove('hidden');
+      const { user, friend } = this.state.profiles;
+      const isFriend = this.currentAuthUser === 'friend';
+      const selfName = isFriend ? friend.name : user.name;
+      const partnerName = isFriend ? user.name : friend.name;
+
+      let msg = '';
+      if (filterName === 'friend-only') msg = `Showing topics ${partnerName} mastered that ${selfName} needs to learn 💡`;
+      if (filterName === 'user-only') msg = `Showing topics ${selfName} mastered that ${partnerName} needs 🚀`;
+      if (filterName === 'both-done') msg = 'Showing topics both of you have mastered ✨';
+      if (filterName === 'neither-done') msg = 'Showing topics pending for both study partners ⏳';
+      this.filterNoticeText.textContent = msg;
+    }
+
+    this.renderChapters();
+  }
+
+  // ===================================================================
+  // Chapter & Topic Rendering
+  // ===================================================================
   renderChapters() {
     this.chaptersContainer.innerHTML = '';
-    const { user, friend } = this.state.profiles;
+    const filteredChapters = this.getFilteredChapters();
 
-    if (!this.state.chapters || this.state.chapters.length === 0) {
+    if (this.state.chapters.length === 0) {
+      this.emptyStateContainer.classList.remove('hidden');
+      this.chaptersContainer.classList.add('hidden');
       return;
     }
 
-    this.state.chapters.forEach(chapter => {
-      // Filter topics based on active filter and search query
-      const filteredTopics = (chapter.topics || []).filter(topic => {
-        // Search filter
-        if (this.searchQuery) {
-          const matchTitle = topic.title.toLowerCase().includes(this.searchQuery);
-          const matchNotes = (topic.notes || '').toLowerCase().includes(this.searchQuery);
-          const matchChapter = chapter.title.toLowerCase().includes(this.searchQuery);
-          if (!matchTitle && !matchNotes && !matchChapter) {
-            return false;
+    this.emptyStateContainer.classList.add('hidden');
+    this.chaptersContainer.classList.remove('hidden');
+
+    if (filteredChapters.length === 0) {
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'empty-chapter-topics';
+      emptyDiv.innerHTML = `<p>No topics match your current filter or search criteria.</p>`;
+      this.chaptersContainer.appendChild(emptyDiv);
+      return;
+    }
+
+    filteredChapters.forEach(chapter => {
+      const chapterCard = this.createChapterCard(chapter);
+      this.chaptersContainer.appendChild(chapterCard);
+    });
+  }
+
+  getFilteredChapters() {
+    return this.state.chapters
+      .map(chapter => {
+        let matchingTopics = (chapter.topics || []).filter(topic => {
+          // Search query match
+          if (this.searchQuery) {
+            const inTopic = topic.title.toLowerCase().includes(this.searchQuery);
+            const inNotes = (topic.notes || '').toLowerCase().includes(this.searchQuery);
+            const inChap = chapter.title.toLowerCase().includes(this.searchQuery);
+            if (!inTopic && !inNotes && !inChap) return false;
           }
-        }
 
-        // Status Filter
-        if (this.activeFilter === 'friend-only') {
-          return topic.friendLearned && !topic.userLearned;
-        }
-        if (this.activeFilter === 'user-only') {
-          return topic.userLearned && !topic.friendLearned;
-        }
-        if (this.activeFilter === 'both-done') {
-          return topic.userLearned && topic.friendLearned;
-        }
-        if (this.activeFilter === 'neither-done') {
-          return !topic.userLearned && !topic.friendLearned;
-        }
-        return true;
-      });
+          // Filter match (adapted to who is currently logged in)
+          const isFriend = this.currentAuthUser === 'friend';
+          const partnerLearned = isFriend ? topic.userLearned : topic.friendLearned;
+          const selfLearned = isFriend ? topic.friendLearned : topic.userLearned;
 
-      // Calculate chapter-level stats
-      const chapTotal = (chapter.topics || []).length;
-      const chapUserDone = (chapter.topics || []).filter(t => t.userLearned).length;
-      const chapFriendDone = (chapter.topics || []).filter(t => t.friendLearned).length;
-      const chapUserPercent = chapTotal > 0 ? Math.round((chapUserDone / chapTotal) * 100) : 0;
-      const chapFriendPercent = chapTotal > 0 ? Math.round((chapFriendDone / chapTotal) * 100) : 0;
+          if (this.activeFilter === 'friend-only') {
+            return partnerLearned && !selfLearned;
+          }
+          if (this.activeFilter === 'user-only') {
+            return selfLearned && !partnerLearned;
+          }
+          if (this.activeFilter === 'both-done') {
+            return selfLearned && partnerLearned;
+          }
+          if (this.activeFilter === 'neither-done') {
+            return !selfLearned && !partnerLearned;
+          }
 
-      const isCollapsed = this.collapsedChapters.has(chapter.id);
+          return true;
+        });
 
-      // Chapter Card DOM
-      const chapterCard = document.createElement('article');
-      chapterCard.className = `chapter-card ${isCollapsed ? 'collapsed' : 'expanded'}`;
-      chapterCard.dataset.chapterId = chapter.id;
+        const chapUserDone = (chapter.topics || []).filter(t => t.userLearned).length;
+        const chapFriendDone = (chapter.topics || []).filter(t => t.friendLearned).length;
 
-      // Header
-      const header = document.createElement('div');
-      header.className = 'chapter-header';
-      header.innerHTML = `
-        <div class="chapter-title-area">
-          <button type="button" class="chapter-collapse-btn" aria-label="Toggle chapter collapse">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        return {
+          ...chapter,
+          topics: matchingTopics,
+          totalTopicsCount: (chapter.topics || []).length,
+          userDoneCount: chapUserDone,
+          friendDoneCount: chapFriendDone
+        };
+      })
+      .filter(chap => chap.topics.length > 0 || !this.searchQuery && this.activeFilter === 'all');
+  }
+
+  createChapterCard(chapter) {
+    const isCollapsed = this.collapsedChapters.has(chapter.id);
+    const { user, friend } = this.state.profiles;
+
+    const userPercent = chapter.totalTopicsCount > 0 ? Math.round((chapter.userDoneCount / chapter.totalTopicsCount) * 100) : 0;
+    const friendPercent = chapter.totalTopicsCount > 0 ? Math.round((chapter.friendDoneCount / chapter.totalTopicsCount) * 100) : 0;
+
+    const card = document.createElement('article');
+    card.className = `chapter-card theme-${chapter.color || 'indigo'}`;
+    card.dataset.chapterId = chapter.id;
+
+    card.innerHTML = `
+      <div class="chapter-header" data-action="toggle-chapter">
+        <div class="chapter-title-group">
+          <button type="button" class="btn-collapse" aria-label="Toggle chapter topics" aria-expanded="${!isCollapsed}">
+            <svg class="chevron-icon ${isCollapsed ? 'collapsed' : ''}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
-          <span class="chapter-badge-color swatch-${chapter.color || 'indigo'}"></span>
-          <div class="chapter-text-info">
-            <div class="chapter-title-row">
+          <div class="chapter-meta">
+            <div class="chapter-title-line">
               <h3 class="chapter-title">${this.escapeHtml(chapter.title)}</h3>
-              ${chapter.category ? `<span class="chapter-category-tag">${this.escapeHtml(chapter.category)}</span>` : ''}
-              <span class="topic-est-time">${chapTotal} topics</span>
+              ${chapter.category ? `<span class="badge-category">${this.escapeHtml(chapter.category)}</span>` : ''}
+              <span class="topic-count-tag">${chapter.topics.length} topic${chapter.topics.length === 1 ? '' : 's'}</span>
             </div>
             ${chapter.description ? `<p class="chapter-desc">${this.escapeHtml(chapter.description)}</p>` : ''}
           </div>
         </div>
 
-        <div class="chapter-dual-progress">
-          <div class="chapter-progress-item">
-            <div class="chapter-progress-label">
-              <span>${this.escapeHtml(user.name)}:</span>
-              <span>${chapUserPercent}%</span>
+        <div class="chapter-progress-actions">
+          <div class="chapter-dual-progress">
+            <div class="mini-progress-row" title="${this.escapeHtml(user.name)}: ${chapter.userDoneCount}/${chapter.totalTopicsCount} completed">
+              <span class="mini-label">${this.escapeHtml(user.name)}</span>
+              <div class="mini-track">
+                <div class="mini-fill fill-user" style="width: ${userPercent}%"></div>
+              </div>
+              <span class="mini-percent">${userPercent}%</span>
             </div>
-            <div class="chapter-progress-track">
-              <div class="chapter-progress-fill fill-user" style="width: ${chapUserPercent}%"></div>
-            </div>
-          </div>
-          <div class="chapter-progress-item">
-            <div class="chapter-progress-label">
-              <span>${this.escapeHtml(friend.name)}:</span>
-              <span>${chapFriendPercent}%</span>
-            </div>
-            <div class="chapter-progress-track">
-              <div class="chapter-progress-fill fill-friend" style="width: ${chapFriendPercent}%"></div>
+            <div class="mini-progress-row" title="${this.escapeHtml(friend.name)}: ${chapter.friendDoneCount}/${chapter.totalTopicsCount} completed">
+              <span class="mini-label">${this.escapeHtml(friend.name)}</span>
+              <div class="mini-track">
+                <div class="mini-fill fill-friend" style="width: ${friendPercent}%"></div>
+              </div>
+              <span class="mini-percent">${friendPercent}%</span>
             </div>
           </div>
+
+          <div class="chapter-actions-group">
+            <button type="button" class="btn btn-secondary btn-sm" data-action="add-topic" title="Add topic to this chapter">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Add Topic</span>
+            </button>
+            <button type="button" class="btn-icon-subtle" data-action="edit-chapter" title="Edit chapter">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+            <button type="button" class="btn-icon-subtle btn-delete" data-action="delete-chapter" title="Delete chapter">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
         </div>
+      </div>
 
-        <div class="chapter-actions">
-          <button type="button" class="chapter-action-btn btn-add-topic" data-action="add-topic" title="Add topic to this chapter">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            <span>Add Topic</span>
-          </button>
-          <button type="button" class="chapter-action-btn" data-action="edit-chapter" title="Edit chapter">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 20h9"></path>
-              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-            </svg>
-          </button>
-          <button type="button" class="chapter-action-btn btn-icon-subtle btn-delete" data-action="delete-chapter" title="Delete chapter">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-          </button>
-        </div>
-      `;
+      <div class="topics-list ${isCollapsed ? 'hidden' : ''}">
+        <!-- Topics rendered here -->
+      </div>
+    `;
 
-      // Header click handling
-      header.addEventListener('click', (e) => {
-        const actionBtn = e.target.closest('[data-action]');
-        if (actionBtn) {
-          const action = actionBtn.dataset.action;
-          if (action === 'add-topic') {
-            this.openAddTopicModal(chapter.id, chapter.title);
-          } else if (action === 'edit-chapter') {
-            this.openEditChapterModal(chapter);
-          } else if (action === 'delete-chapter') {
-            this.deleteChapter(chapter.id);
-          }
-          return;
-        }
+    const topicsListContainer = card.querySelector('.topics-list');
 
-        // Toggle collapse
-        if (this.collapsedChapters.has(chapter.id)) {
-          this.collapsedChapters.delete(chapter.id);
-        } else {
-          this.collapsedChapters.add(chapter.id);
-        }
-        this.renderChapters();
-      });
-
-      // Chapter Body (Topics list)
-      const body = document.createElement('div');
-      body.className = 'chapter-body';
-
-      if (filteredTopics.length === 0) {
-        const emptyMsg = document.createElement('div');
-        emptyMsg.className = 'empty-chapter-topics';
-        if (chapTotal === 0) {
-          emptyMsg.innerHTML = `No topics in this chapter yet. <button type="button" class="btn btn-link" data-add-topic="${chapter.id}">Add your first topic</button>`;
-        } else {
-          emptyMsg.textContent = 'No topics matched the current filter/search.';
-        }
-        emptyMsg.addEventListener('click', (e) => {
-          if (e.target.dataset.addTopic) {
-            this.openAddTopicModal(chapter.id, chapter.title);
-          }
-        });
-        body.appendChild(emptyMsg);
-      } else {
-        filteredTopics.forEach(topic => {
-          body.appendChild(this.createTopicElement(chapter, topic));
-        });
-      }
-
-      chapterCard.appendChild(header);
-      chapterCard.appendChild(body);
-      this.chaptersContainer.appendChild(chapterCard);
-    });
-  }
-
-  // Create single topic DOM element
-  createTopicElement(chapter, topic) {
-    const { user, friend } = this.state.profiles;
-    const row = document.createElement('div');
-
-    // Gap analysis class and indicator badge
-    let gapClass = '';
-    let gapBadgeHtml = '';
-
-    if (topic.friendLearned && !topic.userLearned) {
-      gapClass = 'gap-friend-understands';
-      gapBadgeHtml = `
-        <span class="gap-tag tag-friend-only" title="${this.escapeHtml(friend.name)} mastered this! You need to catch up.">
-          <span>💡</span> ${this.escapeHtml(friend.name)} Understood (You need this)
-        </span>
-      `;
-    } else if (topic.userLearned && !topic.friendLearned) {
-      gapClass = 'gap-user-understands';
-      gapBadgeHtml = `
-        <span class="gap-tag tag-user-only" title="You mastered this! You can explain it to ${this.escapeHtml(friend.name)}.">
-          <span>🚀</span> You Understood (${this.escapeHtml(friend.name)} needs this)
-        </span>
-      `;
-    } else if (topic.userLearned && topic.friendLearned) {
-      gapClass = 'gap-both-mastered';
-      gapBadgeHtml = `
-        <span class="gap-tag tag-both" title="Both of you understand this topic!">
-          <span>✓✓</span> Both Understood
-        </span>
-      `;
+    if (chapter.topics.length === 0) {
+      const emptyTopic = document.createElement('div');
+      emptyTopic.className = 'empty-chapter-topics';
+      emptyTopic.innerHTML = `<span>No topics yet. Click "+ Add Topic" above to add your first sub-chapter!</span>`;
+      topicsListContainer.appendChild(emptyTopic);
     } else {
-      gapBadgeHtml = `
-        <span class="gap-tag tag-neither" title="Neither of you have marked this yet.">
-          <span>⏳</span> In Queue
-        </span>
-      `;
+      chapter.topics.forEach(topic => {
+        const topicRow = this.createTopicRow(chapter, topic);
+        topicsListContainer.appendChild(topicRow);
+      });
     }
 
-    row.className = `topic-row ${gapClass}`;
+    // Event listeners on chapter header
+    card.querySelector('[data-action="toggle-chapter"]').addEventListener('click', (e) => {
+      if (e.target.closest('.chapter-actions-group') || e.target.closest('button')) {
+        return;
+      }
+      this.toggleChapterCollapse(chapter.id);
+    });
+
+    card.querySelector('.btn-collapse').addEventListener('click', () => {
+      this.toggleChapterCollapse(chapter.id);
+    });
+
+    card.querySelector('[data-action="add-topic"]').addEventListener('click', () => {
+      this.openAddTopicModal(chapter.id, chapter.title);
+    });
+
+    card.querySelector('[data-action="edit-chapter"]').addEventListener('click', () => {
+      this.openEditChapterModal(chapter);
+    });
+
+    card.querySelector('[data-action="delete-chapter"]').addEventListener('click', () => {
+      this.deleteChapter(chapter.id);
+    });
+
+    return card;
+  }
+
+  toggleChapterCollapse(chapterId) {
+    if (this.collapsedChapters.has(chapterId)) {
+      this.collapsedChapters.delete(chapterId);
+    } else {
+      this.collapsedChapters.add(chapterId);
+    }
+    this.renderChapters();
+  }
+
+  // ===================================================================
+  // Topic Row Rendering with Locked Access Check
+  // ===================================================================
+  createTopicRow(chapter, topic) {
+    const { user, friend } = this.state.profiles;
+    const row = document.createElement('div');
+    row.className = 'topic-row';
     row.dataset.topicId = topic.id;
+
+    // Determine Gap Badge
+    let gapBadgeHtml = '';
+    if (topic.friendLearned && !topic.userLearned) {
+      gapBadgeHtml = `<span class="gap-tag tag-friend-only" title="${this.escapeHtml(friend.name)} understood this, ${this.escapeHtml(user.name)} needs to learn">💡 ${this.escapeHtml(friend.name)} Mastered</span>`;
+    } else if (topic.userLearned && !topic.friendLearned) {
+      gapBadgeHtml = `<span class="gap-tag tag-user-only" title="${this.escapeHtml(user.name)} understood this, ${this.escapeHtml(friend.name)} needs to learn">🚀 ${this.escapeHtml(user.name)} Mastered</span>`;
+    } else if (topic.userLearned && topic.friendLearned) {
+      gapBadgeHtml = `<span class="gap-tag tag-both" title="Both understood this topic">✨ Both Understood</span>`;
+    } else {
+      gapBadgeHtml = `<span class="gap-tag tag-neither" title="Pending for both">⏳ Both Pending</span>`;
+    }
+
+    // CRITICAL SECURITY & REGULATION:
+    // Only Shahzeb can mark his checkmark. Only Aman can mark his checkmark.
+    const isUserActive = this.currentAuthUser === 'user';
+    const isFriendActive = this.currentAuthUser === 'friend';
+
+    const canEditUser = isUserActive;
+    const canEditFriend = isFriendActive;
+
+    const userLockNotice = canEditUser
+      ? `Click to toggle understood for ${this.escapeHtml(user.name)}`
+      : `🔒 Locked: Only ${this.escapeHtml(user.name)} can mark this`;
+
+    const friendLockNotice = canEditFriend
+      ? `Click to toggle understood for ${this.escapeHtml(friend.name)}`
+      : `🔒 Locked: Only ${this.escapeHtml(friend.name)} can mark this`;
 
     row.innerHTML = `
       <div class="topic-details">
@@ -1062,24 +1102,30 @@ class StudyTrackerApp {
 
       <div class="topic-controls">
         <div class="topic-checkers-group">
-          <!-- Toggle for User -->
-          <div class="learner-toggle ${topic.userLearned ? 'active-user' : ''}" data-learner="user" title="Click to toggle understood for ${this.escapeHtml(user.name)}">
+          <!-- Toggle for User (Shahzeb) -->
+          <div class="learner-toggle ${topic.userLearned ? 'active-user' : ''} ${!canEditUser ? 'locked' : ''}" 
+               data-learner="user" 
+               title="${userLockNotice}">
             <div class="toggle-box">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             </div>
-            <span>${this.escapeHtml(user.name)} (You)</span>
+            <span>${this.escapeHtml(user.name)} ${isUserActive ? '(You)' : ''}</span>
+            ${!canEditUser ? `<span class="lock-icon" title="Only ${this.escapeHtml(user.name)} can mark this">🔒</span>` : ''}
           </div>
 
-          <!-- Toggle for Friend -->
-          <div class="learner-toggle ${topic.friendLearned ? 'active-friend' : ''}" data-learner="friend" title="Click to toggle understood for ${this.escapeHtml(friend.name)}">
+          <!-- Toggle for Friend (Aman) -->
+          <div class="learner-toggle ${topic.friendLearned ? 'active-friend' : ''} ${!canEditFriend ? 'locked' : ''}" 
+               data-learner="friend" 
+               title="${friendLockNotice}">
             <div class="toggle-box">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             </div>
-            <span>${this.escapeHtml(friend.name)}</span>
+            <span>${this.escapeHtml(friend.name)} ${isFriendActive ? '(You)' : ''}</span>
+            ${!canEditFriend ? `<span class="lock-icon" title="Only ${this.escapeHtml(friend.name)} can mark this">🔒</span>` : ''}
           </div>
         </div>
 
@@ -1121,9 +1167,17 @@ class StudyTrackerApp {
   }
 
   // ===================================================================
-  // Chapter & Topic CRUD
+  // Chapter & Topic CRUD with Access Check
   // ===================================================================
   toggleTopicLearner(chapterId, topicId, learner) {
+    // CRITICAL ACCESS REGULATION:
+    // Only the authenticated user can toggle their own status!
+    if (this.currentAuthUser !== learner) {
+      const allowedName = learner === 'user' ? this.state.profiles.user.name : this.state.profiles.friend.name;
+      this.showToast(`🔒 Locked: Only ${allowedName} can mark their own completion!`, 'warning');
+      return;
+    }
+
     const chapter = this.state.chapters.find(c => c.id === chapterId);
     if (!chapter) return;
     const topic = chapter.topics.find(t => t.id === topicId);
@@ -1141,11 +1195,7 @@ class StudyTrackerApp {
     this.saveState();
 
     if (isDone) {
-      this.showToast(`Marked "${topic.title}" as understood by ${learnerName}!`, 'success');
-      // If both completed, fire celebration confetti!
-      if (topic.userLearned && topic.friendLearned) {
-        this.triggerConfetti();
-      }
+      this.showToast(`Marked "${topic.title}" as completed by ${learnerName}!`, 'success');
     } else {
       this.showToast(`Unmarked "${topic.title}" for ${learnerName}`, 'info');
     }
@@ -1180,45 +1230,45 @@ class StudyTrackerApp {
     const title = this.inputChapterTitle.value.trim();
     const description = this.inputChapterDescription.value.trim();
     const category = this.inputChapterCategory.value.trim();
-    const selectedColor = document.querySelector('input[name="chapterColor"]:checked')?.value || 'indigo';
+    const color = document.querySelector('input[name="chapterColor"]:checked')?.value || 'indigo';
 
     if (!title) return;
 
     if (id) {
-      // Edit existing
-      const chap = this.state.chapters.find(c => c.id === id);
-      if (chap) {
-        chap.title = title;
-        chap.description = description;
-        chap.category = category;
-        chap.color = selectedColor;
-        this.showToast(`Chapter "${title}" updated.`, 'info');
+      const chapter = this.state.chapters.find(c => c.id === id);
+      if (chapter) {
+        chapter.title = title;
+        chapter.description = description;
+        chapter.category = category;
+        chapter.color = color;
+        this.showToast(`Chapter "${title}" updated!`, 'success');
       }
     } else {
-      // Create new
-      const newChap = {
+      const newChapter = {
         id: 'chap-' + Date.now(),
         title,
         description,
         category,
-        color: selectedColor,
+        color,
         topics: []
       };
-      this.state.chapters.push(newChap);
-      this.showToast(`Chapter "${title}" created!`, 'success');
+      this.state.chapters.push(newChapter);
+      this.showToast(`Added new chapter "${title}"!`, 'success');
     }
 
-    this.modalChapter.classList.add('hidden');
     this.saveState();
+    this.modalChapter.classList.add('hidden');
   }
 
   deleteChapter(chapterId) {
-    const chap = this.state.chapters.find(c => c.id === chapterId);
-    if (!chap) return;
-    if (confirm(`Are you sure you want to delete chapter "${chap.title}" and all its sub-topics?`)) {
+    const chapter = this.state.chapters.find(c => c.id === chapterId);
+    if (!chapter) return;
+
+    if (confirm(`Are you sure you want to delete chapter "${chapter.title}" and all its topics?`)) {
       this.state.chapters = this.state.chapters.filter(c => c.id !== chapterId);
+      this.collapsedChapters.delete(chapterId);
       this.saveState();
-      this.showToast(`Chapter "${chap.title}" deleted.`, 'info');
+      this.showToast(`Deleted chapter "${chapter.title}".`, 'info');
     }
   }
 
@@ -1230,11 +1280,13 @@ class StudyTrackerApp {
     this.inputTopicTitle.value = '';
     this.inputTopicNotes.value = '';
     this.selectTopicDifficulty.value = 'Medium';
-    this.inputTopicEstTime.value = 2;
+    this.inputTopicEstTime.value = '2';
 
-    // Default checkboxes based on active persona
-    this.checkInitialUserLearned.checked = this.state.activePersona === 'user';
-    this.checkInitialFriendLearned.checked = this.state.activePersona === 'friend';
+    // Current user can only set their own initial mark
+    const isFriend = this.currentAuthUser === 'friend';
+    const profile = isFriend ? this.state.profiles.friend : this.state.profiles.user;
+    this.labelInitialSelf.textContent = profile.name;
+    this.checkInitialUserLearned.checked = false;
 
     this.modalTopic.classList.remove('hidden');
     this.inputTopicTitle.focus();
@@ -1248,9 +1300,12 @@ class StudyTrackerApp {
     this.inputTopicTitle.value = topic.title;
     this.inputTopicNotes.value = topic.notes || '';
     this.selectTopicDifficulty.value = topic.difficulty || 'Medium';
-    this.inputTopicEstTime.value = topic.estHours || 2;
-    this.checkInitialUserLearned.checked = !!topic.userLearned;
-    this.checkInitialFriendLearned.checked = !!topic.friendLearned;
+    this.inputTopicEstTime.value = topic.estHours || '2';
+
+    const isFriend = this.currentAuthUser === 'friend';
+    const profile = isFriend ? this.state.profiles.friend : this.state.profiles.user;
+    this.labelInitialSelf.textContent = profile.name;
+    this.checkInitialUserLearned.checked = isFriend ? !!topic.friendLearned : !!topic.userLearned;
 
     this.modalTopic.classList.remove('hidden');
     this.inputTopicTitle.focus();
@@ -1259,49 +1314,51 @@ class StudyTrackerApp {
   handleSaveTopic(e) {
     e.preventDefault();
     const chapterId = this.inputTopicChapterId.value;
-    const topicId = this.inputTopicId.value;
+    const existingTopicId = this.inputTopicId.value;
     const title = this.inputTopicTitle.value.trim();
     const notes = this.inputTopicNotes.value.trim();
     const difficulty = this.selectTopicDifficulty.value;
     const estHours = parseFloat(this.inputTopicEstTime.value) || 1;
-    const userLearned = this.checkInitialUserLearned.checked;
-    const friendLearned = this.checkInitialFriendLearned.checked;
 
-    if (!title || !chapterId) return;
+    if (!title) return;
 
     const chapter = this.state.chapters.find(c => c.id === chapterId);
     if (!chapter) return;
 
-    if (topicId) {
-      // Edit
-      const topic = chapter.topics.find(t => t.id === topicId);
+    const isFriend = this.currentAuthUser === 'friend';
+    const selfLearned = this.checkInitialUserLearned.checked;
+
+    if (existingTopicId) {
+      const topic = chapter.topics.find(t => t.id === existingTopicId);
       if (topic) {
         topic.title = title;
         topic.notes = notes;
         topic.difficulty = difficulty;
         topic.estHours = estHours;
-        topic.userLearned = userLearned;
-        topic.friendLearned = friendLearned;
-        this.showToast(`Topic "${title}" updated.`, 'info');
+        // Only update current user's learned status
+        if (isFriend) {
+          topic.friendLearned = selfLearned;
+        } else {
+          topic.userLearned = selfLearned;
+        }
+        this.showToast(`Updated topic "${title}"!`, 'success');
       }
     } else {
-      // Create new
       const newTopic = {
         id: 'top-' + Date.now(),
         title,
         notes,
         difficulty,
         estHours,
-        userLearned,
-        friendLearned
+        userLearned: !isFriend && selfLearned,
+        friendLearned: isFriend && selfLearned
       };
-      if (!chapter.topics) chapter.topics = [];
       chapter.topics.push(newTopic);
-      this.showToast(`Topic "${title}" added to ${chapter.title}!`, 'success');
+      this.showToast(`Added topic "${title}"!`, 'success');
     }
 
-    this.modalTopic.classList.add('hidden');
     this.saveState();
+    this.modalTopic.classList.add('hidden');
   }
 
   deleteTopic(chapterId, topicId) {
@@ -1313,289 +1370,54 @@ class StudyTrackerApp {
     if (confirm(`Delete topic "${topic.title}"?`)) {
       chapter.topics = chapter.topics.filter(t => t.id !== topicId);
       this.saveState();
-      this.showToast(`Topic deleted.`, 'info');
+      this.showToast(`Deleted "${topic.title}".`, 'info');
     }
   }
 
   // ===================================================================
-  // Settings & Profiles Modal
-  // ===================================================================
-  openSettingsModal() {
-    const { user, friend } = this.state.profiles;
-    this.inputUserName.value = user.name;
-    this.inputUserInitials.value = user.initials || 'ME';
-    this.inputFriendName.value = friend.name;
-    this.inputFriendInitials.value = friend.initials || 'FR';
-    this.updateSettingsPreviews();
-    this.modalSettings.classList.remove('hidden');
-  }
-
-  updateSettingsPreviews() {
-    this.settingsPreviewAvatarUser.textContent = (this.inputUserInitials.value || 'ME').substring(0, 4);
-    this.settingsPreviewAvatarFriend.textContent = (this.inputFriendInitials.value || 'FR').substring(0, 4);
-  }
-
-  handleSaveSettings(e) {
-    e.preventDefault();
-    const userName = this.inputUserName.value.trim() || 'Alex';
-    const userInit = (this.inputUserInitials.value.trim() || 'ME').toUpperCase();
-    const friendName = this.inputFriendName.value.trim() || 'Sam';
-    const friendInit = (this.inputFriendInitials.value.trim() || 'FR').toUpperCase();
-
-    this.state.profiles.user.name = userName;
-    this.state.profiles.user.initials = userInit;
-    this.state.profiles.friend.name = friendName;
-    this.state.profiles.friend.initials = friendInit;
-
-    this.saveState();
-    this.modalSettings.classList.add('hidden');
-    this.showToast('Study profiles updated successfully!', 'success');
-  }
-
-  // ===================================================================
-  // Presets & Data Management
-  // ===================================================================
-  loadPreset(dataset, name) {
-    if (confirm(`Load the "${name}" study preset? This will replace your current syllabus list.`)) {
-      this.state.chapters = JSON.parse(JSON.stringify(dataset.chapters));
-      this.saveState();
-      this.showToast(`Loaded ${name} preset successfully!`, 'success');
-    }
-  }
-
-  clearAllData() {
-    if (confirm('Are you sure you want to clear all chapters and topics? You can reload sample presets at any time.')) {
-      this.state.chapters = [];
-      this.saveState();
-      this.showToast('All chapters cleared.', 'info');
-    }
-  }
-
-  // ===================================================================
-  // Comparison Matrix View
-  // ===================================================================
-  openMatrixModal() {
-    const { user, friend } = this.state.profiles;
-    this.matrixTableBody.innerHTML = '';
-
-    let rowCount = 0;
-
-    this.state.chapters.forEach(chap => {
-      (chap.topics || []).forEach(top => {
-        rowCount++;
-        const tr = document.createElement('tr');
-
-        let statusDescription = '';
-        let statusTagClass = '';
-
-        if (top.userLearned && top.friendLearned) {
-          statusDescription = '✨ Both Understood (In Sync)';
-          statusTagClass = 'tag-both';
-        } else if (top.friendLearned && !top.userLearned) {
-          statusDescription = `💡 ${this.escapeHtml(friend.name)} knows — Can mentor ${this.escapeHtml(user.name)}`;
-          statusTagClass = 'tag-friend-only';
-        } else if (top.userLearned && !top.friendLearned) {
-          statusDescription = `🚀 ${this.escapeHtml(user.name)} knows — Can mentor ${this.escapeHtml(friend.name)}`;
-          statusTagClass = 'tag-user-only';
-        } else {
-          statusDescription = '⏳ Both In Queue';
-          statusTagClass = 'tag-neither';
-        }
-
-        tr.innerHTML = `
-          <td>
-            <span class="matrix-topic-title">${this.escapeHtml(top.title)}</span>
-            <span class="matrix-chapter-tag">${this.escapeHtml(chap.title)}</span>
-          </td>
-          <td class="col-center">
-            <span class="status-badge-matrix ${top.userLearned ? 'status-matrix-done' : 'status-matrix-pending'}">
-              ${top.userLearned ? '✓' : '—'}
-            </span>
-          </td>
-          <td class="col-center">
-            <span class="status-badge-matrix ${top.friendLearned ? 'status-matrix-done' : 'status-matrix-pending'}">
-              ${top.friendLearned ? '✓' : '—'}
-            </span>
-          </td>
-          <td>
-            <span class="gap-tag ${statusTagClass}">${statusDescription}</span>
-          </td>
-        `;
-        this.matrixTableBody.appendChild(tr);
-      });
-    });
-
-    if (rowCount === 0) {
-      this.matrixTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 2rem;">No topics available to compare. Add chapters and topics first!</td></tr>`;
-    }
-
-    this.modalMatrix.classList.remove('hidden');
-  }
-
-  // ===================================================================
-  // Share, Sync & Export
-  // ===================================================================
-  openShareModal() {
-    this.generateShareUrl();
-    this.modalShare.classList.remove('hidden');
-  }
-
-  generateShareUrl() {
-    try {
-      // Export current state into base64 url hash
-      const payload = JSON.stringify(this.state);
-      const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(payload))));
-      const currentUrl = window.location.origin + window.location.pathname;
-      const shareUrl = `${currentUrl}#sync=${encoded}`;
-      this.shareUrlInput.value = shareUrl;
-    } catch (e) {
-      this.shareUrlInput.value = window.location.href;
-    }
-  }
-
-  copyShareLink() {
-    this.shareUrlInput.select();
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(this.shareUrlInput.value).then(() => {
-        this.btnCopyText.textContent = 'Copied!';
-        this.showToast('Share link copied to clipboard! Send to your friend.', 'success');
-        setTimeout(() => {
-          this.btnCopyText.textContent = 'Copy Link';
-        }, 2200);
-      });
-    } else {
-      document.execCommand('copy');
-      this.btnCopyText.textContent = 'Copied!';
-      setTimeout(() => {
-        this.btnCopyText.textContent = 'Copy Link';
-      }, 2200);
-    }
-  }
-
-  exportJSONFile() {
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.state, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `peertrack_backup_${new Date().toISOString().slice(0, 10)}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-    this.showToast('Downloaded JSON study backup.', 'success');
-  }
-
-  importJSONFile(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const imported = JSON.parse(event.target.result);
-        if (imported.chapters && imported.profiles) {
-          this.state = imported;
-          this.saveState();
-          this.showToast('Study tracker successfully imported!', 'success');
-          this.modalShare.classList.add('hidden');
-        } else {
-          alert('Invalid PeerTrack backup file format.');
-        }
-      } catch (err) {
-        alert('Could not parse JSON file.');
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = '';
-  }
-
-  checkUrlForSharePayload() {
-    const hash = window.location.hash;
-    if (hash && hash.startsWith('#sync=')) {
-      try {
-        const encoded = hash.replace('#sync=', '');
-        const jsonStr = decodeURIComponent(escape(atob(decodeURIComponent(encoded))));
-        const parsed = JSON.parse(jsonStr);
-        if (parsed.chapters && parsed.profiles) {
-          if (confirm('A study plan was shared with you via this link! Would you like to load this shared syllabus and study progress?')) {
-            this.state = parsed;
-            // Switch persona to friend by default since user opened a shared link!
-            this.state.activePersona = 'friend';
-            this.saveState();
-            this.showToast(`Loaded study syllabus! Welcome ${parsed.profiles.friend.name}!`, 'success');
-            // Clean up the URL hash without reload
-            history.replaceState(null, document.title, window.location.pathname);
-          }
-        }
-      } catch (e) {
-        console.warn('Invalid share link payload', e);
-      }
-    }
-  }
-
-  // ===================================================================
-  // Upstash Redis Cloud Sync Methods
+  // Upstash Redis Cloud Sync (REST API & Vercel Proxy)
   // ===================================================================
   loadUpstashConfig() {
     try {
-      const saved = localStorage.getItem(UPSTASH_CONFIG_KEY);
+      const saved = localStorage.getItem(UPSTASH_STORAGE_KEY);
       if (saved) {
-        const parsed = JSON.parse(saved);
-        return Object.assign({
-          url: '',
-          token: '',
-          roomId: 'study-duo-room-1',
-          pollInterval: 10000,
-          autoSync: true,
-          isConnected: false,
-          lastSyncedAt: null
-        }, parsed);
+        return JSON.parse(saved);
       }
     } catch (e) {
-      console.warn('Failed to load Upstash config', e);
+      console.warn('Failed to parse Upstash config:', e);
     }
     return {
       url: '',
       token: '',
       roomId: 'study-duo-room-1',
-      pollInterval: 10000,
       autoSync: true,
+      pollInterval: 10000,
       isConnected: false,
-      lastSyncedAt: null
+      lastSyncedAt: null,
+      useServerProxy: false
     };
   }
 
   saveUpstashConfig() {
     try {
-      localStorage.setItem(UPSTASH_CONFIG_KEY, JSON.stringify(this.upstash));
+      localStorage.setItem(UPSTASH_STORAGE_KEY, JSON.stringify(this.upstash));
     } catch (e) {
-      console.error('Failed to save Upstash config', e);
+      console.error('Failed to save Upstash config:', e);
     }
-    this.updateUpstashStatusUI();
   }
 
   initUpstash() {
-    // Populate form fields
-    if (this.inputUpstashUrl) this.inputUpstashUrl.value = this.upstash.url || '';
-    if (this.inputUpstashToken) this.inputUpstashToken.value = this.upstash.token || '';
-    if (this.inputUpstashRoom) this.inputUpstashRoom.value = this.upstash.roomId || 'study-duo-room-1';
-    if (this.selectSyncInterval) this.selectSyncInterval.value = String(this.upstash.pollInterval || 10000);
-    if (this.checkUpstashAutoSync) this.checkUpstashAutoSync.checked = !!this.upstash.autoSync;
-
     this.updateUpstashStatusUI();
 
-    // Auto-detect Vercel server-side API proxy
+    // Check if Vercel serverless proxy is available
     this.detectVercelAPI();
 
-    // If previously connected, resume polling and pull updates
-    if (this.upstash.isConnected && (this.upstash.useServerProxy || (this.upstash.url && this.upstash.token))) {
+    if (this.upstash.isConnected) {
       this.startSyncPolling();
       this.pullFromUpstash(false);
     }
   }
 
-  /**
-   * Check if the Vercel /api/sync endpoint is available and configured.
-   * If so, enable server-side proxy mode (no client-side credentials needed).
-   */
   async detectVercelAPI() {
     try {
       const res = await fetch('/api/sync?room=' + encodeURIComponent(this.upstash.roomId || 'study-duo-room-1'));
@@ -1608,18 +1430,17 @@ class StudyTrackerApp {
           this.saveUpstashConfig();
           this.startSyncPolling();
           this.pullFromUpstash(false);
-          this.showToast('Auto-connected to Upstash via Vercel!', 'success');
+          this.showToast('Connected to Upstash Cloud via Vercel proxy!', 'success');
         }
       }
     } catch (e) {
-      // Not on Vercel or API not available — that's fine, user can connect manually
+      // Offline or local
     }
   }
 
   updateUpstashStatusUI(syncState = null) {
     const isConn = !!this.upstash.isConnected;
 
-    // Header indicator
     if (this.cloudStatusDot) {
       this.cloudStatusDot.className = 'cloud-status-indicator ' + 
         (syncState === 'syncing' ? 'status-syncing' : (isConn ? 'status-connected' : 'status-offline'));
@@ -1630,28 +1451,27 @@ class StudyTrackerApp {
         : (isConn ? 'Cloud Live 🟢' : 'Upstash Cloud');
     }
 
-    // Modal banner
     if (this.upstashStatusBanner) {
       this.upstashStatusBanner.className = 'cloud-status-banner ' + 
         (isConn ? 'status-banner-connected' : 'status-banner-disconnected');
     }
+    if (this.bannerStatusDot) {
+      this.bannerStatusDot.className = 'status-pulse-dot ' + (isConn ? 'dot-live' : '');
+    }
     if (this.bannerStatusTitle) {
       this.bannerStatusTitle.textContent = isConn 
-        ? `Connected to Room: ${this.upstash.roomId || 'Default'}` 
+        ? `Connected to Room: ${this.upstash.roomId || 'default'}`
         : 'Cloud Sync Disconnected';
     }
     if (this.bannerStatusSub) {
-      this.bannerStatusSub.textContent = isConn 
-        ? 'Live bidirectional sync with Upstash Redis active.' 
-        : 'Currently storing progress locally in browser.';
+      this.bannerStatusSub.textContent = isConn
+        ? 'Changes automatically sync across both devices in real-time.'
+        : 'Currently storing progress locally in your browser.';
     }
     if (this.bannerLastSyncText) {
-      if (this.upstash.lastSyncedAt) {
-        const timeStr = new Date(this.upstash.lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        this.bannerLastSyncText.textContent = `Synced: ${timeStr}`;
-      } else {
-        this.bannerLastSyncText.textContent = isConn ? 'Synced just now' : '—';
-      }
+      this.bannerLastSyncText.textContent = this.upstash.lastSyncedAt
+        ? `Synced ${new Date(this.upstash.lastSyncedAt).toLocaleTimeString()}`
+        : '—';
     }
   }
 
@@ -1665,56 +1485,22 @@ class StudyTrackerApp {
     this.modalUpstash.classList.remove('hidden');
   }
 
-  toggleTokenVisibility() {
-    const isPassword = this.inputUpstashToken.type === 'password';
-    this.inputUpstashToken.type = isPassword ? 'text' : 'password';
-    this.btnToggleTokenVisibility.textContent = isPassword ? 'Hide' : 'Show';
-  }
-
-  cleanUpstashUrl(url) {
-    if (!url) return '';
-    let cleaned = url.trim();
-    if (cleaned.endsWith('/')) {
-      cleaned = cleaned.slice(0, -1);
-    }
-    return cleaned;
-  }
-
   async handleConnectUpstash(e) {
     e.preventDefault();
-    const url = this.cleanUpstashUrl(this.inputUpstashUrl.value);
+    const url = this.inputUpstashUrl.value.trim().replace(/\/+$/, '');
     const token = this.inputUpstashToken.value.trim();
-    const roomId = this.inputUpstashRoom.value.trim() || 'study-duo-room-1';
-    const pollIntervalVal = this.selectSyncInterval.value;
-    const pollInterval = pollIntervalVal === 'manual' ? null : parseInt(pollIntervalVal, 10);
+    const roomId = this.inputTopicClean(this.inputUpstashRoom.value.trim()) || 'study-duo-room-1';
+    const pollInterval = this.selectSyncInterval.value === 'manual' ? 0 : parseInt(this.selectSyncInterval.value, 10);
     const autoSync = this.checkUpstashAutoSync.checked;
 
-    // If server proxy is available, use that instead of direct credentials
-    if (this.upstash.useServerProxy) {
-      this.upstash.roomId = roomId;
-      this.upstash.pollInterval = pollInterval;
-      this.upstash.autoSync = autoSync;
-      this.upstash.isConnected = true;
-      this.upstash.lastSyncedAt = Date.now();
-      this.saveUpstashConfig();
-      this.startSyncPolling();
-      await this.pullFromUpstash(false);
-      this.updateUpstashStatusUI();
-      this.showToast('Connected via server API!', 'success');
-      this.modalUpstash.classList.add('hidden');
-      return;
-    }
-
     if (!url || !token) {
-      this.showToast('Please provide both Upstash URL and Token.', 'info');
+      this.showToast('Please provide both Upstash URL and Token.', 'warning');
       return;
     }
 
-    this.updateUpstashStatusUI('syncing');
-    this.showToast('Connecting to Upstash Redis...', 'info');
+    this.showToast('Testing Upstash connection...', 'info');
 
     try {
-      // Test REST connection with PING
       const testRes = await fetch(url, {
         method: 'POST',
         headers: {
@@ -1725,7 +1511,7 @@ class StudyTrackerApp {
       });
 
       if (!testRes.ok) {
-        throw new Error(`Upstash returned HTTP ${testRes.status}: ${testRes.statusText}`);
+        throw new Error(`Upstash returned HTTP ${testRes.status}`);
       }
 
       const pingData = await testRes.json();
@@ -1733,7 +1519,6 @@ class StudyTrackerApp {
         throw new Error(pingData.error);
       }
 
-      // Connection succeeded! Update config
       this.upstash.url = url;
       this.upstash.token = token;
       this.upstash.roomId = roomId;
@@ -1741,60 +1526,34 @@ class StudyTrackerApp {
       this.upstash.autoSync = autoSync;
       this.upstash.isConnected = true;
       this.upstash.useServerProxy = false;
-      this.upstash.lastSyncedAt = Date.now();
       this.saveUpstashConfig();
 
-      // Check if remote data already exists for this room
-      const getRes = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(['GET', `peertrack:${roomId}`])
-      });
-
-      const getData = await getRes.json();
-      if (getData.result) {
-        try {
-          const remoteObj = JSON.parse(getData.result);
-          if (remoteObj.state && remoteObj.state.chapters) {
-            const pullRemote = confirm(
-              `Found an existing study syllabus in Upstash for room "${roomId}"!\n\n` +
-              `Click OK to load the remote cloud syllabus,\n` +
-              `or Cancel to overwrite the cloud with your current local syllabus.`
-            );
-
-            if (pullRemote) {
-              this.state = remoteObj.state;
-              this.lastRemoteUpdatedAt = remoteObj.updatedAt || Date.now();
-              this.saveStateLocallyWithoutPush();
-              this.showToast('Loaded shared syllabus from Upstash cloud!', 'success');
-            } else {
-              await this.pushToUpstash(false);
-              this.showToast('Pushed current syllabus to Upstash cloud!', 'success');
-            }
-          } else {
-            await this.pushToUpstash(false);
-          }
-        } catch (parseErr) {
-          await this.pushToUpstash(false);
-        }
-      } else {
-        // No existing room data, push current state
-        await this.pushToUpstash(false);
-      }
-
       this.startSyncPolling();
+      await this.pullFromUpstash(false);
       this.updateUpstashStatusUI();
-      this.showToast('Connected to Upstash Redis Cloud!', 'success');
+
+      this.showToast('Successfully connected to Upstash Redis!', 'success');
       this.modalUpstash.classList.add('hidden');
     } catch (err) {
       console.error('Upstash connection error:', err);
-      this.upstash.isConnected = false;
-      this.updateUpstashStatusUI();
-      alert(`Could not connect to Upstash Redis:\n${err.message}\n\nPlease check your REST URL and Token.`);
+      this.showToast(`Connection failed: ${err.message}`, 'warning');
     }
+  }
+
+  disconnectUpstash() {
+    this.stopSyncPolling();
+    this.upstash.isConnected = false;
+    this.upstash.useServerProxy = false;
+    this.saveUpstashConfig();
+    this.updateUpstashStatusUI();
+    this.showToast('Disconnected from Upstash Cloud.', 'info');
+  }
+
+  triggerAutoPush() {
+    clearTimeout(this.autoPushTimer);
+    this.autoPushTimer = setTimeout(() => {
+      this.pushToUpstash(false);
+    }, 800);
   }
 
   async pushToUpstash(notify = true) {
@@ -1814,14 +1573,12 @@ class StudyTrackerApp {
 
       let res;
       if (this.upstash.useServerProxy) {
-        // Use Vercel server-side API proxy (credentials in env vars)
         res = await fetch('/api/sync', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ room: this.upstash.roomId, payload })
         });
       } else {
-        // Direct Upstash REST call (credentials in browser)
         res = await fetch(this.upstash.url, {
           method: 'POST',
           headers: {
@@ -1841,7 +1598,7 @@ class StudyTrackerApp {
       this.updateUpstashStatusUI();
 
       if (notify) {
-        this.showToast('Pushed latest study progress to Upstash!', 'success');
+        this.showToast('Saved latest study progress to Upstash!', 'success');
       }
     } catch (err) {
       console.warn('Failed to push to Upstash', err);
@@ -1862,17 +1619,14 @@ class StudyTrackerApp {
     try {
       let data;
       if (this.upstash.useServerProxy) {
-        // Use Vercel server-side API proxy
         const res = await fetch('/api/sync?room=' + encodeURIComponent(this.upstash.roomId));
         if (res.ok) {
           data = await res.json();
-          // Server returns { configured, result } where result is the raw string
           if (data.result) {
             data = { result: data.result };
           }
         }
       } else {
-        // Direct Upstash REST call
         const res = await fetch(this.upstash.url, {
           method: 'POST',
           headers: {
@@ -1888,50 +1642,42 @@ class StudyTrackerApp {
 
       if (data && data.result) {
         const remote = JSON.parse(data.result);
-        // Only apply if remote was updated after our last known pull
-        if (remote && remote.state && remote.updatedAt) {
-          const isNewer = remote.updatedAt > (this.lastRemoteUpdatedAt || 0);
-          const isDifferent = JSON.stringify(remote.state) !== JSON.stringify(this.state);
+        if (remote && remote.state && remote.updatedAt > this.lastRemoteUpdatedAt) {
+          this.lastRemoteUpdatedAt = remote.updatedAt;
 
-          if (isNewer && isDifferent) {
-            this.state = remote.state;
-            this.lastRemoteUpdatedAt = remote.updatedAt;
-            this.saveStateLocallyWithoutPush();
-            this.showToast(`Updated from study buddy (${remote.sender || 'Cloud'})!`, 'info');
+          // Merge chapters and topics safely
+          this.state = remote.state;
+          this.saveStateLocallyWithoutPush();
+          this.updateProfilesUI();
+          this.render();
+
+          if (notify) {
+            this.showToast('Pulled latest progress from cloud!', 'success');
           }
         }
+      } else if (data && !data.result) {
+        // Cloud is empty, push our local state to initialize it
+        this.pushToUpstash(false);
       }
+
       this.upstash.lastSyncedAt = Date.now();
+      this.saveUpstashConfig();
       this.updateUpstashStatusUI();
-      if (notify) {
-        this.showToast('Synced latest data from Upstash Cloud.', 'success');
-      }
     } catch (err) {
-      console.warn('Failed to pull from Upstash', err);
+      console.warn('Pull from Upstash failed:', err);
     } finally {
       this.isSyncing = false;
-      this.updateUpstashStatusUI();
     }
-  }
-
-  triggerAutoPush() {
-    clearTimeout(this.autoPushTimer);
-    this.autoPushTimer = setTimeout(() => {
-      this.pushToUpstash(false);
-    }, 400);
   }
 
   startSyncPolling() {
     this.stopSyncPolling();
-    if (!this.upstash.pollInterval || this.upstash.pollInterval < 1000) {
-      return;
-    }
-    this.syncPollTimer = setInterval(() => {
-      // Only poll when the window/document is visible to save requests
-      if (!document.hidden && this.upstash.isConnected) {
+    const interval = this.upstash.pollInterval || 10000;
+    if (interval > 0) {
+      this.syncPollTimer = setInterval(() => {
         this.pullFromUpstash(false);
-      }
-    }, this.upstash.pollInterval);
+      }, interval);
+    }
   }
 
   stopSyncPolling() {
@@ -1941,169 +1687,92 @@ class StudyTrackerApp {
     }
   }
 
-  disconnectUpstash() {
-    if (confirm('Disconnect from Upstash Cloud? Your data will remain safely stored locally in your browser.')) {
-      this.stopSyncPolling();
-      this.upstash.isConnected = false;
-      this.saveUpstashConfig();
-      this.updateUpstashStatusUI();
-      this.showToast('Disconnected from Upstash Cloud.', 'info');
-    }
-  }
-
-  copyCloudInviteLink() {
-    if (!this.upstash.url || !this.upstash.token) {
-      alert('Please connect your Upstash URL and Token first before copying an invite link.');
+  copyUpstashInviteLink() {
+    if (!this.upstash.roomId) {
+      this.showToast('Configure a room first.', 'warning');
       return;
     }
 
-    try {
-      const inviteData = {
-        url: this.upstash.url,
-        token: this.upstash.token,
-        roomId: this.upstash.roomId || 'study-duo-room-1'
-      };
-      const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(inviteData)))));
-      const inviteUrl = `${window.location.origin}${window.location.pathname}#cloud=${encoded}`;
-
-      navigator.clipboard.writeText(inviteUrl).then(() => {
-        this.showToast('Copied Cloud Room invite link! Send it to your friend.', 'success');
-      }).catch(() => {
-        prompt('Copy this invite link for your friend:', inviteUrl);
-      });
-    } catch (err) {
-      console.error('Failed to create invite link', err);
+    const payloadObj = {
+      room: this.upstash.roomId
+    };
+    if (!this.upstash.useServerProxy && this.upstash.url && this.upstash.token) {
+      payloadObj.u = this.upstash.url;
+      payloadObj.t = this.upstash.token;
     }
+
+    const encoded = encodeURIComponent(JSON.stringify(payloadObj));
+    const inviteUrl = `${window.location.origin}${window.location.pathname}#cloud=${encoded}`;
+
+    navigator.clipboard.writeText(inviteUrl).then(() => {
+      this.showToast('Partner invite link copied to clipboard!', 'success');
+    }).catch(() => {
+      prompt('Copy this invite link for your partner:', inviteUrl);
+    });
   }
 
   checkUrlForCloudPayload() {
-    const hash = window.location.hash;
-    if (hash && hash.startsWith('#cloud=')) {
-      try {
-        const encoded = hash.replace('#cloud=', '');
-        const jsonStr = decodeURIComponent(escape(atob(decodeURIComponent(encoded))));
-        const parsed = JSON.parse(jsonStr);
-
-        if (parsed.url && parsed.token && parsed.roomId) {
-          const accept = confirm(
-            `Your study buddy invited you to join Upstash Cloud Room: "${parsed.roomId}"!\n\n` +
-            `Would you like to connect and sync your study tracker live?`
-          );
-
-          if (accept) {
-            this.upstash.url = parsed.url;
-            this.upstash.token = parsed.token;
-            this.upstash.roomId = parsed.roomId;
-            this.upstash.isConnected = true;
-            this.upstash.autoSync = true;
-            // Switch persona to friend by default
-            this.state.activePersona = 'friend';
-            this.saveUpstashConfig();
-            this.saveStateLocallyWithoutPush();
-            this.startSyncPolling();
-            this.pullFromUpstash(true);
-            this.showToast(`Connected to room "${parsed.roomId}"! Welcome!`, 'success');
-            history.replaceState(null, document.title, window.location.pathname);
-          }
+    if (!window.location.hash.startsWith('#cloud=')) return;
+    try {
+      const raw = decodeURIComponent(window.location.hash.slice(7));
+      const payload = JSON.parse(raw);
+      if (payload.room) {
+        this.upstash.roomId = payload.room;
+        if (payload.u && payload.t) {
+          this.upstash.url = payload.u;
+          this.upstash.token = payload.t;
         }
-      } catch (err) {
-        console.warn('Invalid cloud invite hash', err);
+        this.upstash.isConnected = true;
+        this.saveUpstashConfig();
+        this.startSyncPolling();
+        this.pullFromUpstash(false);
+        this.showToast(`Joined shared cloud room: "${payload.room}"!`, 'success');
       }
+      history.replaceState(null, '', window.location.pathname);
+    } catch (e) {
+      console.warn('Invalid cloud link:', e);
     }
   }
 
   // ===================================================================
-  // Celebration Confetti
+  // Utility Functions
   // ===================================================================
-  triggerConfetti() {
-    const canvas = this.confettiCanvas;
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const colors = ['#6366f1', '#38bdf8', '#f43f5e', '#fbbf24', '#10b981', '#ec4899'];
-    const particles = [];
-
-    for (let i = 0; i < 90; i++) {
-      particles.push({
-        x: canvas.width / 2,
-        y: canvas.height / 2,
-        vx: (Math.random() - 0.5) * 16,
-        vy: (Math.random() - 0.7) * 16,
-        size: Math.random() * 8 + 4,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        rotation: Math.random() * 360,
-        rSpeed: (Math.random() - 0.5) * 8,
-        life: 1,
-        decay: Math.random() * 0.015 + 0.01
-      });
-    }
-
-    let animationId;
-    const renderConfetti = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      let alive = false;
-
-      particles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.35; // gravity
-        p.rotation += p.rSpeed;
-        p.life -= p.decay;
-
-        if (p.life > 0) {
-          alive = true;
-          ctx.save();
-          ctx.translate(p.x, p.y);
-          ctx.rotate((p.rotation * Math.PI) / 180);
-          ctx.fillStyle = p.color;
-          ctx.globalAlpha = p.life;
-          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.7);
-          ctx.restore();
-        }
-      });
-
-      if (alive) {
-        animationId = requestAnimationFrame(renderConfetti);
-      } else {
-        cancelAnimationFrame(animationId);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
-    };
-
-    renderConfetti();
+  closeAllModals() {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
   }
 
-  // ===================================================================
-  // Toast Alerts
-  // ===================================================================
   showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    const icon = type === 'success' ? '✓' : 'ℹ';
-    toast.innerHTML = `<span style="font-weight: bold;">${icon}</span> <span>${this.escapeHtml(message)}</span>`;
+    toast.textContent = message;
+
     this.toastContainer.appendChild(toast);
 
     setTimeout(() => {
       toast.style.opacity = '0';
-      toast.style.transform = 'translateX(100%)';
-      toast.style.transition = 'all 0.3s ease';
-      setTimeout(() => toast.remove(), 300);
-    }, 3200);
+      toast.style.transform = 'translateY(10px)';
+      setTimeout(() => toast.remove(), 250);
+    }, 2800);
   }
 
   escapeHtml(str) {
     if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    };
+    return String(str).replace(/[&<>"']/g, m => map[m]);
+  }
+
+  inputTopicClean(str) {
+    return str.replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 40);
   }
 }
 
-// Instantiate on DOM ready
+// Initialize on DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
-  window.app = new StudyTrackerApp();
+  window.app = new PeerTrackApp();
 });
