@@ -1588,6 +1588,91 @@ body {
 }
 .guide-content ol { padding-left: 1.1rem; }
 
+/* Bulk CSV Import Styles */
+.csv-upload-zone {
+  border: 2px dashed var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  text-align: center;
+  cursor: pointer;
+  background: var(--bg-elevated);
+  transition: all var(--transition);
+}
+
+.csv-upload-zone:hover,
+.csv-upload-zone.dragover {
+  border-color: var(--user-color);
+  background: var(--user-bg);
+}
+
+.csv-upload-zone svg {
+  color: var(--user-color);
+  margin-bottom: 0.25rem;
+}
+
+.csv-zone-title {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+.csv-zone-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.csv-template-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.75rem 0;
+}
+
+.import-options-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  margin-top: 0.75rem;
+}
+
+.radio-pill-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.custom-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.csv-parsed-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--success);
+  margin-top: 0.85rem;
+}
+
 /* Toast Notifications */
 .toast-container {
   position: fixed;
@@ -1674,6 +1759,69 @@ body {
 
   #btnOpenAddChapter {
     grid-column: span 2;
+  }
+
+  /* Bold Mobile Profiles & Stat Cards */
+  .stats-grid {
+    gap: 0.85rem;
+  }
+
+  .stat-card {
+    padding: 1.1rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .user-stat-card {
+    border-left: 4px solid var(--user-color);
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.04) 0%, var(--bg-card) 100%);
+  }
+
+  .friend-stat-card {
+    border-left: 4px solid var(--friend-color);
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.04) 0%, var(--bg-card) 100%);
+  }
+
+  .avatar-with-ring {
+    width: 44px;
+    height: 44px;
+    border-width: 2px;
+  }
+
+  .avatar-with-ring .stat-avatar {
+    font-size: 0.92rem;
+    font-weight: 800;
+  }
+
+  .stat-owner-name {
+    font-size: 1.18rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .stat-badge {
+    font-size: 0.92rem;
+    font-weight: 800;
+    padding: 0.3rem 0.7rem;
+  }
+
+  .progress-bar-track {
+    height: 9px;
+  }
+
+  .metric-num {
+    font-size: 1.08rem;
+    font-weight: 800;
+  }
+
+  .gap-breakdown-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .gap-item {
+    padding: 0.75rem 0.85rem;
+    min-height: 48px;
   }
 
   /* Toolbar */

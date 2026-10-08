@@ -119,6 +119,16 @@
 
       <!-- Header Action Controls -->
       <div class="header-right">
+        <!-- Import CSV Button -->
+        <button type="button" class="btn btn-secondary btn-icon-text" id="btnOpenImportCSV" title="Bulk Import Chapters & Topics via CSV">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Import CSV</span>
+        </button>
+
         <!-- Upstash Cloud Status -->
         <button type="button" class="btn btn-secondary btn-icon-text cloud-status-btn" id="btnOpenUpstashModal" title="Live Upstash Redis cloud sync">
           <span class="cloud-status-indicator status-offline" id="cloudStatusDot"></span>
@@ -346,6 +356,7 @@
         <p class="empty-desc">Start building your syllabus together by adding your first chapter and topics.</p>
         <div class="empty-actions">
           <button type="button" class="btn btn-primary" id="btnEmptyAddChapter">+ Add Your First Chapter</button>
+          <button type="button" class="btn btn-secondary" id="btnEmptyImportCSV">📥 Import Syllabus (CSV)</button>
         </div>
       </div>
 
@@ -667,6 +678,87 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="btnCloseUpstash">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Bulk Import Chapters & Topics via CSV -->
+  <div class="modal-overlay hidden" id="modalImportCSV" role="dialog" aria-modal="true" aria-labelledby="modalImportCSVTitle">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div class="modal-title-with-badge">
+          <span class="badge-tag">Bulk Syllabus Import</span>
+          <h3 class="modal-title" id="modalImportCSVTitle">Import Chapters & Topics (CSV)</h3>
+        </div>
+        <button type="button" class="btn-close-modal" id="btnCloseModalCSV" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <div class="modal-form">
+        <p class="modal-subtitle">
+          Add your entire syllabus at once instead of adding topics one by one! Upload a <code>.csv</code> file or paste CSV text directly.
+        </p>
+
+        <!-- CSV File Upload & Template Download -->
+        <div class="csv-upload-zone" id="csvDropZone">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span class="csv-zone-title">Tap to select CSV file</span>
+          <span class="csv-zone-sub">Supports Excel / Google Sheets exported .csv</span>
+          <input type="file" id="fileCsvInput" accept=".csv,.txt" class="hidden">
+        </div>
+
+        <div class="csv-template-row">
+          <button type="button" class="btn btn-ghost btn-sm" id="btnDownloadCsvTemplate">
+            <span>📥 Download Sample CSV Template</span>
+          </button>
+          <button type="button" class="btn btn-ghost btn-sm" id="btnFillSampleCsv">
+            <span>📝 Paste Sample Data</span>
+          </button>
+        </div>
+
+        <!-- Direct CSV Text Paste Area -->
+        <div class="form-group">
+          <label for="textCsvInput">
+            <span>Or Paste CSV Text Directly:</span>
+          </label>
+          <textarea id="textCsvInput" rows="6" placeholder="Chapter,Topic,Difficulty,EstHours,Notes
+Dynamic Programming,0/1 Knapsack,Medium,3,Standard 2D DP
+Dynamic Programming,Longest Common Subsequence,Medium,2.5,Matrix transition
+Graph Theory,Breadth First Search,Easy,1.5,Queue traversal
+Graph Theory,Dijkstra Algorithm,Hard,3,Priority Queue"></textarea>
+          <span class="label-hint">Columns supported: <code>Chapter, Topic, Difficulty, EstHours, Notes</code> (Only <code>Chapter, Topic</code> are required).</span>
+        </div>
+
+        <!-- Import Mode Toggle -->
+        <div class="import-options-card">
+          <span class="sub-label">Import Mode:</span>
+          <div class="radio-pill-group">
+            <label class="custom-radio">
+              <input type="radio" name="csvImportMode" value="append" checked>
+              <span>Append to existing chapters</span>
+            </label>
+            <label class="custom-radio">
+              <input type="radio" name="csvImportMode" value="replace">
+              <span class="text-danger">Replace all existing chapters</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Preview Count Badge -->
+        <div class="csv-parsed-summary hidden" id="csvParsedSummary">
+          <span class="summary-icon">✅</span>
+          <span id="csvSummaryText">Parsed 0 chapters and 0 topics</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnCancelCSV">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btnExecuteCsvImport">
+          <span>Import All Topics</span>
+        </button>
       </div>
     </div>
   </div>

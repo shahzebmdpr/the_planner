@@ -395,6 +395,21 @@ class AmanStudyTrackerApp {
     this.btnCopyFriendCloudInvite = document.getElementById('btnCopyFriendCloudInvite');
     this.btnDisconnectUpstash = document.getElementById('btnDisconnectUpstash');
 
+    // Bulk CSV Import Modal Elements
+    this.btnOpenImportCSV = document.getElementById('btnOpenImportCSV');
+    this.btnEmptyImportCSV = document.getElementById('btnEmptyImportCSV');
+    this.modalImportCSV = document.getElementById('modalImportCSV');
+    this.btnCloseModalCSV = document.getElementById('btnCloseModalCSV');
+    this.btnCancelCSV = document.getElementById('btnCancelCSV');
+    this.csvDropZone = document.getElementById('csvDropZone');
+    this.fileCsvInput = document.getElementById('fileCsvInput');
+    this.btnDownloadCsvTemplate = document.getElementById('btnDownloadCsvTemplate');
+    this.btnFillSampleCsv = document.getElementById('btnFillSampleCsv');
+    this.textCsvInput = document.getElementById('textCsvInput');
+    this.btnExecuteCsvImport = document.getElementById('btnExecuteCsvImport');
+    this.csvParsedSummary = document.getElementById('csvParsedSummary');
+    this.csvSummaryText = document.getElementById('csvSummaryText');
+
     // Toast Container
     this.toastContainer = document.getElementById('toastContainer');
   }
@@ -538,6 +553,53 @@ class AmanStudyTrackerApp {
       this.inputUpstashToken.type = isPass ? 'text' : 'password';
       this.btnToggleTokenVisibility.textContent = isPass ? 'Hide' : 'Show';
     });
+
+    // CSV Bulk Import Modal Events
+    if (this.btnOpenImportCSV) {
+      this.btnOpenImportCSV.addEventListener('click', () => this.openCsvModal());
+    }
+    if (this.btnEmptyImportCSV) {
+      this.btnEmptyImportCSV.addEventListener('click', () => this.openCsvModal());
+    }
+    if (this.btnCloseModalCSV) {
+      this.btnCloseModalCSV.addEventListener('click', () => this.modalImportCSV.classList.add('hidden'));
+    }
+    if (this.btnCancelCSV) {
+      this.btnCancelCSV.addEventListener('click', () => this.modalImportCSV.classList.add('hidden'));
+    }
+    if (this.csvDropZone && this.fileCsvInput) {
+      this.csvDropZone.addEventListener('click', () => this.fileCsvInput.click());
+      this.fileCsvInput.addEventListener('change', (e) => this.handleCsvFileSelect(e));
+
+      // Drag and drop support
+      this.csvDropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        this.csvDropZone.classList.add('dragover');
+      });
+      this.csvDropZone.addEventListener('dragleave', () => {
+        this.csvDropZone.classList.remove('dragover');
+      });
+      this.csvDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        this.csvDropZone.classList.remove('dragover');
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+          this.readCsvFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    if (this.btnDownloadCsvTemplate) {
+      this.btnDownloadCsvTemplate.addEventListener('click', () => this.downloadCsvTemplate());
+    }
+    if (this.btnFillSampleCsv) {
+      this.btnFillSampleCsv.addEventListener('click', () => this.fillSampleCsvData());
+    }
+    if (this.textCsvInput) {
+      this.textCsvInput.addEventListener('input', () => this.updateCsvParsedPreview());
+    }
+    if (this.btnExecuteCsvImport) {
+      this.btnExecuteCsvImport.addEventListener('click', () => this.executeCsvImport());
+    }
 
     // Close modals on overlay backdrop click
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
@@ -1751,6 +1813,278 @@ class AmanStudyTrackerApp {
     } catch (e) {
       console.warn('Invalid cloud link:', e);
     }
+  }
+
+  // ===================================================================
+  // Bulk CSV Import System
+  // ===================================================================
+
+  openCsvModal() {
+    if (!this.modalImportCSV) return;
+    this.modalImportCSV.classList.remove('hidden');
+    if (this.textCsvInput) {
+      this.updateCsvParsedPreview();
+      this.textCsvInput.focus();
+    }
+  }
+
+  handleCsvFileSelect(e) {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      this.readCsvFile(file);
+    }
+  }
+
+  readCsvFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const content = evt.target.result;
+      if (this.textCsvInput) {
+        this.textCsvInput.value = content;
+        this.updateCsvParsedPreview();
+        this.showToast(`Loaded ${file.name} successfully!`, 'success');
+      }
+    };
+    reader.onerror = () => {
+      this.showToast('Failed to read CSV file.', 'danger');
+    };
+    reader.readAsText(file);
+  }
+
+  downloadCsvTemplate() {
+    const csvContent = [
+      'Chapter,Topic,Difficulty,EstHours,Notes',
+      'Dynamic Programming,0/1 Knapsack,Medium,3,Standard 2D DP table memoization',
+      'Dynamic Programming,Longest Common Subsequence,Medium,2.5,Matrix diagonal transition',
+      'Dynamic Programming,Matrix Chain Multiplication,Hard,4,Interval DP with partition k',
+      'Graph Theory,Breadth First Search (BFS),Easy,1.5,Queue traversal with visited array',
+      'Graph Theory,Dijkstra Shortest Path,Medium,3,Priority Queue min-heap traversal',
+      'Binary Trees,Lowest Common Ancestor,Medium,2,Recursive tree path comparison',
+      'Operating Systems,Process Scheduling Algorithms,Easy,2,FCFS SJF Round Robin analysis',
+      'Operating Systems,Deadlock & Banker Algorithm,Hard,3.5,Resource allocation graph'
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'aman_study_tracker_template.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    this.showToast('Downloaded sample CSV template!', 'info');
+  }
+
+  fillSampleCsvData() {
+    const sample = [
+      'Chapter,Topic,Difficulty,EstHours,Notes',
+      'Dynamic Programming,0/1 Knapsack,Medium,3,Standard 2D DP array',
+      'Dynamic Programming,Longest Common Subsequence,Medium,2.5,Matrix diagonal transition',
+      'Dynamic Programming,Coin Change Problem,Medium,2,Unbounded knapsack base case',
+      'Graph Theory,BFS & Shortest Path,Easy,1.5,Queue traversal with visited set',
+      'Graph Theory,Dijkstra Algorithm,Medium,3,Min-heap priority queue',
+      'Graph Theory,Topological Sort,Medium,2,Kahn algorithm and DFS ordering',
+      'System Design,Consistent Hashing,Medium,2.5,Virtual nodes distribution',
+      'System Design,Rate Limiting Algorithms,Hard,3,Token bucket and Leaky bucket'
+    ].join('\n');
+
+    if (this.textCsvInput) {
+      this.textCsvInput.value = sample;
+      this.updateCsvParsedPreview();
+      this.showToast('Sample syllabus pasted! Review and click Import.', 'info');
+    }
+  }
+
+  parseCsvData(rawText) {
+    if (!rawText || !rawText.trim()) return [];
+
+    // Robust CSV parser supporting quotes and standard separators
+    const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+    if (lines.length === 0) return [];
+
+    // Parse a line into cells taking quotes into account
+    const parseLine = (line) => {
+      const cells = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"' || char === "'") {
+          inQuotes = !inQuotes;
+        } else if ((char === ',' || char === '\t' || char === ';') && !inQuotes) {
+          cells.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      cells.push(current.trim());
+      return cells.map(c => c.replace(/^["']|["']$/g, '').trim());
+    };
+
+    const firstCells = parseLine(lines[0]).map(c => c.toLowerCase());
+    let startIndex = 0;
+    let colChapter = 0;
+    let colTopic = 1;
+    let colDifficulty = -1;
+    let colEstHours = -1;
+    let colNotes = -1;
+
+    // Check if first line is a header
+    const hasHeader = firstCells.some(c => c.includes('chap') || c.includes('topic') || c.includes('subject'));
+    if (hasHeader) {
+      startIndex = 1;
+      firstCells.forEach((c, idx) => {
+        if (c.includes('chap') || c.includes('subject') || c.includes('module')) colChapter = idx;
+        else if (c.includes('topic') || c.includes('subtopic') || c.includes('concept') || c.includes('title')) colTopic = idx;
+        else if (c.includes('diff') || c.includes('level')) colDifficulty = idx;
+        else if (c.includes('hour') || c.includes('time') || c.includes('est')) colEstHours = idx;
+        else if (c.includes('note') || c.includes('desc') || c.includes('formula')) colNotes = idx;
+      });
+    }
+
+    const rows = [];
+    for (let i = startIndex; i < lines.length; i++) {
+      const cells = parseLine(lines[i]);
+      if (cells.length < 1) continue;
+
+      const chapterName = cells[colChapter] || 'General Syllabus';
+      const topicName = cells[colTopic] || cells[0] || '';
+      if (!topicName || topicName.toLowerCase() === 'topic') continue;
+
+      let difficulty = 'Medium';
+      if (colDifficulty >= 0 && cells[colDifficulty]) {
+        const diffVal = cells[colDifficulty].toLowerCase();
+        if (diffVal.startsWith('e')) difficulty = 'Easy';
+        else if (diffVal.startsWith('h')) difficulty = 'Hard';
+        else difficulty = 'Medium';
+      }
+
+      let estHours = 2;
+      if (colEstHours >= 0 && cells[colEstHours]) {
+        const parsed = parseFloat(cells[colEstHours]);
+        if (!isNaN(parsed) && parsed > 0) estHours = parsed;
+      }
+
+      const notes = (colNotes >= 0 && cells[colNotes]) ? cells[colNotes] : '';
+
+      rows.push({
+        chapter: chapterName,
+        topic: topicName,
+        difficulty,
+        estHours,
+        notes
+      });
+    }
+
+    return rows;
+  }
+
+  updateCsvParsedPreview() {
+    if (!this.textCsvInput || !this.csvParsedSummary || !this.csvSummaryText) return;
+
+    const raw = this.textCsvInput.value;
+    const rows = this.parseCsvData(raw);
+
+    if (rows.length === 0) {
+      this.csvParsedSummary.classList.add('hidden');
+      return;
+    }
+
+    const uniqueChapters = new Set(rows.map(r => r.chapter.toLowerCase()));
+    this.csvSummaryText.textContent = `Ready to import: ${uniqueChapters.size} Chapter(s) and ${rows.length} Total Subtopics!`;
+    this.csvParsedSummary.classList.remove('hidden');
+  }
+
+  executeCsvImport() {
+    if (!this.textCsvInput) return;
+    const raw = this.textCsvInput.value;
+    const rows = this.parseCsvData(raw);
+
+    if (rows.length === 0) {
+      this.showToast('Please provide valid CSV rows (e.g. Chapter, Topic)', 'warning');
+      return;
+    }
+
+    const importMode = document.querySelector('input[name="csvImportMode"]:checked')?.value || 'append';
+
+    // Group rows by chapter title
+    const grouped = {};
+    rows.forEach(r => {
+      const chapKey = r.chapter.trim();
+      if (!grouped[chapKey]) {
+        grouped[chapKey] = [];
+      }
+      grouped[chapKey].push(r);
+    });
+
+    const colors = ['indigo', 'emerald', 'amber', 'rose', 'cyan', 'purple'];
+    let colorIdx = 0;
+
+    if (importMode === 'replace') {
+      this.state.chapters = [];
+    }
+
+    let addedChapters = 0;
+    let addedTopics = 0;
+
+    Object.keys(grouped).forEach(chapTitle => {
+      // Find existing chapter by title or create new
+      let existingChap = this.state.chapters.find(c => c.title.trim().toLowerCase() === chapTitle.toLowerCase());
+
+      if (!existingChap) {
+        const newChapId = 'chap-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 6);
+        existingChap = {
+          id: newChapId,
+          title: chapTitle,
+          category: 'Syllabus',
+          description: `Imported chapters & subtopics for ${chapTitle}`,
+          color: colors[colorIdx % colors.length],
+          topics: []
+        };
+        colorIdx++;
+        this.state.chapters.push(existingChap);
+        addedChapters++;
+      }
+
+      // Add topics under this chapter
+      grouped[chapTitle].forEach(item => {
+        const existingTopic = existingChap.topics.find(t => t.title.trim().toLowerCase() === item.topic.trim().toLowerCase());
+        if (!existingTopic) {
+          const newTopicId = 'top-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 6);
+          existingChap.topics.push({
+            id: newTopicId,
+            title: item.topic,
+            notes: item.notes || '',
+            difficulty: item.difficulty || 'Medium',
+            estHours: item.estHours || 2,
+            userLearned: false,
+            friendLearned: false
+          });
+          addedTopics++;
+        }
+      });
+    });
+
+    this.saveState();
+    this.render();
+
+    // Sync to cloud if connected
+    if (this.upstash && this.upstash.isConnected) {
+      this.pushToUpstash(false);
+    }
+
+    if (this.modalImportCSV) {
+      this.modalImportCSV.classList.add('hidden');
+    }
+
+    // Reset textarea for next time
+    this.textCsvInput.value = '';
+    if (this.csvParsedSummary) this.csvParsedSummary.classList.add('hidden');
+
+    this.showToast(`Imported ${addedChapters} new chapters and ${addedTopics} topics successfully!`, 'success');
   }
 
   // ===================================================================
