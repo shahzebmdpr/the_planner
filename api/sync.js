@@ -1,5 +1,6 @@
 /**
  * Vercel Serverless Function — Upstash Redis Sync Proxy
+ * Aman Study Tracker
  * 
  * Handles GET (pull from cloud) and POST (push to cloud).
  * Reads UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN
@@ -31,16 +32,34 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const room = req.query.room || 'study-duo-room-1';
 
-      const response = await fetch(UPSTASH_URL, {
+      // Check current key prefix first
+      let response = await fetch(UPSTASH_URL, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${UPSTASH_TOKEN}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(['GET', `peertrack:${room}`])
+        body: JSON.stringify(['GET', `aman_study_tracker:${room}`])
       });
 
-      const data = await response.json();
+      let data = await response.json();
+
+      // Fallback check for legacy key
+      if (!data.result) {
+        const legacyRes = await fetch(UPSTASH_URL, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(['GET', `peertrack:${room}`])
+        });
+        const legacyData = await legacyRes.json();
+        if (legacyData.result) {
+          data = legacyData;
+        }
+      }
+
       return res.status(200).json({ configured: true, result: data.result || null });
     }
 
@@ -55,7 +74,7 @@ export default async function handler(req, res) {
           'Authorization': `Bearer ${UPSTASH_TOKEN}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(['SET', `peertrack:${roomId}`, JSON.stringify(payload)])
+        body: JSON.stringify(['SET', `aman_study_tracker:${roomId}`, JSON.stringify(payload)])
       });
 
       const data = await response.json();

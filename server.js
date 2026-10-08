@@ -76,15 +76,27 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET') {
       const room = url.searchParams.get('room') || 'study-duo-room-1';
       try {
-        const response = await fetch(UPSTASH_URL, {
+        let response = await fetch(UPSTASH_URL, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${UPSTASH_TOKEN}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(['GET', `peertrack:${room}`])
+          body: JSON.stringify(['GET', `aman_study_tracker:${room}`])
         });
-        const data = await response.json();
+        let data = await response.json();
+        if (!data.result) {
+          const legacyRes = await fetch(UPSTASH_URL, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(['GET', `peertrack:${room}`])
+          });
+          const legacyData = await legacyRes.json();
+          if (legacyData.result) data = legacyData;
+        }
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ configured: true, result: data.result || null }));
       } catch (err) {
@@ -109,7 +121,7 @@ const server = http.createServer(async (req, res) => {
               'Authorization': `Bearer ${UPSTASH_TOKEN}`,
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify(['SET', `peertrack:${room}`, JSON.stringify(payload)])
+            body: JSON.stringify(['SET', `aman_study_tracker:${room}`, JSON.stringify(payload)])
           });
           const data = await response.json();
           res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -145,7 +157,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`\n⚡ PeerTrack Server running at http://localhost:${PORT}`);
+  console.log(`\n⚡ Aman Study Tracker Server running at http://localhost:${PORT}`);
   if (UPSTASH_URL && UPSTASH_TOKEN) {
     console.log(`☁️  Upstash Redis proxy active with URL: ${UPSTASH_URL}`);
   } else {

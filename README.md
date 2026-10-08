@@ -1,4 +1,4 @@
-# PeerTrack — Minimalist Duo Study & Knowledge Gap Tracker
+# Aman Study Tracker — Minimalist Duo Study & Knowledge Gap Tracker
 
 A clean, minimalist collaborative study tracker for two study partners. Add chapters and topics, mark completion, and instantly visualize what you've mastered, what your friend has mastered, and what gaps remain between you.
 
@@ -24,14 +24,14 @@ Your `.env` file with secret keys will **never** be pushed to GitHub because `.g
 
 ### Step 1: Push This Project to GitHub
 
-1. Create a new repository on [GitHub](https://github.com/new) (e.g. `planner` or `peertrack`). Keep it Public or Private — your secrets are safe either way.
+1. Create a new repository on [GitHub](https://github.com/new) (e.g. `the_planner` or `aman-study-tracker`). Keep it Public or Private — your secrets are safe either way.
 2. In your terminal inside this project folder, run:
    ```bash
    # 1. Stage all project files (safe — .gitignore blocks .env)
    git add .
 
    # 2. Commit the changes
-   git commit -m "Initial commit: PeerTrack minimalist study planner with Upstash sync"
+   git commit -m "Initial commit: Aman Study Tracker with Upstash sync"
 
    # 3. Rename branch to main if not already
    git branch -M main

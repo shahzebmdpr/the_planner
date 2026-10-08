@@ -146,19 +146,23 @@ const SEED_DATA_DSA = {
   ]
 };
 
-const STORAGE_KEY = 'peertrack_collaborative_planner_v2';
-const UPSTASH_STORAGE_KEY = 'peertrack_upstash_config_v2';
-const AUTH_USER_KEY = 'peertrack_auth_user';
+const STORAGE_KEY = 'aman_study_tracker_state_v1';
+const LEGACY_STORAGE_KEY = 'peertrack_collaborative_planner_v2';
+const UPSTASH_STORAGE_KEY = 'aman_study_tracker_upstash_v1';
+const LEGACY_UPSTASH_KEY = 'peertrack_upstash_config_v2';
+const AUTH_USER_KEY = 'aman_study_tracker_auth_user';
+const LEGACY_AUTH_KEY = 'peertrack_auth_user';
 
 // ===================================================================
 // Main Application Class
 // ===================================================================
 
-class PeerTrackApp {
+class AmanStudyTrackerApp {
   constructor() {
     this.state = this.loadState();
-    this.currentAuthUser = localStorage.getItem(AUTH_USER_KEY); // 'user' or 'friend'
+    this.currentAuthUser = localStorage.getItem(AUTH_USER_KEY) || localStorage.getItem(LEGACY_AUTH_KEY); // 'user' or 'friend'
     this.isMasterUnlocked = false;
+
     this.activeFilter = 'all';
     this.searchQuery = '';
     this.collapsedChapters = new Set();
@@ -188,7 +192,7 @@ class PeerTrackApp {
   loadState() {
     let state = null;
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
       if (saved) {
         state = JSON.parse(saved);
       }
@@ -1379,7 +1383,7 @@ class PeerTrackApp {
   // ===================================================================
   loadUpstashConfig() {
     try {
-      const saved = localStorage.getItem(UPSTASH_STORAGE_KEY);
+      const saved = localStorage.getItem(UPSTASH_STORAGE_KEY) || localStorage.getItem(LEGACY_UPSTASH_KEY);
       if (saved) {
         return JSON.parse(saved);
       }
@@ -1585,7 +1589,7 @@ class PeerTrackApp {
             'Authorization': `Bearer ${this.upstash.token}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(['SET', `peertrack:${this.upstash.roomId}`, JSON.stringify(payload)])
+          body: JSON.stringify(['SET', `aman_study_tracker:${this.upstash.roomId}`, JSON.stringify(payload)])
         });
       }
 
@@ -1633,12 +1637,27 @@ class PeerTrackApp {
             'Authorization': `Bearer ${this.upstash.token}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(['GET', `peertrack:${this.upstash.roomId}`])
+          body: JSON.stringify(['GET', `aman_study_tracker:${this.upstash.roomId}`])
         });
         if (res.ok) {
           data = await res.json();
+          if (!data.result) {
+            const legRes = await fetch(this.upstash.url, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${this.upstash.token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(['GET', `peertrack:${this.upstash.roomId}`])
+            });
+            if (legRes.ok) {
+              const legData = await legRes.json();
+              if (legData.result) data = legData;
+            }
+          }
         }
       }
+
 
       if (data && data.result) {
         const remote = JSON.parse(data.result);
@@ -1774,5 +1793,6 @@ class PeerTrackApp {
 
 // Initialize on DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
-  window.app = new PeerTrackApp();
+  window.app = new AmanStudyTrackerApp();
 });
+
