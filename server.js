@@ -62,78 +62,67 @@ const server = http.createServer(async (req, res) => {
 
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 
-  // API Route: Check Server Upstash Status
-  if (url.pathname === '/api/upstash/status') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      serverConfigured: !!(UPSTASH_URL && UPSTASH_TOKEN),
-      upstashUrl: UPSTASH_URL ? UPSTASH_URL.replace(/(https?:\/\/)(.*)/, '$1***') : null
-    }));
-    return;
-  }
-
-  // API Route: Upstash Server Proxy (GET)
-  if (url.pathname === '/api/upstash/get' && req.method === 'GET') {
+  // API Route: Vercel parity /api/sync endpoint
+  if (url.pathname === '/api/sync') {
     if (!UPSTASH_URL || !UPSTASH_TOKEN) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'UPSTASH_REDIS_REST_URL or TOKEN not configured on server' }));
-      return;
-    }
-
-    const roomId = url.searchParams.get('room') || 'study-duo-room-1';
-    try {
-      const response = await fetch(UPSTASH_URL, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${UPSTASH_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(['GET', `peertrack:${roomId}`])
-      });
-      const data = await response.json();
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(data));
-    } catch (err) {
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: err.message }));
-    }
-    return;
-  }
-
-  // API Route: Upstash Server Proxy (SET)
-  if (url.pathname === '/api/upstash/set' && req.method === 'POST') {
-    if (!UPSTASH_URL || !UPSTASH_TOKEN) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'UPSTASH_REDIS_REST_URL or TOKEN not configured on server' }));
+      res.end(JSON.stringify({
+        configured: false,
+        error: 'Upstash environment variables not set on server'
+      }));
       return;
     }
 
-    let bodyStr = '';
-    req.on('data', chunk => { bodyStr += chunk; });
-    req.on('end', async () => {
+    if (req.method === 'GET') {
+      const room = url.searchParams.get('room') || 'study-duo-room-1';
       try {
-        const body = JSON.parse(bodyStr);
-        const roomId = body.roomId || 'study-duo-room-1';
-        const payload = JSON.stringify(body.payload);
-
         const response = await fetch(UPSTASH_URL, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${UPSTASH_TOKEN}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(['SET', `peertrack:${roomId}`, payload])
+          body: JSON.stringify(['GET', `peertrack:${room}`])
         });
         const data = await response.json();
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(data));
+        res.end(JSON.stringify({ configured: true, result: data.result || null }));
       } catch (err) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: err.message }));
       }
-    });
-    return;
+      return;
+    }
+
+    if (req.method === 'POST') {
+      let bodyStr = '';
+      req.on('data', chunk => { bodyStr += chunk; });
+      req.on('end', async () => {
+        try {
+          const body = JSON.parse(bodyStr);
+          const room = body.room || body.roomId || 'study-duo-room-1';
+          const payload = body.payload;
+
+          const response = await fetch(UPSTASH_URL, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(['SET', `peertrack:${room}`, JSON.stringify(payload)])
+          });
+          const data = await response.json();
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ configured: true, ok: true, result: data.result }));
+        } catch (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
+      return;
+    }
   }
+
 
   // Static File Serving
   let filePath = path.join(__dirname, url.pathname === '/' ? 'index.html' : url.pathname);
