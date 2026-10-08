@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PeerTrack — Collaborative Study & Topic Master</title>
+  <meta name="description" content="Collaborative study planner to track chapters and topics between you and your friend. See what your friend understood, what you mastered, and bridge learning gaps together.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Decorative Ambient Glows -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <!-- Main Container -->
+  <div class="app-layout">
+    
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-badge">
+          <div class="brand-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-0.5-0.05"></path>
+              <path d="M6 6h10"></path>
+              <path d="M6 10h10"></path>
+              <path d="M18 14l2 2 4-4"></path>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">Peer<span class="gradient-text">Track</span></span>
+            <span class="brand-subtitle">Duo Study & Gap Analyzer</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Active Persona Switcher -->
+      <div class="persona-switch-bar" id="personaSwitchBar" title="Switch who is currently marking topics">
+        <span class="persona-label">Active Marker:</span>
+        <div class="persona-pill-group">
+          <button type="button" class="persona-btn active" id="btnPersonaUser" data-persona="user">
+            <span class="persona-avatar user-avatar" id="avatarUser">ME</span>
+            <span class="persona-name" id="labelUserName">Me (You)</span>
+            <span class="active-dot"></span>
+          </button>
+          <button type="button" class="persona-btn" id="btnPersonaFriend" data-persona="friend">
+            <span class="persona-avatar friend-avatar" id="avatarFriend">FR</span>
+            <span class="persona-name" id="labelFriendName">Friend</span>
+            <span class="active-dot"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Header Action Controls -->
+      <div class="header-right">
+        <button type="button" class="btn btn-secondary btn-icon-text" id="btnComparisonMatrix">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="9" y1="21" x2="9" y2="9"></line>
+          </svg>
+          <span>Matrix View</span>
+        </button>
+
+        <button type="button" class="btn btn-secondary btn-icon-text" id="btnShareModal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+          <span>Sync & Share</span>
+        </button>
+
+        <button type="button" class="btn btn-secondary btn-icon-text cloud-status-btn" id="btnOpenUpstashModal" title="Configure Upstash Redis for real-time cloud sync across devices">
+          <span class="cloud-status-indicator status-offline" id="cloudStatusDot"></span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+          </svg>
+          <span id="cloudStatusLabel">Upstash Cloud</span>
+        </button>
+
+        <button type="button" class="btn btn-secondary btn-icon" id="btnSettingsModal" title="Edit Names & Avatars">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+
+        <button type="button" class="btn btn-primary btn-icon-text" id="btnOpenAddChapter">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>New Chapter</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper">
+      
+      <!-- Comparative Stats & Learning Gap Dashboard -->
+      <section class="dashboard-section" aria-label="Peer Study Comparison Overview">
+        <div class="stats-grid">
+          
+          <!-- User Stats Card -->
+          <div class="stat-card user-stat-card">
+            <div class="stat-header">
+              <div class="avatar-with-ring user-ring">
+                <span class="stat-avatar user-avatar" id="dashAvatarUser">ME</span>
+              </div>
+              <div class="stat-title-wrap">
+                <span class="stat-owner-tag">You</span>
+                <h2 class="stat-owner-name" id="dashNameUser">Alex</h2>
+              </div>
+              <div class="stat-badge user-badge" id="dashPercentUserBadge">0%</div>
+            </div>
+            
+            <div class="progress-bar-container">
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill fill-user" id="dashProgressBarUser" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="stat-footer">
+              <div class="stat-metric">
+                <span class="metric-num" id="dashCountUser">0 / 0</span>
+                <span class="metric-label">Topics Understood</span>
+              </div>
+              <div class="stat-metric align-right">
+                <span class="metric-num tag-user-lead" id="dashUserLead">+0</span>
+                <span class="metric-label">Topics Ahead</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Peer Gap & Synergy Card (The core feature requested!) -->
+          <div class="stat-card gap-stat-card">
+            <div class="gap-card-header">
+              <div class="gap-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <polyline points="16 11 18 13 22 9"></polyline>
+                </svg>
+              </div>
+              <div>
+                <h3 class="gap-title">Peer Knowledge Gap Analyzer</h3>
+                <p class="gap-desc">Compare what you know vs what your friend knows</p>
+              </div>
+            </div>
+
+            <div class="gap-breakdown-row">
+              <!-- Friend knows, You don't -->
+              <div class="gap-item gap-friend-ahead" id="cardFilterFriendAhead" role="button" tabindex="0" title="Click to filter topics your friend mastered but you haven't">
+                <div class="gap-indicator-dot friend-dot"></div>
+                <div class="gap-info">
+                  <span class="gap-val" id="countFriendOnly">0</span>
+                  <span class="gap-name"><strong id="dashFriendShortName">Friend</strong> knows, you need</span>
+                </div>
+                <span class="gap-action-hint">Help you 💡</span>
+              </div>
+
+              <!-- You know, Friend doesn't -->
+              <div class="gap-item gap-user-ahead" id="cardFilterUserAhead" role="button" tabindex="0" title="Click to filter topics you mastered but your friend hasn't">
+                <div class="gap-indicator-dot user-dot"></div>
+                <div class="gap-info">
+                  <span class="gap-val" id="countUserOnly">0</span>
+                  <span class="gap-name">You know, <strong id="dashFriendShortName2">Friend</strong> needs</span>
+                </div>
+                <span class="gap-action-hint">Teach them 🚀</span>
+              </div>
+
+              <!-- Both Mastered -->
+              <div class="gap-item gap-both-mastered" id="cardFilterBothMastered" role="button" tabindex="0" title="Click to filter topics both mastered">
+                <div class="gap-indicator-dot both-dot"></div>
+                <div class="gap-info">
+                  <span class="gap-val" id="countBoth">0</span>
+                  <span class="gap-name">Both Understood</span>
+                </div>
+                <span class="gap-action-hint">In Sync ✨</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Friend Stats Card -->
+          <div class="stat-card friend-stat-card">
+            <div class="stat-header">
+              <div class="avatar-with-ring friend-ring">
+                <span class="stat-avatar friend-avatar" id="dashAvatarFriend">FR</span>
+              </div>
+              <div class="stat-title-wrap">
+                <span class="stat-owner-tag">Friend</span>
+                <h2 class="stat-owner-name" id="dashNameFriend">Sam</h2>
+              </div>
+              <div class="stat-badge friend-badge" id="dashPercentFriendBadge">0%</div>
+            </div>
+
+            <div class="progress-bar-container">
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill fill-friend" id="dashProgressBarFriend" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="stat-footer">
+              <div class="stat-metric">
+                <span class="metric-num" id="dashCountFriend">0 / 0</span>
+                <span class="metric-label">Topics Understood</span>
+              </div>
+              <div class="stat-metric align-right">
+                <span class="metric-num tag-friend-lead" id="dashFriendLead">+0</span>
+                <span class="metric-label">Topics Ahead</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Toolbar: Search, Filters, View Toggles -->
+      <section class="toolbar-section">
+        <div class="search-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="topicSearchInput" placeholder="Search chapters or topics (press '/' to focus)..." autocomplete="off">
+          <button type="button" class="btn-clear-search hidden" id="btnClearSearch" aria-label="Clear search">&times;</button>
+        </div>
+
+        <div class="filter-pills-bar" id="filterPillsContainer">
+          <button type="button" class="filter-pill active" data-filter="all">
+            <span>All Topics</span>
+            <span class="pill-badge" id="pillCountAll">0</span>
+          </button>
+          <button type="button" class="filter-pill pill-friend-ahead" data-filter="friend-only" title="Topics your friend understood but you have not yet">
+            <span class="dot-friend"></span>
+            <span>Friend Understood, I Haven't</span>
+            <span class="pill-badge badge-warning" id="pillCountFriendOnly">0</span>
+          </button>
+          <button type="button" class="filter-pill pill-user-ahead" data-filter="user-only" title="Topics you understood but your friend has not yet">
+            <span class="dot-user"></span>
+            <span>I Understood, Friend Hasn't</span>
+            <span class="pill-badge badge-info" id="pillCountUserOnly">0</span>
+          </button>
+          <button type="button" class="filter-pill pill-both-done" data-filter="both-done" title="Topics both of you have mastered">
+            <span class="dot-both"></span>
+            <span>Both Understood</span>
+            <span class="pill-badge badge-success" id="pillCountBoth">0</span>
+          </button>
+          <button type="button" class="filter-pill pill-neither-done" data-filter="neither-done" title="Topics neither of you have finished yet">
+            <span class="dot-neither"></span>
+            <span>Both Pending</span>
+            <span class="pill-badge" id="pillCountNeither">0</span>
+          </button>
+        </div>
+
+        <div class="toolbar-actions">
+          <button type="button" class="btn btn-ghost btn-sm" id="btnToggleAllChapters" title="Expand or collapse all chapters">
+            <span id="btnToggleAllText">Collapse All</span>
+          </button>
+          <div class="dropdown-wrap">
+            <button type="button" class="btn btn-ghost btn-sm" id="btnQuickOptions">
+              <span>Presets & Data</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="dropdown-menu hidden" id="quickOptionsMenu">
+              <button type="button" class="dropdown-item" id="btnLoadDSA">Load DSA & Algorithms Syllabus</button>
+              <button type="button" class="dropdown-item" id="btnLoadWebDev">Load Full-Stack Web Dev Syllabus</button>
+              <button type="button" class="dropdown-item" id="btnLoadML">Load AI & Machine Learning Syllabus</button>
+              <hr class="dropdown-divider">
+              <button type="button" class="dropdown-item text-danger" id="btnClearAllData">Clear All Chapters</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Active Filter Notice Banner (appears when filter is active) -->
+      <div class="filter-notice-banner hidden" id="filterNoticeBanner">
+        <div class="notice-content">
+          <span class="notice-icon">🔍</span>
+          <span class="notice-text" id="filterNoticeText">Showing filtered topics</span>
+        </div>
+        <button type="button" class="btn btn-link btn-sm" id="btnResetFilter">Show all topics</button>
+      </div>
+
+      <!-- Chapters & Topics List View -->
+      <section class="chapters-container" id="chaptersContainer" aria-live="polite">
+        <!-- Chapters dynamically rendered here -->
+      </section>
+
+      <!-- Empty State -->
+      <div class="empty-state hidden" id="emptyStateContainer">
+        <div class="empty-illustration">📚</div>
+        <h3 class="empty-title">No chapters found</h3>
+        <p class="empty-desc">Start building your collaborative syllabus by adding your first chapter and topics, or load a curated study preset!</p>
+        <div class="empty-actions">
+          <button type="button" class="btn btn-primary" id="btnEmptyAddChapter">+ Add Your First Chapter</button>
+          <button type="button" class="btn btn-secondary" id="btnEmptyLoadSample">Load Sample Syllabus</button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <p>PeerTrack — Dual Mastery Collaborative Planner. Works offline & automatically synchronizes in real-time across your browser tabs.</p>
+        <div class="footer-badges">
+          <span class="badge-tag">⚡ Live Tab Sync</span>
+          <span class="badge-tag">🔒 Local & Private</span>
+          <span class="badge-tag">🌐 Shareable URL</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal 1: Add / Edit Chapter -->
+  <div class="modal-overlay hidden" id="modalChapter" role="dialog" aria-modal="true" aria-labelledby="modalChapterTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalChapterTitle">Add New Chapter</h3>
+        <button type="button" class="btn-close-modal" id="btnCloseModalChapter" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="formChapter" class="modal-form">
+        <input type="hidden" id="inputChapterId">
+        
+        <div class="form-group">
+          <label for="inputChapterTitle">Chapter Name <span class="required">*</span></label>
+          <input type="text" id="inputChapterTitle" placeholder="e.g. Dynamic Programming, Operating Systems, React 19" required maxlength="100">
+        </div>
+
+        <div class="form-group">
+          <label for="inputChapterDescription">Description / Study Goal (Optional)</label>
+          <textarea id="inputChapterDescription" rows="2" placeholder="e.g. Master memoization, tabulation and 2D grid problems"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="inputChapterCategory">Subject / Track</label>
+            <input type="text" id="inputChapterCategory" placeholder="e.g. Algorithms, Frontend, Backend">
+          </div>
+          <div class="form-group flex-1">
+            <label>Color Theme</label>
+            <div class="color-picker-row" id="chapterColorPicker">
+              <label class="color-radio"><input type="radio" name="chapterColor" value="indigo" checked><span class="color-swatch swatch-indigo"></span></label>
+              <label class="color-radio"><input type="radio" name="chapterColor" value="emerald"><span class="color-swatch swatch-emerald"></span></label>
+              <label class="color-radio"><input type="radio" name="chapterColor" value="amber"><span class="color-swatch swatch-amber"></span></label>
+              <label class="color-radio"><input type="radio" name="chapterColor" value="rose"><span class="color-swatch swatch-rose"></span></label>
+              <label class="color-radio"><input type="radio" name="chapterColor" value="cyan"><span class="color-swatch swatch-cyan"></span></label>
+              <label class="color-radio"><input type="radio" name="chapterColor" value="purple"><span class="color-swatch swatch-purple"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelChapter">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitChapter">Save Chapter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Add / Edit Topic (Sub-Chapter) -->
+  <div class="modal-overlay hidden" id="modalTopic" role="dialog" aria-modal="true" aria-labelledby="modalTopicTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTopicTitle">Add Topic / Sub-Chapter</h3>
+        <button type="button" class="btn-close-modal" id="btnCloseModalTopic" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="formTopic" class="modal-form">
+        <input type="hidden" id="inputTopicId">
+        <input type="hidden" id="inputTopicChapterId">
+        
+        <div class="form-group">
+          <label>Target Chapter</label>
+          <div class="target-chapter-banner" id="modalTopicChapterName">Chapter Title</div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputTopicTitle">Topic Name <span class="required">*</span></label>
+          <input type="text" id="inputTopicTitle" placeholder="e.g. Longest Common Subsequence, Binary Search on Answer" required maxlength="120">
+        </div>
+
+        <div class="form-group">
+          <label for="inputTopicNotes">Key Concepts / Explanation Notes (Optional)</label>
+          <textarea id="inputTopicNotes" rows="2" placeholder="e.g. Formula: dp[i][j] = dp[i-1][j-1] + 1 if match else max(dp[i-1][j], dp[i][j-1])"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="selectTopicDifficulty">Difficulty Level</label>
+            <select id="selectTopicDifficulty">
+              <option value="Easy">Easy (Fundamental)</option>
+              <option value="Medium" selected>Medium (Standard)</option>
+              <option value="Hard">Hard (Advanced)</option>
+            </select>
+          </div>
+          <div class="form-group flex-1">
+            <label for="inputTopicEstTime">Est. Hours</label>
+            <input type="number" id="inputTopicEstTime" min="0.5" max="100" step="0.5" value="2">
+          </div>
+        </div>
+
+        <div class="initial-status-box">
+          <span class="sub-label">Initial Statuses:</span>
+          <div class="status-toggles-row">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="checkInitialUserLearned">
+              <span class="checkmark user-check"></span>
+              <span class="check-label"><span id="labelInitialUser">You</span> understood this</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="checkInitialFriendLearned">
+              <span class="checkmark friend-check"></span>
+              <span class="check-label"><span id="labelInitialFriend">Friend</span> understood this</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelTopic">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitTopic">Save Topic</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Settings & Personas (Rename Me & Friend) -->
+  <div class="modal-overlay hidden" id="modalSettings" role="dialog" aria-modal="true" aria-labelledby="modalSettingsTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalSettingsTitle">Study Buddy Profiles</h3>
+        <button type="button" class="btn-close-modal" id="btnCloseModalSettings" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="formSettings" class="modal-form">
+        <p class="modal-subtitle">Customize your names and avatars to make tracking intuitive for both of you.</p>
+        
+        <div class="profile-edit-card user-edit-box">
+          <div class="profile-header-sm">
+            <span class="persona-avatar user-avatar" id="settingsPreviewAvatarUser">ME</span>
+            <h4>Your Profile ("Me")</h4>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-2">
+              <label for="inputUserName">Your Name</label>
+              <input type="text" id="inputUserName" value="Alex" maxlength="25" required>
+            </div>
+            <div class="form-group flex-1">
+              <label for="inputUserInitials">Initials / Emoji</label>
+              <input type="text" id="inputUserInitials" value="ME" maxlength="4">
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-edit-card friend-edit-box">
+          <div class="profile-header-sm">
+            <span class="persona-avatar friend-avatar" id="settingsPreviewAvatarFriend">FR</span>
+            <h4>Friend's Profile</h4>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-2">
+              <label for="inputFriendName">Friend's Name</label>
+              <input type="text" id="inputFriendName" value="Sam" maxlength="25" required>
+            </div>
+            <div class="form-group flex-1">
+              <label for="inputFriendInitials">Initials / Emoji</label>
+              <input type="text" id="inputFriendInitials" value="FR" maxlength="4">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelSettings">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Profiles</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 4: Share, Export & Sync Link -->
+  <div class="modal-overlay hidden" id="modalShare" role="dialog" aria-modal="true" aria-labelledby="modalShareTitle">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalShareTitle">Sync & Share With Your Friend</h3>
+        <button type="button" class="btn-close-modal" id="btnCloseModalShare" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="share-modal-body">
+        
+        <div class="share-tab-card">
+          <div class="share-card-icon">🔗</div>
+          <div class="share-card-content">
+            <h4>One-Click Shareable Link</h4>
+            <p>Generate a unique URL containing your syllabus and progress. Send it to your friend on WhatsApp, Telegram, or Discord. When they open it, it opens with their profile activated!</p>
+            <div class="copy-input-row">
+              <input type="text" id="shareUrlInput" readonly value="Generating link...">
+              <button type="button" class="btn btn-primary" id="btnCopyShareUrl">
+                <span id="btnCopyText">Copy Link</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="share-tab-card">
+          <div class="share-card-icon">⚡</div>
+          <div class="share-card-content">
+            <h4>Instant Real-Time Browser Tab Sync</h4>
+            <p>If you and your friend open this page in multiple tabs or on the same computer, changes you make will instantly reflect without refreshing!</p>
+          </div>
+        </div>
+
+        <div class="share-tab-card">
+          <div class="share-card-icon">💾</div>
+          <div class="share-card-content">
+            <h4>Backup & Restore (JSON)</h4>
+            <p>Download your complete study tracker file or import a saved backup from your friend.</p>
+            <div class="btn-group-row">
+              <button type="button" class="btn btn-secondary" id="btnExportJSON">Download JSON Backup</button>
+              <label class="btn btn-secondary btn-file-upload">
+                <span>Upload JSON File</span>
+                <input type="file" id="fileImportJSON" accept=".json" class="hidden">
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnCloseShare">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Side-by-Side Comparison Matrix -->
+  <div class="modal-overlay hidden" id="modalMatrix" role="dialog" aria-modal="true" aria-labelledby="modalMatrixTitle">
+    <div class="modal-card modal-matrix-card">
+      <div class="modal-header">
+        <div class="matrix-title-wrap">
+          <h3 class="modal-title" id="modalMatrixTitle">Topic Comparison Matrix</h3>
+          <span class="matrix-subtitle">Side-by-side verification of all chapters & topics</span>
+        </div>
+        <button type="button" class="btn-close-modal" id="btnCloseModalMatrix" aria-label="Close dialog">&times;</button>
+      </div>
+      
+      <div class="matrix-table-wrapper">
+        <table class="matrix-table" id="matrixTable">
+          <thead>
+            <tr>
+              <th>Chapter & Topic</th>
+              <th class="col-center" id="thMatrixUser">Alex (You)</th>
+              <th class="col-center" id="thMatrixFriend">Sam (Friend)</th>
+              <th>Status & Mentoring Action</th>
+            </tr>
+          </thead>
+          <tbody id="matrixTableBody">
+            <!-- Rendered dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnCloseMatrix">Close Matrix</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 6: Upstash Redis Cloud Sync -->
+  <div class="modal-overlay hidden" id="modalUpstash" role="dialog" aria-modal="true" aria-labelledby="modalUpstashTitle">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div class="upstash-modal-title-wrap">
+          <div class="upstash-brand-row">
+            <span class="upstash-logo-badge">⚡ Upstash Redis</span>
+            <span class="badge-tag live-cloud-tag">Cloud Sync</span>
+          </div>
+          <h3 class="modal-title" id="modalUpstashTitle">Live Remote Sync Setup</h3>
+        </div>
+        <button type="button" class="btn-close-modal" id="btnCloseModalUpstash" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <div class="upstash-modal-body">
+        
+        <!-- Live Connection Status Banner -->
+        <div class="cloud-status-banner status-banner-disconnected" id="upstashStatusBanner">
+          <div class="banner-status-left">
+            <span class="status-pulse-dot" id="bannerStatusDot"></span>
+            <div>
+              <span class="banner-status-title" id="bannerStatusTitle">Cloud Sync Disconnected</span>
+              <span class="banner-status-sub" id="bannerStatusSub">Currently storing progress locally in your browser.</span>
+            </div>
+          </div>
+          <span class="banner-last-sync" id="bannerLastSyncText">—</span>
+        </div>
+
+        <form id="formUpstash" class="modal-form-inline">
+          <div class="form-group">
+            <label for="inputUpstashUrl">
+              <span>Upstash REST URL</span> <span class="required">*</span>
+            </label>
+            <input type="url" id="inputUpstashUrl" placeholder="https://flowing-zebra-12345.upstash.io" autocomplete="off" spellcheck="false" required>
+          </div>
+
+          <div class="form-group">
+            <label for="inputUpstashToken">
+              <span>Upstash REST Token</span> <span class="required">*</span>
+            </label>
+            <div class="password-input-wrap">
+              <input type="password" id="inputUpstashToken" placeholder="AXXXXXXXXXXXXX..." autocomplete="off" spellcheck="false" required>
+              <button type="button" class="btn-toggle-token" id="btnToggleTokenVisibility">Show</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-2">
+              <label for="inputUpstashRoom">
+                <span>Shared Room / Pair Key</span>
+                <span class="label-hint">(Both you and your friend must use the same key)</span>
+              </label>
+              <input type="text" id="inputUpstashRoom" value="study-duo-room-1" placeholder="e.g. duo-dsa-track" maxlength="40">
+            </div>
+            <div class="form-group flex-1">
+              <label for="selectSyncInterval">Auto-Poll Rate</label>
+              <select id="selectSyncInterval">
+                <option value="5000">Every 5 seconds</option>
+                <option value="10000" selected>Every 10 seconds</option>
+                <option value="30000">Every 30 seconds</option>
+                <option value="manual">Manual only</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sync-toggles-box">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="checkUpstashAutoSync" checked>
+              <span class="checkmark user-check"></span>
+              <span class="check-label"><strong>Real-time push:</strong> Automatically save to Upstash whenever I mark or edit a topic</span>
+            </label>
+          </div>
+
+          <div class="upstash-actions-grid">
+            <button type="submit" class="btn btn-primary" id="btnConnectUpstash">
+              <span>⚡ Connect & Sync</span>
+            </button>
+            <button type="button" class="btn btn-secondary" id="btnPushToUpstash" title="Force overwrite cloud with your local state">
+              <span>⬆️ Push Local to Cloud</span>
+            </button>
+            <button type="button" class="btn btn-secondary" id="btnPullFromUpstash" title="Fetch latest from cloud">
+              <span>⬇️ Pull from Cloud</span>
+            </button>
+            <button type="button" class="btn btn-secondary" id="btnCopyFriendCloudInvite" title="Copy an invite link with this room & credentials for your friend">
+              <span>🔗 Copy Friend Invite Link</span>
+            </button>
+            <button type="button" class="btn btn-ghost text-danger" id="btnDisconnectUpstash">
+              <span>Disconnect</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Upstash 30-Second Quick Start Guide -->
+        <details class="upstash-guide-accordion">
+          <summary class="guide-summary">
+            <span>ℹ️ How to get your free Upstash Redis credentials (Takes 30 seconds)</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="guide-content">
+            <ol>
+              <li>Create a free account at <a href="https://console.upstash.com" target="_blank" rel="noopener noreferrer">console.upstash.com</a> (no credit card required).</li>
+              <li>Click <strong>"Create Database"</strong>, choose Redis, pick the region closest to you, and click <strong>Create</strong>.</li>
+              <li>Scroll down to the <strong>"REST API"</strong> section on your database dashboard.</li>
+              <li>Click on the <strong>JavaScript / Fetch</strong> tab.</li>
+              <li>Copy the <code>UPSTASH_REDIS_REST_URL</code> and <code>UPSTASH_REDIS_REST_TOKEN</code> and paste them above!</li>
+              <li>Share the invite link with your friend so they connect in one click without needing to configure anything.</li>
+            </ol>
+          </div>
+        </details>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnCloseUpstash">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Celebration Confetti Canvas -->
+  <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
+
+  <script src="app.js"></script>
+</body>
+</html>
