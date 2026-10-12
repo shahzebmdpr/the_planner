@@ -109,7 +109,7 @@
       </div>
 
       <!-- Center: Current Authenticated User -->
-      <div class="logged-user-bar" id="loggedUserBar" title="Active study account">
+      <div class="logged-user-bar" id="loggedUserBar" title="Active study account — tap to manage profile or change picture">
         <span class="persona-avatar" id="headerUserAvatar">SH</span>
         <div class="logged-user-meta">
           <span class="logged-user-title" id="headerUserName">Shahzeb (You)</span>
@@ -149,7 +149,7 @@
           <!-- 1. Primary User Stats Card (Shahzeb) -->
           <div class="stat-card user-stat-card">
             <div class="stat-header">
-              <div class="avatar-with-ring user-ring">
+              <div class="avatar-with-ring user-ring" title="Tap to change profile picture or manage account">
                 <span class="stat-avatar user-avatar" id="dashAvatarUser">SH</span>
               </div>
               <div class="stat-title-wrap">
@@ -299,13 +299,20 @@
         </div>
 
         <div class="toolbar-actions">
-          <!-- Compact Add Chapter Button for Mobile & Desktop -->
-          <button type="button" class="btn btn-primary btn-sm btn-icon-text" id="btnOpenAddChapter" title="Create a new chapter">
+          <button type="button" class="btn btn-primary btn-sm btn-icon-text" id="btnOpenAddItem" title="Add new study item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
-            <span>+ Chapter</span>
+            <span>+ Add Item</span>
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm btn-icon-text" id="btnOpenImportCSV" title="Import syllabus via CSV">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Import CSV</span>
           </button>
           <button type="button" class="btn btn-ghost btn-sm" id="btnToggleAllChapters" title="Expand or collapse all chapters">
             <span id="btnToggleAllText">Collapse All</span>
@@ -330,10 +337,10 @@
       <!-- Empty State -->
       <div class="empty-state hidden" id="emptyStateContainer">
         <div class="empty-illustration">📚</div>
-        <h3 class="empty-title">No chapters found</h3>
-        <p class="empty-desc">Start building your syllabus together by adding your first chapter and topics.</p>
+        <h3 class="empty-title">No items found</h3>
+        <p class="empty-desc">Start building your syllabus together by adding your first study item.</p>
         <div class="empty-actions">
-          <button type="button" class="btn btn-primary" id="btnEmptyAddChapter">+ Add Your First Chapter</button>
+          <button type="button" class="btn btn-primary" id="btnEmptyAddItem">+ Add Your First Item</button>
           <button type="button" class="btn btn-secondary" id="btnEmptyImportCSV">📥 Import Syllabus (CSV)</button>
         </div>
       </div>
@@ -354,90 +361,40 @@
 
   <!-- ==================== MODALS ==================== -->
 
-  <!-- Modal 1: Add / Edit Chapter -->
-  <div class="modal-overlay hidden" id="modalChapter" role="dialog" aria-modal="true" aria-labelledby="modalChapterTitle">
+  <!-- Modal 1: Add / Edit Item -->
+  <div class="modal-overlay hidden" id="modalItem" role="dialog" aria-modal="true" aria-labelledby="modalItemTitle">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title" id="modalChapterTitle">Add New Chapter</h3>
-        <button type="button" class="btn-close-modal" id="btnCloseModalChapter" aria-label="Close dialog">&times;</button>
+        <h3 class="modal-title" id="modalItemTitle">Add Study Item</h3>
+        <button type="button" class="btn-close-modal" id="btnCloseModalItem" aria-label="Close dialog">&times;</button>
       </div>
-      <form id="formChapter" class="modal-form">
-        <input type="hidden" id="inputChapterId">
+      <form id="formItem" class="modal-form">
+        <input type="hidden" id="inputItemId">
         
         <div class="form-group">
-          <label for="inputChapterTitle">Chapter Name <span class="required">*</span></label>
-          <input type="text" id="inputChapterTitle" placeholder="e.g. Dynamic Programming, Operating Systems" required maxlength="100">
+          <label for="inputItemSubject">Subject <span class="required">*</span></label>
+          <input type="text" id="inputItemSubject" placeholder="e.g. Mathematics, Core CS" required maxlength="100">
         </div>
 
         <div class="form-group">
-          <label for="inputChapterDescription">Description / Study Goal (Optional)</label>
-          <textarea id="inputChapterDescription" rows="2" placeholder="e.g. Master memoization and 2D grid problems"></textarea>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label for="inputChapterCategory">Subject / Track</label>
-            <input type="text" id="inputChapterCategory" placeholder="e.g. Algorithms, Core CS">
-          </div>
-          <div class="form-group flex-1">
-            <label>Color Accent</label>
-            <div class="color-picker-row" id="chapterColorPicker">
-              <label class="color-radio"><input type="radio" name="chapterColor" value="indigo" checked><span class="color-swatch swatch-indigo"></span></label>
-              <label class="color-radio"><input type="radio" name="chapterColor" value="emerald"><span class="color-swatch swatch-emerald"></span></label>
-              <label class="color-radio"><input type="radio" name="chapterColor" value="amber"><span class="color-swatch swatch-amber"></span></label>
-              <label class="color-radio"><input type="radio" name="chapterColor" value="rose"><span class="color-swatch swatch-rose"></span></label>
-              <label class="color-radio"><input type="radio" name="chapterColor" value="cyan"><span class="color-swatch swatch-cyan"></span></label>
-              <label class="color-radio"><input type="radio" name="chapterColor" value="purple"><span class="color-swatch swatch-purple"></span></label>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" id="btnCancelChapter">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="btnSubmitChapter">Save Chapter</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal 2: Add / Edit Topic -->
-  <div class="modal-overlay hidden" id="modalTopic" role="dialog" aria-modal="true" aria-labelledby="modalTopicTitle">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 class="modal-title" id="modalTopicTitle">Add Topic / Sub-Chapter</h3>
-        <button type="button" class="btn-close-modal" id="btnCloseModalTopic" aria-label="Close dialog">&times;</button>
-      </div>
-      <form id="formTopic" class="modal-form">
-        <input type="hidden" id="inputTopicId">
-        <input type="hidden" id="inputTopicChapterId">
-        
-        <div class="form-group">
-          <label>Target Chapter</label>
-          <div class="target-chapter-banner" id="modalTopicChapterName">Chapter Title</div>
+          <label for="inputItemChapter">Chapter (Optional)</label>
+          <input type="text" id="inputItemChapter" placeholder="e.g. Dynamic Programming" maxlength="100">
         </div>
 
         <div class="form-group">
-          <label for="inputTopicTitle">Topic Name <span class="required">*</span></label>
-          <input type="text" id="inputTopicTitle" placeholder="e.g. 0/1 Knapsack, Binary Search on Answer" required maxlength="120">
+          <label for="inputItemTopic">Topic (Optional)</label>
+          <input type="text" id="inputItemTopic" placeholder="e.g. 0/1 Knapsack" maxlength="120">
         </div>
 
         <div class="form-group">
-          <label for="inputTopicNotes">Key Formula / Notes (Optional)</label>
-          <textarea id="inputTopicNotes" rows="2" placeholder="e.g. State equation: dp[i][w] = max(...)"></textarea>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label for="selectTopicDifficulty">Difficulty Level</label>
-            <select id="selectTopicDifficulty">
-              <option value="Easy">Easy</option>
-              <option value="Medium" selected>Medium</option>
-              <option value="Hard">Hard</option>
-            </select>
-          </div>
-          <div class="form-group flex-1">
-            <label for="inputTopicEstTime">Est. Hours</label>
-            <input type="number" id="inputTopicEstTime" min="0.5" max="100" step="0.5" value="2">
+          <label>Subject Color</label>
+          <div class="color-picker-row" id="itemColorPicker">
+            <label class="color-radio"><input type="radio" name="itemColor" value="indigo" checked><span class="color-swatch swatch-indigo"></span></label>
+            <label class="color-radio"><input type="radio" name="itemColor" value="emerald"><span class="color-swatch swatch-emerald"></span></label>
+            <label class="color-radio"><input type="radio" name="itemColor" value="amber"><span class="color-swatch swatch-amber"></span></label>
+            <label class="color-radio"><input type="radio" name="itemColor" value="rose"><span class="color-swatch swatch-rose"></span></label>
+            <label class="color-radio"><input type="radio" name="itemColor" value="cyan"><span class="color-swatch swatch-cyan"></span></label>
+            <label class="color-radio"><input type="radio" name="itemColor" value="purple"><span class="color-swatch swatch-purple"></span></label>
           </div>
         </div>
 
@@ -447,15 +404,15 @@
             <label class="custom-checkbox">
               <input type="checkbox" id="checkInitialUserLearned">
               <span class="checkmark user-check"></span>
-              <span class="check-label"><span id="labelInitialSelf">I</span> understood this topic</span>
+              <span class="check-label"><span id="labelInitialSelf">I</span> understood this</span>
             </label>
           </div>
-          <span class="label-hint">Note: You can only set your own completion mark. Your partner must mark theirs.</span>
+          <span class="label-hint">Note: You can only set your own completion mark.</span>
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" id="btnCancelTopic">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="btnSubmitTopic">Save Topic</button>
+          <button type="button" class="btn btn-secondary" id="btnCancelItem">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitItem">Save Item</button>
         </div>
       </form>
     </div>
@@ -626,6 +583,10 @@
                     <input type="text" id="adminInputUserPin" value="1234" maxlength="15" required>
                   </div>
                 </div>
+                <div class="form-group">
+                  <label for="adminInputUserAvatarFile">Upload Profile Picture (Optional)</label>
+                  <input type="file" id="adminInputUserAvatarFile" accept="image/*">
+                </div>
               </div>
 
               <!-- User 2 Config -->
@@ -643,6 +604,10 @@
                     <label for="adminInputFriendPin">Passcode</label>
                     <input type="text" id="adminInputFriendPin" value="1234" maxlength="15" required>
                   </div>
+                </div>
+                <div class="form-group">
+                  <label for="adminInputFriendAvatarFile">Upload Profile Picture (Optional)</label>
+                  <input type="file" id="adminInputFriendAvatarFile" accept="image/*">
                 </div>
               </div>
 
@@ -689,17 +654,16 @@
               </button>
             </div>
 
-            <!-- Direct CSV Text Paste Area -->
             <div class="form-group">
               <label for="textCsvInput">
                 <span>Or Paste CSV Text Directly:</span>
               </label>
-              <textarea id="textCsvInput" rows="5" placeholder="Chapter,Topic,Difficulty,EstHours,Notes
-Dynamic Programming,0/1 Knapsack,Medium,3,Standard 2D DP
-Dynamic Programming,Longest Common Subsequence,Medium,2.5,Matrix transition
-Graph Theory,Breadth First Search,Easy,1.5,Queue traversal
-Graph Theory,Dijkstra Algorithm,Hard,3,Priority Queue"></textarea>
-              <span class="label-hint">Columns supported: <code>Chapter, Topic, Difficulty, EstHours, Notes</code> (Only <code>Chapter, Topic</code> are required).</span>
+              <textarea id="textCsvInput" rows="5" placeholder="Subject,Chapter,Topic
+Algorithms,Dynamic Programming,0/1 Knapsack
+Algorithms,Dynamic Programming,LCS
+Algorithms,Graph Theory,
+Mathematics,,"></textarea>
+              <span class="label-hint">Columns supported: <code>Subject, Chapter, Topic</code> (Only <code>Subject</code> is required).</span>
             </div>
 
             <!-- Import Mode Toggle -->
@@ -720,7 +684,7 @@ Graph Theory,Dijkstra Algorithm,Hard,3,Priority Queue"></textarea>
             <!-- Preview Count Badge -->
             <div class="csv-parsed-summary hidden" id="csvParsedSummary">
               <span class="summary-icon">✅</span>
-              <span id="csvSummaryText">Parsed 0 chapters and 0 topics</span>
+              <span id="csvSummaryText">Parsed 0 items</span>
             </div>
 
             <div class="modal-footer" style="margin-top: 1.25rem;">
@@ -748,6 +712,11 @@ Graph Theory,Dijkstra Algorithm,Hard,3,Priority Queue"></textarea>
               <p class="account-notice-text">
                 🔒 <strong>Restricted Marking:</strong> You can only mark completion for your own topics. Your study partner must log in to their account to mark theirs.
               </p>
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
+              <label for="quickAvatarUpload">Change Profile Picture</label>
+              <input type="file" id="quickAvatarUpload" accept="image/*">
             </div>
 
             <div class="modal-footer" style="margin-top: 1.5rem; justify-content: flex-start;">

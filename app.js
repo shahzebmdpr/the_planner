@@ -1,12 +1,6 @@
 /**
- * PeerTrack — Minimalist Duo Study & Knowledge Gap Tracker
- * Collaborative tracker for chapters & sub-topics between two learners
- * with Master Key regulation and locked progress checkmarks.
+ * PeerTrack — Minimalist Duo Study & Knowledge Gap Tracker (Subject/Chapter/Topic Version)
  */
-
-// ===================================================================
-// Default Seed Dataset
-// ===================================================================
 
 const SEED_DATA_DSA = {
   profiles: {
@@ -16,151 +10,23 @@ const SEED_DATA_DSA = {
   auth: {
     masterKey: 'thekey'
   },
-  chapters: [
-    {
-      id: 'chap-dp',
-      title: 'Dynamic Programming',
-      category: 'Algorithms',
-      description: 'Tabulation, memoization, state transition equations and grid paths.',
-      color: 'indigo',
-      topics: [
-        {
-          id: 'top-dp-1',
-          title: '0/1 Knapsack Problem',
-          notes: 'Standard 2D DP array: dp[i][w] = max(dp[i-1][w], val[i] + dp[i-1][w - wt[i]])',
-          difficulty: 'Medium',
-          estHours: 3,
-          userLearned: true,
-          friendLearned: false
-        },
-        {
-          id: 'top-dp-2',
-          title: 'Longest Common Subsequence (LCS)',
-          notes: 'Diagonal transition when characters match: dp[i][j] = dp[i-1][j-1] + 1',
-          difficulty: 'Medium',
-          estHours: 2.5,
-          userLearned: false,
-          friendLearned: true
-        },
-        {
-          id: 'top-dp-3',
-          title: 'Coin Change (Unbounded Knapsack)',
-          notes: 'Minimum coins to reach amount. Base case dp[0] = 0, others Infinity.',
-          difficulty: 'Medium',
-          estHours: 2,
-          userLearned: true,
-          friendLearned: true
-        },
-        {
-          id: 'top-dp-4',
-          title: 'Matrix Chain Multiplication (Interval DP)',
-          notes: 'Cost of multiplying chain of matrices; try all possible partition points k.',
-          difficulty: 'Hard',
-          estHours: 4,
-          userLearned: false,
-          friendLearned: false
-        }
-      ]
-    },
-    {
-      id: 'chap-graphs',
-      title: 'Graph Theory & Traversal',
-      category: 'Algorithms',
-      description: 'Shortest paths, minimum spanning trees, cycle detection, and topological sorting.',
-      color: 'emerald',
-      topics: [
-        {
-          id: 'top-g-1',
-          title: 'BFS & Shortest Path in Unweighted Graph',
-          notes: 'Queue-based traversal with visited set and level tracker.',
-          difficulty: 'Easy',
-          estHours: 1.5,
-          userLearned: true,
-          friendLearned: true
-        },
-        {
-          id: 'top-g-2',
-          title: "Dijkstra's Algorithm (Priority Queue)",
-          notes: 'Non-negative edge weights using min-heap. Time: O((V + E) log V).',
-          difficulty: 'Medium',
-          estHours: 3,
-          userLearned: true,
-          friendLearned: false
-        },
-        {
-          id: 'top-g-3',
-          title: 'Topological Sort (Kahn’s & DFS)',
-          notes: 'DAG ordering using in-degree array or post-order reverse DFS.',
-          difficulty: 'Medium',
-          estHours: 2,
-          userLearned: false,
-          friendLearned: true
-        },
-        {
-          id: 'top-g-4',
-          title: 'Disjoint Set Union (DSU with Path Compression)',
-          notes: 'Find and union with rank. Nearly O(1) amortized alpha(N).',
-          difficulty: 'Medium',
-          estHours: 2.5,
-          userLearned: false,
-          friendLearned: false
-        }
-      ]
-    },
-    {
-      id: 'chap-trees',
-      title: 'Binary Trees & BST',
-      category: 'Data Structures',
-      description: 'Tree traversals, binary search tree properties, and tree DP.',
-      color: 'amber',
-      topics: [
-        {
-          id: 'top-t-1',
-          title: 'Lowest Common Ancestor (LCA)',
-          notes: 'Recursive check if target nodes reside in left/right subtrees.',
-          difficulty: 'Medium',
-          estHours: 2,
-          userLearned: true,
-          friendLearned: true
-        },
-        {
-          id: 'top-t-2',
-          title: 'Serialize and Deserialize Binary Tree',
-          notes: 'Preorder traversal with null indicators or level order with queue.',
-          difficulty: 'Hard',
-          estHours: 3.5,
-          userLearned: false,
-          friendLearned: false
-        },
-        {
-          id: 'top-t-3',
-          title: 'Diameter of Binary Tree',
-          notes: 'Longest path between any two nodes. Compute height while updating max.',
-          difficulty: 'Easy',
-          estHours: 1,
-          userLearned: true,
-          friendLearned: false
-        }
-      ]
-    }
+  items: [
+    { id: 'item-1', subject: 'Algorithms', chapter: 'Dynamic Programming', topic: '0/1 Knapsack Problem', color: 'indigo', userLearned: true, friendLearned: false },
+    { id: 'item-2', subject: 'Algorithms', chapter: 'Dynamic Programming', topic: 'Longest Common Subsequence', color: 'indigo', userLearned: false, friendLearned: true },
+    { id: 'item-3', subject: 'Algorithms', chapter: 'Graph Theory', topic: 'BFS & Shortest Path', color: 'emerald', userLearned: true, friendLearned: true },
+    { id: 'item-4', subject: 'Algorithms', chapter: 'Graph Theory', topic: 'Dijkstra Algorithm', color: 'emerald', userLearned: true, friendLearned: false },
+    { id: 'item-5', subject: 'Mathematics', chapter: '', topic: 'Discrete Math Basics', color: 'amber', userLearned: false, friendLearned: false }
   ]
 };
 
-const STORAGE_KEY = 'aman_study_tracker_state_v1';
-const LEGACY_STORAGE_KEY = 'peertrack_collaborative_planner_v2';
-const UPSTASH_STORAGE_KEY = 'aman_study_tracker_upstash_v1';
-const LEGACY_UPSTASH_KEY = 'peertrack_upstash_config_v2';
-const AUTH_USER_KEY = 'aman_study_tracker_auth_user';
-const LEGACY_AUTH_KEY = 'peertrack_auth_user';
-
-// ===================================================================
-// Main Application Class
-// ===================================================================
+const STORAGE_KEY = 'aman_study_tracker_state_v3';
+const UPSTASH_STORAGE_KEY = 'aman_study_tracker_upstash_v3';
+const AUTH_USER_KEY = 'aman_study_tracker_auth_user_v3';
 
 class AmanStudyTrackerApp {
   constructor() {
     this.state = this.loadState();
-    this.currentAuthUser = localStorage.getItem(AUTH_USER_KEY) || localStorage.getItem(LEGACY_AUTH_KEY); // 'user' or 'friend'
+    this.currentAuthUser = localStorage.getItem(AUTH_USER_KEY);
     this.isMasterUnlocked = false;
 
     this.activeFilter = 'all';
@@ -178,7 +44,6 @@ class AmanStudyTrackerApp {
     this.initUpstash();
     this.checkUrlForCloudPayload();
 
-    // Check auth status
     if (this.currentAuthUser && this.state.profiles[this.currentAuthUser]) {
       this.updateAuthUI();
       this.render();
@@ -188,53 +53,33 @@ class AmanStudyTrackerApp {
     }
   }
 
-  // Load state from localStorage or use default seed
   loadState() {
     let state = null;
     try {
-      const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
+      const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         state = JSON.parse(saved);
       }
-    } catch (e) {
-      console.warn('Failed to parse saved state:', e);
-    }
+    } catch (e) {}
 
-    if (!state || !state.chapters || !state.profiles) {
+    if (!state || !state.items || !state.profiles) {
       state = JSON.parse(JSON.stringify(SEED_DATA_DSA));
     }
 
-    // Ensure profiles & auth exist
     if (!state.profiles) state.profiles = {};
     if (!state.profiles.user) state.profiles.user = { id: 'user', name: 'Shahzeb', initials: 'SH', pin: '1234' };
     if (!state.profiles.friend) state.profiles.friend = { id: 'friend', name: 'Aman', initials: 'AM', pin: '1234' };
 
-    // Migrate old names if default
-    if (state.profiles.user.name === 'Alex' || !state.profiles.user.name) {
-      state.profiles.user.name = 'Shahzeb';
-      state.profiles.user.initials = 'SH';
-    }
-    if (state.profiles.friend.name === 'Sam' || !state.profiles.friend.name) {
-      state.profiles.friend.name = 'Aman';
-      state.profiles.friend.initials = 'AM';
-    }
-    if (!state.profiles.user.pin) state.profiles.user.pin = '1234';
-    if (!state.profiles.friend.pin) state.profiles.friend.pin = '1234';
-
     if (!state.auth) state.auth = { masterKey: 'thekey' };
-    if (!state.auth.masterKey) state.auth.masterKey = 'thekey';
 
     return state;
   }
 
-  // Save current state to localStorage and Upstash
   saveState() {
     this.lastLocalUpdatedAt = Date.now();
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
-    } catch (e) {
-      console.error('Failed to save state:', e);
-    }
+    } catch (e) {}
     this.render();
     if (this.upstash && this.upstash.isConnected && this.upstash.autoSync) {
       this.triggerAutoPush();
@@ -244,15 +89,11 @@ class AmanStudyTrackerApp {
   saveStateLocallyWithoutPush() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
-    } catch (e) {
-      console.error('Failed to save state:', e);
-    }
+    } catch (e) {}
     this.render();
   }
 
-  // DOM Elements initialization
   initElements() {
-    // Auth & Views
     this.loginScreen = document.getElementById('loginScreen');
     this.mainAppLayout = document.getElementById('mainAppLayout');
     this.formLogin = document.getElementById('formLogin');
@@ -266,15 +107,14 @@ class AmanStudyTrackerApp {
     this.btnToggleLoginPin = document.getElementById('btnToggleLoginPin');
     this.btnTriggerMasterFromLogin = document.getElementById('btnTriggerMasterFromLogin');
 
-    // Header Elements
+    this.loggedUserBar = document.getElementById('loggedUserBar');
     this.headerUserName = document.getElementById('headerUserName');
     this.headerUserAvatar = document.getElementById('headerUserAvatar');
     this.btnLogout = document.getElementById('btnLogout');
     this.btnOpenMasterKeyModal = document.getElementById('btnOpenMasterKeyModal');
     this.btnOpenUpstashModal = document.getElementById('btnOpenUpstashModal');
-    this.btnOpenAddChapter = document.getElementById('btnOpenAddChapter');
+    this.btnOpenAddItem = document.getElementById('btnOpenAddItem');
 
-    // Dashboard Cards
     this.dashAvatarUser = document.getElementById('dashAvatarUser');
     this.dashTagUser = document.getElementById('dashTagUser');
     this.dashNameUser = document.getElementById('dashNameUser');
@@ -294,7 +134,6 @@ class AmanStudyTrackerApp {
     this.dashFriendShortName = document.getElementById('dashFriendShortName');
     this.dashFriendShortName2 = document.getElementById('dashFriendShortName2');
 
-    // Gap Analyzer Counts
     this.countFriendOnly = document.getElementById('countFriendOnly');
     this.countUserOnly = document.getElementById('countUserOnly');
     this.countBoth = document.getElementById('countBoth');
@@ -302,7 +141,6 @@ class AmanStudyTrackerApp {
     this.cardFilterUserAhead = document.getElementById('cardFilterUserAhead');
     this.cardFilterBothMastered = document.getElementById('cardFilterBothMastered');
 
-    // Toolbar & Filters
     this.topicSearchInput = document.getElementById('topicSearchInput');
     this.btnClearSearch = document.getElementById('btnClearSearch');
     this.filterPillsContainer = document.getElementById('filterPillsContainer');
@@ -320,40 +158,22 @@ class AmanStudyTrackerApp {
     this.filterNoticeText = document.getElementById('filterNoticeText');
     this.btnResetFilter = document.getElementById('btnResetFilter');
 
-    // Main content
     this.chaptersContainer = document.getElementById('chaptersContainer');
     this.emptyStateContainer = document.getElementById('emptyStateContainer');
-    this.btnEmptyAddChapter = document.getElementById('btnEmptyAddChapter');
+    this.btnEmptyAddItem = document.getElementById('btnEmptyAddItem');
 
-    // Modals
-    // Chapter Modal
-    this.modalChapter = document.getElementById('modalChapter');
-    this.formChapter = document.getElementById('formChapter');
-    this.btnCloseModalChapter = document.getElementById('btnCloseModalChapter');
-    this.btnCancelChapter = document.getElementById('btnCancelChapter');
-    this.inputChapterId = document.getElementById('inputChapterId');
-    this.inputChapterTitle = document.getElementById('inputChapterTitle');
-    this.inputChapterDescription = document.getElementById('inputChapterDescription');
-    this.inputChapterCategory = document.getElementById('inputChapterCategory');
-    this.modalChapterTitle = document.getElementById('modalChapterTitle');
-
-    // Topic Modal
-    this.modalTopic = document.getElementById('modalTopic');
-    this.formTopic = document.getElementById('formTopic');
-    this.btnCloseModalTopic = document.getElementById('btnCloseModalTopic');
-    this.btnCancelTopic = document.getElementById('btnCancelTopic');
-    this.inputTopicId = document.getElementById('inputTopicId');
-    this.inputTopicChapterId = document.getElementById('inputTopicChapterId');
-    this.modalTopicChapterName = document.getElementById('modalTopicChapterName');
-    this.inputTopicTitle = document.getElementById('inputTopicTitle');
-    this.inputTopicNotes = document.getElementById('inputTopicNotes');
-    this.selectTopicDifficulty = document.getElementById('selectTopicDifficulty');
-    this.inputTopicEstTime = document.getElementById('inputTopicEstTime');
+    this.modalItem = document.getElementById('modalItem');
+    this.formItem = document.getElementById('formItem');
+    this.btnCloseModalItem = document.getElementById('btnCloseModalItem');
+    this.btnCancelItem = document.getElementById('btnCancelItem');
+    this.inputItemId = document.getElementById('inputItemId');
+    this.inputItemSubject = document.getElementById('inputItemSubject');
+    this.inputItemChapter = document.getElementById('inputItemChapter');
+    this.inputItemTopic = document.getElementById('inputItemTopic');
+    this.modalItemTitle = document.getElementById('modalItemTitle');
     this.checkInitialUserLearned = document.getElementById('checkInitialUserLearned');
     this.labelInitialSelf = document.getElementById('labelInitialSelf');
-    this.modalTopicTitle = document.getElementById('modalTopicTitle');
 
-    // Unified Settings Hub Modal Elements
     this.modalSettings = document.getElementById('modalSettings');
     this.btnCloseModalSettings = document.getElementById('btnCloseModalSettings');
     this.btnOpenSettingsModal = document.getElementById('btnOpenSettingsModal');
@@ -362,12 +182,10 @@ class AmanStudyTrackerApp {
     this.settingsAccountUserName = document.getElementById('settingsAccountUserName');
     this.settingsAccountUserAvatar = document.getElementById('settingsAccountUserAvatar');
 
-    // Compatibility references
     this.modalMasterKeyAdmin = this.modalSettings;
     this.modalUpstash = this.modalSettings;
     this.modalImportCSV = this.modalSettings;
 
-    // Master Key Admin Form Elements
     this.btnCloseModalMasterKey = document.getElementById('btnCloseModalMasterKey');
     this.formVerifyMasterKey = document.getElementById('formVerifyMasterKey');
     this.inputMasterKeyVerify = document.getElementById('inputMasterKeyVerify');
@@ -378,13 +196,14 @@ class AmanStudyTrackerApp {
     this.adminAvatarUser = document.getElementById('adminAvatarUser');
     this.adminInputUserName = document.getElementById('adminInputUserName');
     this.adminInputUserPin = document.getElementById('adminInputUserPin');
+    this.adminInputUserAvatarFile = document.getElementById('adminInputUserAvatarFile');
     this.adminAvatarFriend = document.getElementById('adminAvatarFriend');
     this.adminInputFriendName = document.getElementById('adminInputFriendName');
     this.adminInputFriendPin = document.getElementById('adminInputFriendPin');
+    this.adminInputFriendAvatarFile = document.getElementById('adminInputFriendAvatarFile');
     this.adminInputMasterKey = document.getElementById('adminInputMasterKey');
     this.btnCloseMasterAdmin = document.getElementById('btnCloseMasterAdmin');
 
-    // Upstash Cloud Sync Elements
     this.cloudStatusDot = document.getElementById('cloudStatusDot');
     this.cloudStatusLabel = document.getElementById('cloudStatusLabel');
     this.btnCloseModalUpstash = document.getElementById('btnCloseModalUpstash');
@@ -407,7 +226,6 @@ class AmanStudyTrackerApp {
     this.btnCopyFriendCloudInvite = document.getElementById('btnCopyFriendCloudInvite');
     this.btnDisconnectUpstash = document.getElementById('btnDisconnectUpstash');
 
-    // Bulk CSV Import Modal Elements
     this.btnOpenImportCSV = document.getElementById('btnOpenImportCSV');
     this.btnEmptyImportCSV = document.getElementById('btnEmptyImportCSV');
     this.btnCloseModalCSV = document.getElementById('btnCloseModalCSV');
@@ -421,28 +239,21 @@ class AmanStudyTrackerApp {
     this.csvParsedSummary = document.getElementById('csvParsedSummary');
     this.csvSummaryText = document.getElementById('csvSummaryText');
 
-    // Toast Container
+    this.quickAvatarUpload = document.getElementById('quickAvatarUpload');
     this.toastContainer = document.getElementById('toastContainer');
   }
 
-  // ===================================================================
-  // Event Listeners
-  // ===================================================================
   attachEvents() {
-    // Tab Sync
     window.addEventListener('storage', (event) => {
       if (event.key === STORAGE_KEY && event.newValue) {
         try {
           this.state = JSON.parse(event.newValue);
           this.render();
           this.showToast('Synced updates from your study buddy!', 'info');
-        } catch (e) {
-          console.error(e);
-        }
+        } catch (e) {}
       }
     });
 
-    // Login Form Events
     this.formLogin.addEventListener('submit', (e) => this.handleLoginSubmit(e));
 
     this.cardSelectUser.addEventListener('click', () => {
@@ -461,50 +272,27 @@ class AmanStudyTrackerApp {
       this.btnToggleLoginPin.textContent = isPass ? 'Hide' : 'Show';
     });
 
-    this.btnTriggerMasterFromLogin.addEventListener('click', () => {
-      this.openMasterKeyModal();
-    });
+    this.btnTriggerMasterFromLogin.addEventListener('click', () => this.openMasterKeyModal());
 
-    // Settings Hub Modal Events
-    if (this.btnOpenSettingsModal) {
-      this.btnOpenSettingsModal.addEventListener('click', () => this.openSettingsModal('settingsPanelCloud'));
-    }
-    if (this.btnCloseModalSettings) {
-      this.btnCloseModalSettings.addEventListener('click', () => this.modalSettings.classList.add('hidden'));
-    }
+    if (this.btnOpenSettingsModal) this.btnOpenSettingsModal.addEventListener('click', () => this.openSettingsModal('settingsPanelCloud'));
+    if (this.loggedUserBar) this.loggedUserBar.addEventListener('click', () => this.openSettingsModal('settingsPanelAccount'));
+    if (this.dashAvatarUser) this.dashAvatarUser.addEventListener('click', (e) => { e.stopPropagation(); this.openSettingsModal('settingsPanelAccount'); });
+    if (this.btnCloseModalSettings) this.btnCloseModalSettings.addEventListener('click', () => this.modalSettings.classList.add('hidden'));
+    
     if (this.settingsTabBtns) {
       this.settingsTabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const target = btn.getAttribute('data-target');
-          this.switchSettingsTab(target);
-        });
+        btn.addEventListener('click', () => this.switchSettingsTab(btn.getAttribute('data-target')));
       });
     }
 
-    // Header Logout & Master Key
-    if (this.btnLogout) {
-      this.btnLogout.addEventListener('click', () => this.handleLogout());
-    }
-    if (this.btnOpenMasterKeyModal) {
-      this.btnOpenMasterKeyModal.addEventListener('click', () => this.openMasterKeyModal());
-    }
+    if (this.btnLogout) this.btnLogout.addEventListener('click', () => this.handleLogout());
+    if (this.btnOpenMasterKeyModal) this.btnOpenMasterKeyModal.addEventListener('click', () => this.openMasterKeyModal());
 
-    // Master Key Modal
-    if (this.btnCloseModalMasterKey) {
-      this.btnCloseModalMasterKey.addEventListener('click', () => this.modalSettings.classList.add('hidden'));
-    }
-    if (this.btnCancelMasterKeyVerify) {
-      this.btnCancelMasterKeyVerify.addEventListener('click', () => this.modalSettings.classList.add('hidden'));
-    }
-    if (this.btnCloseMasterAdmin) {
-      this.btnCloseMasterAdmin.addEventListener('click', () => this.modalSettings.classList.add('hidden'));
-    }
-    if (this.formVerifyMasterKey) {
-      this.formVerifyMasterKey.addEventListener('submit', (e) => this.handleVerifyMasterKey(e));
-    }
-    if (this.formSaveUsersAdmin) {
-      this.formSaveUsersAdmin.addEventListener('submit', (e) => this.handleSaveUsersAdmin(e));
-    }
+    if (this.btnCloseModalMasterKey) this.btnCloseModalMasterKey.addEventListener('click', () => this.modalSettings.classList.add('hidden'));
+    if (this.btnCancelMasterKeyVerify) this.btnCancelMasterKeyVerify.addEventListener('click', () => this.modalSettings.classList.add('hidden'));
+    if (this.btnCloseMasterAdmin) this.btnCloseMasterAdmin.addEventListener('click', () => this.modalSettings.classList.add('hidden'));
+    if (this.formVerifyMasterKey) this.formVerifyMasterKey.addEventListener('submit', (e) => this.handleVerifyMasterKey(e));
+    if (this.formSaveUsersAdmin) this.formSaveUsersAdmin.addEventListener('submit', (e) => this.handleSaveUsersAdmin(e));
 
     this.btnToggleMasterVerifyKey.addEventListener('click', () => {
       const isPass = this.inputMasterKeyVerify.type === 'password';
@@ -512,114 +300,86 @@ class AmanStudyTrackerApp {
       this.btnToggleMasterVerifyKey.textContent = isPass ? 'Hide' : 'Show';
     });
 
-    // Dashboard gap cards click to filter
     this.cardFilterFriendAhead.addEventListener('click', () => this.setFilter('friend-only'));
     this.cardFilterUserAhead.addEventListener('click', () => this.setFilter('user-only'));
     this.cardFilterBothMastered.addEventListener('click', () => this.setFilter('both-done'));
 
-    // Search Box
     this.topicSearchInput.addEventListener('input', (e) => {
       this.searchQuery = e.target.value.trim().toLowerCase();
       this.btnClearSearch.classList.toggle('hidden', !this.searchQuery);
-      this.renderChapters();
+      this.renderItems();
     });
 
     this.btnClearSearch.addEventListener('click', () => {
       this.topicSearchInput.value = '';
       this.searchQuery = '';
       this.btnClearSearch.classList.add('hidden');
-      this.renderChapters();
+      this.renderItems();
     });
 
-    // Keyboard shortcut '/'
     window.addEventListener('keydown', (e) => {
       if (e.key === '/' && document.activeElement !== this.topicSearchInput && !document.querySelector('.modal-overlay:not(.hidden)')) {
         e.preventDefault();
         this.topicSearchInput.focus();
       }
-      if (e.key === 'Escape') {
-        this.closeAllModals();
-      }
+      if (e.key === 'Escape') this.closeAllModals();
     });
 
-    // Filter pills
     this.filterPillsContainer.addEventListener('click', (e) => {
       const pill = e.target.closest('.filter-pill');
       if (!pill) return;
-      const filter = pill.getAttribute('data-filter');
-      this.setFilter(filter);
+      this.setFilter(pill.getAttribute('data-filter'));
     });
 
     this.btnResetFilter.addEventListener('click', () => this.setFilter('all'));
 
-    // Expand / Collapse all chapters
     this.btnToggleAllChapters.addEventListener('click', () => {
-      const allChapterIds = this.state.chapters.map(c => c.id);
-      if (this.collapsedChapters.size === allChapterIds.length) {
+      const allChapterIds = this.getUniqueChapterIds();
+      if (this.collapsedChapters.size >= allChapterIds.length && allChapterIds.length > 0) {
         this.collapsedChapters.clear();
         this.btnToggleAllText.textContent = 'Collapse All';
       } else {
         allChapterIds.forEach(id => this.collapsedChapters.add(id));
         this.btnToggleAllText.textContent = 'Expand All';
       }
-      this.renderChapters();
+      this.renderItems();
     });
 
-    // Empty state trigger
-    this.btnEmptyAddChapter.addEventListener('click', () => this.openAddChapterModal());
+    if (this.btnEmptyAddItem) this.btnEmptyAddItem.addEventListener('click', () => this.openAddItemModal());
+    if (this.btnOpenAddItem) this.btnOpenAddItem.addEventListener('click', () => this.openAddItemModal());
+    if (this.btnCloseModalItem) this.btnCloseModalItem.addEventListener('click', () => this.modalItem.classList.add('hidden'));
+    if (this.btnCancelItem) this.btnCancelItem.addEventListener('click', () => this.modalItem.classList.add('hidden'));
+    if (this.formItem) this.formItem.addEventListener('submit', (e) => this.handleSaveItem(e));
 
-    // Chapter Modal
-    this.btnOpenAddChapter.addEventListener('click', () => this.openAddChapterModal());
-    this.btnCloseModalChapter.addEventListener('click', () => this.modalChapter.classList.add('hidden'));
-    this.btnCancelChapter.addEventListener('click', () => this.modalChapter.classList.add('hidden'));
-    this.formChapter.addEventListener('submit', (e) => this.handleSaveChapter(e));
+    if (this.btnOpenUpstashModal) this.btnOpenUpstashModal.addEventListener('click', () => this.openUpstashModal());
+    if (this.btnCloseModalUpstash) this.btnCloseModalUpstash.addEventListener('click', () => this.modalUpstash.classList.add('hidden'));
+    if (this.btnCloseUpstash) this.btnCloseUpstash.addEventListener('click', () => this.modalUpstash.classList.add('hidden'));
+    if (this.formUpstash) this.formUpstash.addEventListener('submit', (e) => this.handleConnectUpstash(e));
+    if (this.btnPushToUpstash) this.btnPushToUpstash.addEventListener('click', () => this.pushToUpstash(true));
+    if (this.btnPullFromUpstash) this.btnPullFromUpstash.addEventListener('click', () => this.pullFromUpstash(true));
+    if (this.btnCopyFriendCloudInvite) this.btnCopyFriendCloudInvite.addEventListener('click', () => this.copyUpstashInviteLink());
+    if (this.btnDisconnectUpstash) this.btnDisconnectUpstash.addEventListener('click', () => this.disconnectUpstash());
 
-    // Topic Modal
-    this.btnCloseModalTopic.addEventListener('click', () => this.modalTopic.classList.add('hidden'));
-    this.btnCancelTopic.addEventListener('click', () => this.modalTopic.classList.add('hidden'));
-    this.formTopic.addEventListener('submit', (e) => this.handleSaveTopic(e));
-
-    // Upstash Cloud Sync Modal
-    this.btnOpenUpstashModal.addEventListener('click', () => this.openUpstashModal());
-    this.btnCloseModalUpstash.addEventListener('click', () => this.modalUpstash.classList.add('hidden'));
-    this.btnCloseUpstash.addEventListener('click', () => this.modalUpstash.classList.add('hidden'));
-    this.formUpstash.addEventListener('submit', (e) => this.handleConnectUpstash(e));
-    this.btnPushToUpstash.addEventListener('click', () => this.pushToUpstash(true));
-    this.btnPullFromUpstash.addEventListener('click', () => this.pullFromUpstash(true));
-    this.btnCopyFriendCloudInvite.addEventListener('click', () => this.copyUpstashInviteLink());
-    this.btnDisconnectUpstash.addEventListener('click', () => this.disconnectUpstash());
-
-    this.btnToggleTokenVisibility.addEventListener('click', () => {
-      const isPass = this.inputUpstashToken.type === 'password';
-      this.inputUpstashToken.type = isPass ? 'text' : 'password';
-      this.btnToggleTokenVisibility.textContent = isPass ? 'Hide' : 'Show';
-    });
-
-    // CSV Bulk Import Modal Events
-    if (this.btnOpenImportCSV) {
-      this.btnOpenImportCSV.addEventListener('click', () => this.openCsvModal());
+    if (this.btnToggleTokenVisibility) {
+      this.btnToggleTokenVisibility.addEventListener('click', () => {
+        const isPass = this.inputUpstashToken.type === 'password';
+        this.inputUpstashToken.type = isPass ? 'text' : 'password';
+        this.btnToggleTokenVisibility.textContent = isPass ? 'Hide' : 'Show';
+      });
     }
-    if (this.btnEmptyImportCSV) {
-      this.btnEmptyImportCSV.addEventListener('click', () => this.openCsvModal());
-    }
-    if (this.btnCloseModalCSV) {
-      this.btnCloseModalCSV.addEventListener('click', () => this.modalImportCSV.classList.add('hidden'));
-    }
-    if (this.btnCancelCSV) {
-      this.btnCancelCSV.addEventListener('click', () => this.modalImportCSV.classList.add('hidden'));
-    }
+
+    if (this.btnOpenImportCSV) this.btnOpenImportCSV.addEventListener('click', () => this.openCsvModal());
+    if (this.btnEmptyImportCSV) this.btnEmptyImportCSV.addEventListener('click', () => this.openCsvModal());
+    if (this.btnCloseModalCSV) this.btnCloseModalCSV.addEventListener('click', () => this.modalImportCSV.classList.add('hidden'));
+    if (this.btnCancelCSV) this.btnCancelCSV.addEventListener('click', () => this.modalImportCSV.classList.add('hidden'));
+    
     if (this.csvDropZone && this.fileCsvInput) {
-      this.csvDropZone.addEventListener('click', () => this.fileCsvInput.click());
+      this.csvDropZone.addEventListener('click', (e) => {
+        if (e.target !== this.fileCsvInput) this.fileCsvInput.click();
+      });
       this.fileCsvInput.addEventListener('change', (e) => this.handleCsvFileSelect(e));
-
-      // Drag and drop support
-      this.csvDropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        this.csvDropZone.classList.add('dragover');
-      });
-      this.csvDropZone.addEventListener('dragleave', () => {
-        this.csvDropZone.classList.remove('dragover');
-      });
+      this.csvDropZone.addEventListener('dragover', (e) => { e.preventDefault(); this.csvDropZone.classList.add('dragover'); });
+      this.csvDropZone.addEventListener('dragleave', () => this.csvDropZone.classList.remove('dragover'));
       this.csvDropZone.addEventListener('drop', (e) => {
         e.preventDefault();
         this.csvDropZone.classList.remove('dragover');
@@ -629,32 +389,49 @@ class AmanStudyTrackerApp {
       });
     }
 
-    if (this.btnDownloadCsvTemplate) {
-      this.btnDownloadCsvTemplate.addEventListener('click', () => this.downloadCsvTemplate());
-    }
-    if (this.btnFillSampleCsv) {
-      this.btnFillSampleCsv.addEventListener('click', () => this.fillSampleCsvData());
-    }
-    if (this.textCsvInput) {
-      this.textCsvInput.addEventListener('input', () => this.updateCsvParsedPreview());
-    }
-    if (this.btnExecuteCsvImport) {
-      this.btnExecuteCsvImport.addEventListener('click', () => this.executeCsvImport());
+    if (this.btnDownloadCsvTemplate) this.btnDownloadCsvTemplate.addEventListener('click', () => this.downloadCsvTemplate());
+    if (this.btnFillSampleCsv) this.btnFillSampleCsv.addEventListener('click', () => this.fillSampleCsvData());
+    if (this.textCsvInput) this.textCsvInput.addEventListener('input', () => this.updateCsvParsedPreview());
+    if (this.btnExecuteCsvImport) this.btnExecuteCsvImport.addEventListener('click', () => this.executeCsvImport());
+
+    if (this.quickAvatarUpload) {
+      this.quickAvatarUpload.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file || !this.currentAuthUser) return;
+        try {
+          const reader = new FileReader();
+          reader.onload = () => {
+            this.state.profiles[this.currentAuthUser].avatarUrl = reader.result;
+            this.saveState();
+            this.updateAuthUI();
+            this.render();
+            this.showToast('Profile picture updated!', 'success');
+          };
+          reader.readAsDataURL(file);
+        } catch (error) {}
+      });
     }
 
-    // Close modals on overlay backdrop click
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
       overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-          overlay.classList.add('hidden');
-        }
+        if (e.target === overlay) overlay.classList.add('hidden');
       });
     });
   }
 
-  // ===================================================================
-  // Authentication & Master Key Regulation
-  // ===================================================================
+  getUniqueChapterIds() {
+    const ids = new Set();
+    this.state.items.forEach(i => {
+      const subj = (i.subject || 'General').trim();
+      const chap = (i.chapter || '').trim();
+      if (chap) {
+        ids.add(subj + '::' + chap);
+      } else {
+        ids.add(subj + '::__direct__');
+      }
+    });
+    return Array.from(ids);
+  }
 
   renderLoginScreen() {
     this.loginScreen.classList.remove('hidden');
@@ -664,10 +441,18 @@ class AmanStudyTrackerApp {
     const u2 = this.state.profiles.friend;
 
     this.loginNameUser.textContent = u1.name;
-    this.loginAvatarUser.textContent = u1.initials || u1.name.slice(0, 2).toUpperCase();
+    if (u1.avatarUrl) {
+      this.loginAvatarUser.innerHTML = `<img src="${this.escapeHtml(u1.avatarUrl)}" alt="${this.escapeHtml(u1.name)}" class="avatar-image">`;
+    } else {
+      this.loginAvatarUser.textContent = u1.initials || u1.name.slice(0, 2).toUpperCase();
+    }
 
     this.loginNameFriend.textContent = u2.name;
-    this.loginAvatarFriend.textContent = u2.initials || u2.name.slice(0, 2).toUpperCase();
+    if (u2.avatarUrl) {
+      this.loginAvatarFriend.innerHTML = `<img src="${this.escapeHtml(u2.avatarUrl)}" alt="${this.escapeHtml(u2.name)}" class="avatar-image">`;
+    } else {
+      this.loginAvatarFriend.textContent = u2.initials || u2.name.slice(0, 2).toUpperCase();
+    }
 
     this.inputLoginPin.value = '';
     this.inputLoginPin.focus();
@@ -684,7 +469,13 @@ class AmanStudyTrackerApp {
 
     const profile = this.currentAuthUser === 'user' ? this.state.profiles.user : this.state.profiles.friend;
     this.headerUserName.textContent = `${profile.name} (You)`;
-    this.headerUserAvatar.textContent = profile.initials || profile.name.slice(0, 2).toUpperCase();
+    
+    if (profile.avatarUrl) {
+      this.headerUserAvatar.innerHTML = `<img src="${this.escapeHtml(profile.avatarUrl)}" alt="${this.escapeHtml(profile.name)}" class="avatar-image">`;
+    } else {
+      this.headerUserAvatar.textContent = profile.initials || profile.name.slice(0, 2).toUpperCase();
+    }
+    
     this.headerUserAvatar.className = `persona-avatar ${this.currentAuthUser === 'user' ? 'user-avatar' : 'friend-avatar'}`;
   }
 
@@ -703,23 +494,18 @@ class AmanStudyTrackerApp {
       this.render();
       this.showToast(`Logged in as ${targetProfile.name}!`, 'success');
     } else {
-      this.showToast('Incorrect passcode. Default is "1234", or use Master Key to regulate.', 'warning');
+      this.showToast('Incorrect passcode. Default is "1234".', 'warning');
     }
   }
 
   handleLogout() {
-    if (this.modalSettings) {
-      this.modalSettings.classList.add('hidden');
-    }
+    if (this.modalSettings) this.modalSettings.classList.add('hidden');
     this.currentAuthUser = null;
     localStorage.removeItem(AUTH_USER_KEY);
     this.updateAuthUI();
     this.showToast('Logged out.', 'info');
   }
 
-  // ===================================================================
-  // Settings Hub System
-  // ===================================================================
   switchSettingsTab(targetId) {
     if (!this.settingsTabBtns || !this.settingsPanels) return;
     this.settingsTabBtns.forEach(btn => {
@@ -744,11 +530,13 @@ class AmanStudyTrackerApp {
   updateSettingsAccountUI() {
     if (!this.currentAuthUser) return;
     const u = this.state.profiles[this.currentAuthUser];
-    if (this.settingsAccountUserName) {
-      this.settingsAccountUserName.textContent = u ? u.name : 'Learner';
-    }
+    if (this.settingsAccountUserName) this.settingsAccountUserName.textContent = u ? u.name : 'Learner';
     if (this.settingsAccountUserAvatar) {
-      this.settingsAccountUserAvatar.textContent = u ? (u.initials || u.name.slice(0, 2).toUpperCase()) : 'ME';
+      if (u && u.avatarUrl) {
+        this.settingsAccountUserAvatar.innerHTML = `<img src="${this.escapeHtml(u.avatarUrl)}" alt="${this.escapeHtml(u.name)}" class="avatar-image">`;
+      } else {
+        this.settingsAccountUserAvatar.textContent = u ? (u.initials || u.name.slice(0, 2).toUpperCase()) : 'ME';
+      }
       this.settingsAccountUserAvatar.className = `persona-avatar ${this.currentAuthUser === 'user' ? 'user-avatar' : 'friend-avatar'}`;
     }
   }
@@ -790,8 +578,17 @@ class AmanStudyTrackerApp {
     this.adminInputFriendPin.value = this.state.profiles.friend.pin || '1234';
     this.adminInputMasterKey.value = this.state.auth?.masterKey || 'thekey';
 
-    this.adminAvatarUser.textContent = this.state.profiles.user.initials || 'SH';
-    this.adminAvatarFriend.textContent = this.state.profiles.friend.initials || 'AM';
+    if (this.state.profiles.user.avatarUrl) {
+      this.adminAvatarUser.innerHTML = `<img src="${this.escapeHtml(this.state.profiles.user.avatarUrl)}" alt="User" class="avatar-image">`;
+    } else {
+      this.adminAvatarUser.textContent = this.state.profiles.user.initials || 'SH';
+    }
+    
+    if (this.state.profiles.friend.avatarUrl) {
+      this.adminAvatarFriend.innerHTML = `<img src="${this.escapeHtml(this.state.profiles.friend.avatarUrl)}" alt="Partner" class="avatar-image">`;
+    } else {
+      this.adminAvatarFriend.textContent = this.state.profiles.friend.initials || 'AM';
+    }
   }
 
   handleSaveUsersAdmin(e) {
@@ -818,18 +615,34 @@ class AmanStudyTrackerApp {
     if (!this.state.auth) this.state.auth = {};
     this.state.auth.masterKey = mKey;
 
-    this.saveState();
-    this.modalMasterKeyAdmin.classList.add('hidden');
-    this.renderLoginScreen();
-    if (this.currentAuthUser) {
-      this.updateAuthUI();
-    }
-    this.showToast('Users & Master Key updated and saved!', 'success');
+    const fileToDataURL = (file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const uAvatarFile = this.adminInputUserAvatarFile?.files?.[0];
+    const fAvatarFile = this.adminInputFriendAvatarFile?.files?.[0];
+
+    const processAvatars = async () => {
+      if (uAvatarFile) {
+        try { this.state.profiles.user.avatarUrl = await fileToDataURL(uAvatarFile); } catch (e) {}
+      }
+      if (fAvatarFile) {
+        try { this.state.profiles.friend.avatarUrl = await fileToDataURL(fAvatarFile); } catch (e) {}
+      }
+    };
+
+    processAvatars().then(() => {
+      this.saveState();
+      this.modalMasterKeyAdmin.classList.add('hidden');
+      this.renderLoginScreen();
+      if (this.currentAuthUser) this.updateAuthUI();
+      this.showToast('Users & Master Key updated and saved!', 'success');
+    });
   }
 
-  // ===================================================================
-  // Calculations & Analytics
-  // ===================================================================
   getStats() {
     let totalTopics = 0;
     let userCount = 0;
@@ -839,22 +652,20 @@ class AmanStudyTrackerApp {
     let bothCount = 0;
     let neitherCount = 0;
 
-    this.state.chapters.forEach(chap => {
-      (chap.topics || []).forEach(t => {
-        totalTopics++;
-        if (t.userLearned) userCount++;
-        if (t.friendLearned) friendCount++;
+    this.state.items.forEach(t => {
+      totalTopics++;
+      if (t.userLearned) userCount++;
+      if (t.friendLearned) friendCount++;
 
-        if (t.friendLearned && !t.userLearned) {
-          friendOnlyCount++;
-        } else if (t.userLearned && !t.friendLearned) {
-          userOnlyCount++;
-        } else if (t.userLearned && t.friendLearned) {
-          bothCount++;
-        } else {
-          neitherCount++;
-        }
-      });
+      if (t.friendLearned && !t.userLearned) {
+        friendOnlyCount++;
+      } else if (t.userLearned && !t.friendLearned) {
+        userOnlyCount++;
+      } else if (t.userLearned && t.friendLearned) {
+        bothCount++;
+      } else {
+        neitherCount++;
+      }
     });
 
     const userPercent = totalTopics > 0 ? Math.round((userCount / totalTopics) * 100) : 0;
@@ -862,74 +673,47 @@ class AmanStudyTrackerApp {
     const userLead = Math.max(0, userCount - friendCount);
     const friendLead = Math.max(0, friendCount - userCount);
 
-    return {
-      totalTopics,
-      userCount,
-      friendCount,
-      userPercent,
-      friendPercent,
-      friendOnlyCount,
-      userOnlyCount,
-      bothCount,
-      neitherCount,
-      userLead,
-      friendLead
-    };
+    return { totalTopics, userCount, friendCount, userPercent, friendPercent, friendOnlyCount, userOnlyCount, bothCount, neitherCount, userLead, friendLead };
   }
 
-  // ===================================================================
-  // Rendering
-  // ===================================================================
   render() {
     this.updateProfilesUI();
     this.updateStatsUI();
-    this.renderChapters();
+    this.renderItems();
   }
 
   updateProfilesUI() {
     const { user, friend } = this.state.profiles;
     const isFriendActive = this.currentAuthUser === 'friend';
+    const primary = isFriendActive ? friend : user;
+    const secondary = isFriendActive ? user : friend;
 
-    if (isFriendActive) {
-      // Primary card shows Aman ("You")
-      this.dashAvatarUser.textContent = friend.initials || 'AM';
-      this.dashNameUser.textContent = friend.name;
-      this.dashTagUser.textContent = 'You';
-
-      // Secondary card shows Shahzeb ("Partner")
-      this.dashAvatarFriend.textContent = user.initials || 'SH';
-      this.dashNameFriend.textContent = user.name;
-      this.dashTagFriend.textContent = 'Partner';
-
-      this.dashFriendShortName.textContent = user.name;
-      this.dashFriendShortName2.textContent = user.name;
-
-      this.filterLabelFriendOnly.textContent = `${user.name} Understood, I Haven't`;
-      this.filterLabelUserOnly.textContent = `I Understood, ${user.name} Hasn't`;
+    if (primary.avatarUrl) {
+      this.dashAvatarUser.innerHTML = `<img src="${this.escapeHtml(primary.avatarUrl)}" alt="You" class="avatar-image">`;
     } else {
-      // Primary card shows Shahzeb ("You")
-      this.dashAvatarUser.textContent = user.initials || 'SH';
-      this.dashNameUser.textContent = user.name;
-      this.dashTagUser.textContent = 'You';
-
-      // Secondary card shows Aman ("Partner")
-      this.dashAvatarFriend.textContent = friend.initials || 'AM';
-      this.dashNameFriend.textContent = friend.name;
-      this.dashTagFriend.textContent = 'Partner';
-
-      this.dashFriendShortName.textContent = friend.name;
-      this.dashFriendShortName2.textContent = friend.name;
-
-      this.filterLabelFriendOnly.textContent = `${friend.name} Understood, I Haven't`;
-      this.filterLabelUserOnly.textContent = `I Understood, ${friend.name} Hasn't`;
+      this.dashAvatarUser.textContent = primary.initials;
     }
+    this.dashNameUser.textContent = primary.name;
+    this.dashTagUser.textContent = 'You';
+
+    if (secondary.avatarUrl) {
+      this.dashAvatarFriend.innerHTML = `<img src="${this.escapeHtml(secondary.avatarUrl)}" alt="Partner" class="avatar-image">`;
+    } else {
+      this.dashAvatarFriend.textContent = secondary.initials;
+    }
+    this.dashNameFriend.textContent = secondary.name;
+    this.dashTagFriend.textContent = 'Partner';
+
+    this.dashFriendShortName.textContent = secondary.name;
+    this.dashFriendShortName2.textContent = secondary.name;
+    this.filterLabelFriendOnly.textContent = `${secondary.name} Understood, I Haven't`;
+    this.filterLabelUserOnly.textContent = `I Understood, ${secondary.name} Hasn't`;
   }
 
   updateStatsUI() {
     const stats = this.getStats();
     const isFriendActive = this.currentAuthUser === 'friend';
 
-    // Adapt stats to current authenticated user
     const primaryPercent = isFriendActive ? stats.friendPercent : stats.userPercent;
     const primaryCount = isFriendActive ? stats.friendCount : stats.userCount;
     const primaryLead = isFriendActive ? stats.friendLead : stats.userLead;
@@ -938,19 +722,16 @@ class AmanStudyTrackerApp {
     const partnerCount = isFriendActive ? stats.userCount : stats.friendCount;
     const partnerLead = isFriendActive ? stats.userLead : stats.friendLead;
 
-    // Card 1: Logged-in User
     this.dashPercentUserBadge.textContent = `${primaryPercent}%`;
     this.dashProgressBarUser.style.width = `${primaryPercent}%`;
     this.dashCountUser.textContent = `${primaryCount} / ${stats.totalTopics}`;
     this.dashUserLead.textContent = `+${primaryLead}`;
 
-    // Card 3: Study Partner
     this.dashPercentFriendBadge.textContent = `${partnerPercent}%`;
     this.dashProgressBarFriend.style.width = `${partnerPercent}%`;
     this.dashCountFriend.textContent = `${partnerCount} / ${stats.totalTopics}`;
     this.dashFriendLead.textContent = `+${partnerLead}`;
 
-    // Gap Card metrics
     const partnerOnlyDone = isFriendActive ? stats.userOnlyCount : stats.friendOnlyCount;
     const selfOnlyDone = isFriendActive ? stats.friendOnlyCount : stats.userOnlyCount;
 
@@ -958,7 +739,6 @@ class AmanStudyTrackerApp {
     this.countUserOnly.textContent = selfOnlyDone;
     this.countBoth.textContent = stats.bothCount;
 
-    // Filter pills counters
     this.pillCountAll.textContent = stats.totalTopics;
     this.pillCountFriendOnly.textContent = partnerOnlyDone;
     this.pillCountUserOnly.textContent = selfOnlyDone;
@@ -968,13 +748,10 @@ class AmanStudyTrackerApp {
 
   setFilter(filterName) {
     this.activeFilter = filterName;
-
-    // Update filter pill UI
     this.filterPillsContainer.querySelectorAll('.filter-pill').forEach(pill => {
       pill.classList.toggle('active', pill.getAttribute('data-filter') === filterName);
     });
 
-    // Update banner
     if (filterName === 'all') {
       this.filterNoticeBanner.classList.add('hidden');
     } else {
@@ -985,24 +762,20 @@ class AmanStudyTrackerApp {
       const partnerName = isFriend ? user.name : friend.name;
 
       let msg = '';
-      if (filterName === 'friend-only') msg = `Showing topics ${partnerName} mastered that ${selfName} needs to learn 💡`;
-      if (filterName === 'user-only') msg = `Showing topics ${selfName} mastered that ${partnerName} needs 🚀`;
-      if (filterName === 'both-done') msg = 'Showing topics both of you have mastered ✨';
-      if (filterName === 'neither-done') msg = 'Showing topics pending for both study partners ⏳';
+      if (filterName === 'friend-only') msg = `Showing items ${partnerName} mastered that ${selfName} needs to learn 💡`;
+      if (filterName === 'user-only') msg = `Showing items ${selfName} mastered that ${partnerName} needs 🚀`;
+      if (filterName === 'both-done') msg = 'Showing items both of you have mastered ✨';
+      if (filterName === 'neither-done') msg = 'Showing items pending for both study partners ⏳';
       this.filterNoticeText.textContent = msg;
     }
-
-    this.renderChapters();
+    this.renderItems();
   }
 
-  // ===================================================================
-  // Chapter & Topic Rendering
-  // ===================================================================
-  renderChapters() {
+  renderItems() {
     this.chaptersContainer.innerHTML = '';
-    const filteredChapters = this.getFilteredChapters();
+    const filteredItems = this.getFilteredItems();
 
-    if (this.state.chapters.length === 0) {
+    if (this.state.items.length === 0) {
       this.emptyStateContainer.classList.remove('hidden');
       this.chaptersContainer.classList.add('hidden');
       return;
@@ -1011,614 +784,466 @@ class AmanStudyTrackerApp {
     this.emptyStateContainer.classList.add('hidden');
     this.chaptersContainer.classList.remove('hidden');
 
-    if (filteredChapters.length === 0) {
+    if (filteredItems.length === 0) {
       const emptyDiv = document.createElement('div');
       emptyDiv.className = 'empty-chapter-topics';
-      emptyDiv.innerHTML = `<p>No topics match your current filter or search criteria.</p>`;
+      emptyDiv.innerHTML = `
+        <div class="empty-filter-icon">🔍</div>
+        <p class="empty-filter-text">No study items match your current filter or search criteria.</p>
+        <button type="button" class="btn btn-secondary btn-sm" id="btnResetSearchOrFilter">Show all items</button>
+      `;
+      emptyDiv.querySelector('#btnResetSearchOrFilter')?.addEventListener('click', () => {
+        this.searchQuery = '';
+        this.topicSearchInput.value = '';
+        this.btnClearSearch.classList.add('hidden');
+        this.setFilter('all');
+      });
       this.chaptersContainer.appendChild(emptyDiv);
       return;
     }
 
-    filteredChapters.forEach(chapter => {
-      const chapterCard = this.createChapterCard(chapter);
-      this.chaptersContainer.appendChild(chapterCard);
+    // Group items: Subject -> (Chapters + Direct Items)
+    const grouped = {};
+    filteredItems.forEach(item => {
+      const subj = (item.subject || 'General').trim();
+      if (!grouped[subj]) {
+        grouped[subj] = {
+          color: item.color || 'indigo',
+          chapters: {},
+          directItems: []
+        };
+      }
+      
+      const chap = (item.chapter || '').trim();
+      if (chap) {
+        if (!grouped[subj].chapters[chap]) grouped[subj].chapters[chap] = [];
+        grouped[subj].chapters[chap].push(item);
+      } else {
+        grouped[subj].directItems.push(item);
+      }
+    });
+
+    const { user, friend } = this.state.profiles;
+
+    for (const [subjName, subjData] of Object.entries(grouped)) {
+      const subjCard = document.createElement('section');
+      subjCard.className = `subject-card theme-${subjData.color}`;
+
+      const chapterKeys = Object.keys(subjData.chapters);
+      const totalChapters = chapterKeys.length;
+      const allSubjItems = [
+        ...subjData.directItems,
+        ...Object.values(subjData.chapters).flat()
+      ];
+      const totalSubjItems = allSubjItems.length;
+
+      let subjUserDone = 0;
+      let subjFriendDone = 0;
+      allSubjItems.forEach(i => {
+        if (i.userLearned) subjUserDone++;
+        if (i.friendLearned) subjFriendDone++;
+      });
+      const subjUserPct = totalSubjItems > 0 ? Math.round((subjUserDone / totalSubjItems) * 100) : 0;
+      const subjFriendPct = totalSubjItems > 0 ? Math.round((subjFriendDone / totalSubjItems) * 100) : 0;
+
+      subjCard.innerHTML = `
+        <div class="subject-header">
+          <div class="subject-header-main">
+            <div class="subject-icon-box theme-${subjData.color}">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-0.5-0.05"></path>
+                <path d="M6 6h10"></path>
+                <path d="M6 10h10"></path>
+              </svg>
+            </div>
+            <div class="subject-info">
+              <div class="subject-title-line">
+                <h2 class="subject-title">${this.escapeHtml(subjName)}</h2>
+                <span class="subject-badge theme-${subjData.color}">${this.escapeHtml(subjName)}</span>
+              </div>
+              <div class="subject-meta-chips">
+                ${totalChapters > 0 ? `<span class="subject-chip">📚 ${totalChapters} Chapter${totalChapters === 1 ? '' : 's'}</span>` : ''}
+                <span class="subject-chip">📝 ${totalSubjItems} Topic${totalSubjItems === 1 ? '' : 's'}</span>
+              </div>
+            </div>
+          </div>
+          <div class="subject-header-side">
+            <div class="subject-dual-progress">
+              <div class="subject-prog-bar">
+                <span class="subject-prog-name">${this.escapeHtml(user.name)}</span>
+                <div class="subject-prog-track"><div class="subject-prog-fill fill-user" style="width: ${subjUserPct}%"></div></div>
+                <span class="subject-prog-pct">${subjUserPct}%</span>
+              </div>
+              <div class="subject-prog-bar">
+                <span class="subject-prog-name">${this.escapeHtml(friend.name)}</span>
+                <div class="subject-prog-track"><div class="subject-prog-fill fill-friend" style="width: ${subjFriendPct}%"></div></div>
+                <span class="subject-prog-pct">${subjFriendPct}%</span>
+              </div>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm btn-icon-text btn-add-subject-item" title="Add item to ${this.escapeHtml(subjName)}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>+ Add</span>
+            </button>
+          </div>
+        </div>
+        <div class="subject-body"></div>
+      `;
+
+      subjCard.querySelector('.btn-add-subject-item').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openAddItemModal(subjName, subjData.color);
+      });
+
+      const body = subjCard.querySelector('.subject-body');
+
+      // 1. Direct items (items with no chapter)
+      if (subjData.directItems.length > 0) {
+        if (totalChapters === 0) {
+          const directContainer = document.createElement('div');
+          directContainer.className = 'direct-topics-list';
+          subjData.directItems.forEach(item => {
+            directContainer.appendChild(this.createItemRow(item, subjData.color));
+          });
+          body.appendChild(directContainer);
+        } else {
+          const directCard = this.createGroupCard('Core Topics', subjData.color, subjData.directItems, subjName + '::__direct__');
+          body.appendChild(directCard);
+        }
+      }
+
+      // 2. Chapters
+      for (const [chapName, items] of Object.entries(subjData.chapters)) {
+        const chapterId = subjName + '::' + chapName;
+        const chapterCard = this.createGroupCard(chapName, subjData.color, items, chapterId);
+        body.appendChild(chapterCard);
+      }
+
+      this.chaptersContainer.appendChild(subjCard);
+    }
+  }
+
+  getFilteredItems() {
+    return this.state.items.filter(item => {
+      if (this.searchQuery) {
+        const inTopic = (item.topic || '').toLowerCase().includes(this.searchQuery);
+        const inChap = (item.chapter || '').toLowerCase().includes(this.searchQuery);
+        const inSubj = (item.subject || '').toLowerCase().includes(this.searchQuery);
+        if (!inTopic && !inChap && !inSubj) return false;
+      }
+
+      const isFriend = this.currentAuthUser === 'friend';
+      const partnerLearned = isFriend ? item.userLearned : item.friendLearned;
+      const selfLearned = isFriend ? item.friendLearned : item.userLearned;
+
+      if (this.activeFilter === 'friend-only') return partnerLearned && !selfLearned;
+      if (this.activeFilter === 'user-only') return selfLearned && !partnerLearned;
+      if (this.activeFilter === 'both-done') return selfLearned && partnerLearned;
+      if (this.activeFilter === 'neither-done') return !selfLearned && !partnerLearned;
+      return true;
     });
   }
 
-  getFilteredChapters() {
-    return this.state.chapters
-      .map(chapter => {
-        let matchingTopics = (chapter.topics || []).filter(topic => {
-          // Search query match
-          if (this.searchQuery) {
-            const inTopic = topic.title.toLowerCase().includes(this.searchQuery);
-            const inNotes = (topic.notes || '').toLowerCase().includes(this.searchQuery);
-            const inChap = chapter.title.toLowerCase().includes(this.searchQuery);
-            if (!inTopic && !inNotes && !inChap) return false;
-          }
-
-          // Filter match (adapted to who is currently logged in)
-          const isFriend = this.currentAuthUser === 'friend';
-          const partnerLearned = isFriend ? topic.userLearned : topic.friendLearned;
-          const selfLearned = isFriend ? topic.friendLearned : topic.userLearned;
-
-          if (this.activeFilter === 'friend-only') {
-            return partnerLearned && !selfLearned;
-          }
-          if (this.activeFilter === 'user-only') {
-            return selfLearned && !partnerLearned;
-          }
-          if (this.activeFilter === 'both-done') {
-            return selfLearned && partnerLearned;
-          }
-          if (this.activeFilter === 'neither-done') {
-            return !selfLearned && !partnerLearned;
-          }
-
-          return true;
-        });
-
-        const chapUserDone = (chapter.topics || []).filter(t => t.userLearned).length;
-        const chapFriendDone = (chapter.topics || []).filter(t => t.friendLearned).length;
-
-        return {
-          ...chapter,
-          topics: matchingTopics,
-          totalTopicsCount: (chapter.topics || []).length,
-          userDoneCount: chapUserDone,
-          friendDoneCount: chapFriendDone
-        };
-      })
-      .filter(chap => chap.topics.length > 0 || !this.searchQuery && this.activeFilter === 'all');
-  }
-
-  createChapterCard(chapter) {
-    const isCollapsed = this.collapsedChapters.has(chapter.id);
+  createGroupCard(chapterName, color, items, chapterId) {
+    const isCollapsed = this.collapsedChapters.has(chapterId);
     const { user, friend } = this.state.profiles;
 
-    const userPercent = chapter.totalTopicsCount > 0 ? Math.round((chapter.userDoneCount / chapter.totalTopicsCount) * 100) : 0;
-    const friendPercent = chapter.totalTopicsCount > 0 ? Math.round((chapter.friendDoneCount / chapter.totalTopicsCount) * 100) : 0;
+    let userDone = 0;
+    let friendDone = 0;
+    items.forEach(i => {
+      if (i.userLearned) userDone++;
+      if (i.friendLearned) friendDone++;
+    });
+
+    const total = items.length;
+    const userPercent = total > 0 ? Math.round((userDone / total) * 100) : 0;
+    const friendPercent = total > 0 ? Math.round((friendDone / total) * 100) : 0;
 
     const card = document.createElement('article');
-    card.className = `chapter-card theme-${chapter.color || 'indigo'}`;
-    card.dataset.chapterId = chapter.id;
+    card.className = `chapter-card theme-${color}`;
 
     card.innerHTML = `
       <div class="chapter-header" data-action="toggle-chapter">
         <div class="chapter-title-group">
-          <button type="button" class="btn-collapse" aria-label="Toggle chapter topics" aria-expanded="${!isCollapsed}">
-            <svg class="chevron-icon ${isCollapsed ? 'collapsed' : ''}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <button type="button" class="btn-collapse" aria-expanded="${!isCollapsed}" aria-label="Toggle ${this.escapeHtml(chapterName)}">
+            <svg class="chevron-icon ${isCollapsed ? 'collapsed' : ''}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
           <div class="chapter-meta">
             <div class="chapter-title-line">
-              <h3 class="chapter-title">${this.escapeHtml(chapter.title)}</h3>
-              ${chapter.category ? `<span class="badge-category">${this.escapeHtml(chapter.category)}</span>` : ''}
-              <span class="topic-count-tag">${chapter.topics.length} topic${chapter.topics.length === 1 ? '' : 's'}</span>
+              <h3 class="chapter-title">${this.escapeHtml(chapterName)}</h3>
+              <span class="topic-count-tag">${total} topic${total === 1 ? '' : 's'}</span>
             </div>
-            ${chapter.description ? `<p class="chapter-desc">${this.escapeHtml(chapter.description)}</p>` : ''}
           </div>
         </div>
-
         <div class="chapter-progress-actions">
           <div class="chapter-dual-progress">
-            <div class="mini-progress-row" title="${this.escapeHtml(user.name)}: ${chapter.userDoneCount}/${chapter.totalTopicsCount} completed">
+            <div class="mini-progress-row">
               <span class="mini-label">${this.escapeHtml(user.name)}</span>
-              <div class="mini-track">
-                <div class="mini-fill fill-user" style="width: ${userPercent}%"></div>
-              </div>
+              <div class="mini-track"><div class="mini-fill fill-user" style="width: ${userPercent}%"></div></div>
               <span class="mini-percent">${userPercent}%</span>
             </div>
-            <div class="mini-progress-row" title="${this.escapeHtml(friend.name)}: ${chapter.friendDoneCount}/${chapter.totalTopicsCount} completed">
+            <div class="mini-progress-row">
               <span class="mini-label">${this.escapeHtml(friend.name)}</span>
-              <div class="mini-track">
-                <div class="mini-fill fill-friend" style="width: ${friendPercent}%"></div>
-              </div>
+              <div class="mini-track"><div class="mini-fill fill-friend" style="width: ${friendPercent}%"></div></div>
               <span class="mini-percent">${friendPercent}%</span>
             </div>
           </div>
-
-          <div class="chapter-actions-group">
-            <button type="button" class="btn btn-secondary btn-sm" data-action="add-topic" title="Add topic to this chapter">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-              <span>Add Topic</span>
-            </button>
-            <button type="button" class="btn-icon-subtle" data-action="edit-chapter" title="Edit chapter">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>
-            </button>
-            <button type="button" class="btn-icon-subtle btn-delete" data-action="delete-chapter" title="Delete chapter">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
-            </button>
-          </div>
         </div>
       </div>
-
-      <div class="topics-list ${isCollapsed ? 'hidden' : ''}">
-        <!-- Topics rendered here -->
-      </div>
+      <div class="topics-list ${isCollapsed ? 'hidden' : ''}"></div>
     `;
 
-    const topicsListContainer = card.querySelector('.topics-list');
+    const list = card.querySelector('.topics-list');
+    items.forEach(item => {
+      list.appendChild(this.createItemRow(item, color));
+    });
 
-    if (chapter.topics.length === 0) {
-      const emptyTopic = document.createElement('div');
-      emptyTopic.className = 'empty-chapter-topics';
-      emptyTopic.innerHTML = `<span>No topics yet. Click "+ Add Topic" above to add your first sub-chapter!</span>`;
-      topicsListContainer.appendChild(emptyTopic);
-    } else {
-      chapter.topics.forEach(topic => {
-        const topicRow = this.createTopicRow(chapter, topic);
-        topicsListContainer.appendChild(topicRow);
-      });
-    }
-
-    // Event listeners on chapter header
     card.querySelector('[data-action="toggle-chapter"]').addEventListener('click', (e) => {
-      if (e.target.closest('.chapter-actions-group') || e.target.closest('button')) {
-        return;
+      if (e.target.closest('.chapter-actions-group') || e.target.closest('.btn-collapse')) {
+        // Toggle click
       }
-      this.toggleChapterCollapse(chapter.id);
-    });
-
-    card.querySelector('.btn-collapse').addEventListener('click', () => {
-      this.toggleChapterCollapse(chapter.id);
-    });
-
-    card.querySelector('[data-action="add-topic"]').addEventListener('click', () => {
-      this.openAddTopicModal(chapter.id, chapter.title);
-    });
-
-    card.querySelector('[data-action="edit-chapter"]').addEventListener('click', () => {
-      this.openEditChapterModal(chapter);
-    });
-
-    card.querySelector('[data-action="delete-chapter"]').addEventListener('click', () => {
-      this.deleteChapter(chapter.id);
+      if (this.collapsedChapters.has(chapterId)) this.collapsedChapters.delete(chapterId);
+      else this.collapsedChapters.add(chapterId);
+      this.renderItems();
     });
 
     return card;
   }
 
-  toggleChapterCollapse(chapterId) {
-    if (this.collapsedChapters.has(chapterId)) {
-      this.collapsedChapters.delete(chapterId);
-    } else {
-      this.collapsedChapters.add(chapterId);
-    }
-    this.renderChapters();
-  }
-
-  // ===================================================================
-  // Topic Row Rendering with Locked Access Check
-  // ===================================================================
-  createTopicRow(chapter, topic) {
+  createItemRow(item, color = 'indigo') {
     const { user, friend } = this.state.profiles;
     const row = document.createElement('div');
     row.className = 'topic-row';
-    row.dataset.topicId = topic.id;
 
-    // Determine Gap Badge
     let gapBadgeHtml = '';
-    if (topic.friendLearned && !topic.userLearned) {
-      gapBadgeHtml = `<span class="gap-tag tag-friend-only" title="${this.escapeHtml(friend.name)} understood this, ${this.escapeHtml(user.name)} needs to learn">💡 ${this.escapeHtml(friend.name)} Mastered</span>`;
-    } else if (topic.userLearned && !topic.friendLearned) {
-      gapBadgeHtml = `<span class="gap-tag tag-user-only" title="${this.escapeHtml(user.name)} understood this, ${this.escapeHtml(friend.name)} needs to learn">🚀 ${this.escapeHtml(user.name)} Mastered</span>`;
-    } else if (topic.userLearned && topic.friendLearned) {
-      gapBadgeHtml = `<span class="gap-tag tag-both" title="Both understood this topic">✨ Both Understood</span>`;
+    if (item.friendLearned && !item.userLearned) {
+      gapBadgeHtml = `<span class="gap-tag tag-friend-only"><span class="gap-dot friend-dot"></span>💡 ${this.escapeHtml(friend.name)} Mastered</span>`;
+    } else if (item.userLearned && !item.friendLearned) {
+      gapBadgeHtml = `<span class="gap-tag tag-user-only"><span class="gap-dot user-dot"></span>🚀 ${this.escapeHtml(user.name)} Mastered</span>`;
+    } else if (item.userLearned && item.friendLearned) {
+      gapBadgeHtml = `<span class="gap-tag tag-both"><span class="gap-dot both-dot"></span>✨ Both Understood</span>`;
     } else {
-      gapBadgeHtml = `<span class="gap-tag tag-neither" title="Pending for both">⏳ Both Pending</span>`;
+      gapBadgeHtml = `<span class="gap-tag tag-neither"><span class="gap-dot neither-dot"></span>⏳ Both Pending</span>`;
     }
 
-    // CRITICAL SECURITY & REGULATION:
-    // Only Shahzeb can mark his checkmark. Only Aman can mark his checkmark.
     const isUserActive = this.currentAuthUser === 'user';
     const isFriendActive = this.currentAuthUser === 'friend';
-
     const canEditUser = isUserActive;
     const canEditFriend = isFriendActive;
 
-    const userLockNotice = canEditUser
-      ? `Click to toggle understood for ${this.escapeHtml(user.name)}`
-      : `🔒 Locked: Only ${this.escapeHtml(user.name)} can mark this`;
+    const displayTitle = item.topic || item.chapter || item.subject;
 
-    const friendLockNotice = canEditFriend
-      ? `Click to toggle understood for ${this.escapeHtml(friend.name)}`
-      : `🔒 Locked: Only ${this.escapeHtml(friend.name)} can mark this`;
+    let breadcrumbHtml = '';
+    if (item.chapter && item.topic) {
+      breadcrumbHtml = `<span class="topic-breadcrumb">${this.escapeHtml(item.chapter)}</span>`;
+    }
 
     row.innerHTML = `
       <div class="topic-details">
         <div class="topic-title-line">
-          <span class="topic-title">${this.escapeHtml(topic.title)}</span>
-          <span class="badge-difficulty difficulty-${topic.difficulty || 'Medium'}">${topic.difficulty || 'Medium'}</span>
-          ${topic.estHours ? `<span class="topic-est-time">${topic.estHours}h</span>` : ''}
+          <span class="topic-bullet theme-${color}"></span>
+          <span class="topic-title">${this.escapeHtml(displayTitle)}</span>
           ${gapBadgeHtml}
         </div>
-        ${topic.notes ? `<div class="topic-notes" title="${this.escapeHtml(topic.notes)}">${this.escapeHtml(topic.notes)}</div>` : ''}
+        ${breadcrumbHtml}
       </div>
-
       <div class="topic-controls">
         <div class="topic-checkers-group">
-          <!-- Toggle for User (Shahzeb) -->
-          <div class="learner-toggle ${topic.userLearned ? 'active-user' : ''} ${!canEditUser ? 'locked' : ''}" 
-               data-learner="user" 
-               title="${userLockNotice}">
-            <div class="toggle-box">
+          <button type="button" class="learner-toggle ${item.userLearned ? 'active-user' : ''} ${!canEditUser ? 'locked' : ''}" data-learner="user" title="${canEditUser ? 'Toggle your completion' : '🔒 Locked to ' + this.escapeHtml(user.name)}">
+            <span class="toggle-avatar-bubble user-bubble">${user.avatarUrl ? `<img src="${this.escapeHtml(user.avatarUrl)}" class="avatar-image">` : (user.initials || 'SH')}</span>
+            <span class="toggle-name">${this.escapeHtml(user.name)}</span>
+            <span class="toggle-box">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
-            </div>
-            <span>${this.escapeHtml(user.name)} ${isUserActive ? '(You)' : ''}</span>
-            ${!canEditUser ? `<span class="lock-icon" title="Only ${this.escapeHtml(user.name)} can mark this">🔒</span>` : ''}
-          </div>
-
-          <!-- Toggle for Friend (Aman) -->
-          <div class="learner-toggle ${topic.friendLearned ? 'active-friend' : ''} ${!canEditFriend ? 'locked' : ''}" 
-               data-learner="friend" 
-               title="${friendLockNotice}">
-            <div class="toggle-box">
+            </span>
+            ${!canEditUser ? `<svg class="lock-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>` : ''}
+          </button>
+          
+          <button type="button" class="learner-toggle ${item.friendLearned ? 'active-friend' : ''} ${!canEditFriend ? 'locked' : ''}" data-learner="friend" title="${canEditFriend ? 'Toggle your completion' : '🔒 Locked to ' + this.escapeHtml(friend.name)}">
+            <span class="toggle-avatar-bubble friend-bubble">${friend.avatarUrl ? `<img src="${this.escapeHtml(friend.avatarUrl)}" class="avatar-image">` : (friend.initials || 'AM')}</span>
+            <span class="toggle-name">${this.escapeHtml(friend.name)}</span>
+            <span class="toggle-box">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
-            </div>
-            <span>${this.escapeHtml(friend.name)} ${isFriendActive ? '(You)' : ''}</span>
-            ${!canEditFriend ? `<span class="lock-icon" title="Only ${this.escapeHtml(friend.name)} can mark this">🔒</span>` : ''}
-          </div>
+            </span>
+            ${!canEditFriend ? `<svg class="lock-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>` : ''}
+          </button>
         </div>
 
         <div class="topic-actions-btn-group">
-          <button type="button" class="btn-icon-subtle" data-action="edit-topic" title="Edit topic notes or difficulty">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-            </svg>
+          <button type="button" class="btn-icon-subtle" data-action="edit-item" title="Edit item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
           </button>
-          <button type="button" class="btn-icon-subtle btn-delete" data-action="delete-topic" title="Delete topic">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
+          <button type="button" class="btn-icon-subtle btn-delete" data-action="delete-item" title="Delete item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           </button>
         </div>
       </div>
     `;
 
-    // Toggle event listeners
-    row.querySelectorAll('.learner-toggle').forEach(toggleBtn => {
-      toggleBtn.addEventListener('click', () => {
-        const learner = toggleBtn.dataset.learner;
-        this.toggleTopicLearner(chapter.id, topic.id, learner);
+    row.querySelectorAll('.learner-toggle').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleItemLearner(item.id, btn.dataset.learner);
       });
     });
 
-    // Action buttons
-    row.querySelector('[data-action="edit-topic"]').addEventListener('click', () => {
-      this.openEditTopicModal(chapter.id, chapter.title, topic);
+    row.querySelector('[data-action="edit-item"]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.openEditItemModal(item);
     });
-
-    row.querySelector('[data-action="delete-topic"]').addEventListener('click', () => {
-      this.deleteTopic(chapter.id, topic.id);
+    row.querySelector('[data-action="delete-item"]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.deleteItem(item.id);
     });
 
     return row;
   }
 
-  // ===================================================================
-  // Chapter & Topic CRUD with Access Check
-  // ===================================================================
-  toggleTopicLearner(chapterId, topicId, learner) {
-    // CRITICAL ACCESS REGULATION:
-    // Only the authenticated user can toggle their own status!
+  toggleItemLearner(itemId, learner) {
     if (this.currentAuthUser !== learner) {
       const allowedName = learner === 'user' ? this.state.profiles.user.name : this.state.profiles.friend.name;
       this.showToast(`🔒 Locked: Only ${allowedName} can mark their own completion!`, 'warning');
       return;
     }
 
-    const chapter = this.state.chapters.find(c => c.id === chapterId);
-    if (!chapter) return;
-    const topic = chapter.topics.find(t => t.id === topicId);
-    if (!topic) return;
+    const item = this.state.items.find(i => i.id === itemId);
+    if (!item) return;
 
-    if (learner === 'user') {
-      topic.userLearned = !topic.userLearned;
-    } else {
-      topic.friendLearned = !topic.friendLearned;
-    }
+    if (learner === 'user') item.userLearned = !item.userLearned;
+    else item.friendLearned = !item.friendLearned;
 
     const learnerName = learner === 'user' ? this.state.profiles.user.name : this.state.profiles.friend.name;
-    const isDone = learner === 'user' ? topic.userLearned : topic.friendLearned;
+    const isDone = learner === 'user' ? item.userLearned : item.friendLearned;
 
     this.saveState();
-
-    if (isDone) {
-      this.showToast(`Marked "${topic.title}" as completed by ${learnerName}!`, 'success');
-    } else {
-      this.showToast(`Unmarked "${topic.title}" for ${learnerName}`, 'info');
-    }
+    if (isDone) this.showToast(`Marked completed by ${learnerName}!`, 'success');
   }
 
-  openAddChapterModal() {
-    this.modalChapterTitle.textContent = 'Add New Chapter';
-    this.inputChapterId.value = '';
-    this.inputChapterTitle.value = '';
-    this.inputChapterDescription.value = '';
-    this.inputChapterCategory.value = '';
-    document.querySelector('input[name="chapterColor"][value="indigo"]').checked = true;
-    this.modalChapter.classList.remove('hidden');
-    this.inputChapterTitle.focus();
-  }
+  openAddItemModal(defaultSubject = '', defaultColor = 'indigo') {
+    this.modalItemTitle.textContent = defaultSubject ? `Add Item to ${defaultSubject}` : 'Add Study Item';
+    this.inputItemId.value = '';
+    this.inputItemSubject.value = defaultSubject;
+    this.inputItemChapter.value = '';
+    this.inputItemTopic.value = '';
 
-  openEditChapterModal(chapter) {
-    this.modalChapterTitle.textContent = 'Edit Chapter';
-    this.inputChapterId.value = chapter.id;
-    this.inputChapterTitle.value = chapter.title;
-    this.inputChapterDescription.value = chapter.description || '';
-    this.inputChapterCategory.value = chapter.category || '';
-    const colorRadio = document.querySelector(`input[name="chapterColor"][value="${chapter.color || 'indigo'}"]`);
+    const colorRadio = document.querySelector(`input[name="itemColor"][value="${defaultColor}"]`);
     if (colorRadio) colorRadio.checked = true;
-    this.modalChapter.classList.remove('hidden');
-    this.inputChapterTitle.focus();
-  }
 
-  handleSaveChapter(e) {
-    e.preventDefault();
-    const id = this.inputChapterId.value;
-    const title = this.inputChapterTitle.value.trim();
-    const description = this.inputChapterDescription.value.trim();
-    const category = this.inputChapterCategory.value.trim();
-    const color = document.querySelector('input[name="chapterColor"]:checked')?.value || 'indigo';
-
-    if (!title) return;
-
-    if (id) {
-      const chapter = this.state.chapters.find(c => c.id === id);
-      if (chapter) {
-        chapter.title = title;
-        chapter.description = description;
-        chapter.category = category;
-        chapter.color = color;
-        this.showToast(`Chapter "${title}" updated!`, 'success');
-      }
-    } else {
-      const newChapter = {
-        id: 'chap-' + Date.now(),
-        title,
-        description,
-        category,
-        color,
-        topics: []
-      };
-      this.state.chapters.push(newChapter);
-      this.showToast(`Added new chapter "${title}"!`, 'success');
-    }
-
-    this.saveState();
-    this.modalChapter.classList.add('hidden');
-  }
-
-  deleteChapter(chapterId) {
-    const chapter = this.state.chapters.find(c => c.id === chapterId);
-    if (!chapter) return;
-
-    if (confirm(`Are you sure you want to delete chapter "${chapter.title}" and all its topics?`)) {
-      this.state.chapters = this.state.chapters.filter(c => c.id !== chapterId);
-      this.collapsedChapters.delete(chapterId);
-      this.saveState();
-      this.showToast(`Deleted chapter "${chapter.title}".`, 'info');
-    }
-  }
-
-  openAddTopicModal(chapterId, chapterTitle) {
-    this.modalTopicTitle.textContent = 'Add Topic / Sub-Chapter';
-    this.inputTopicId.value = '';
-    this.inputTopicChapterId.value = chapterId;
-    this.modalTopicChapterName.textContent = chapterTitle;
-    this.inputTopicTitle.value = '';
-    this.inputTopicNotes.value = '';
-    this.selectTopicDifficulty.value = 'Medium';
-    this.inputTopicEstTime.value = '2';
-
-    // Current user can only set their own initial mark
     const isFriend = this.currentAuthUser === 'friend';
     const profile = isFriend ? this.state.profiles.friend : this.state.profiles.user;
     this.labelInitialSelf.textContent = profile.name;
     this.checkInitialUserLearned.checked = false;
 
-    this.modalTopic.classList.remove('hidden');
-    this.inputTopicTitle.focus();
+    this.modalItem.classList.remove('hidden');
+    if (defaultSubject) {
+      this.inputItemChapter.focus();
+    } else {
+      this.inputItemSubject.focus();
+    }
   }
 
-  openEditTopicModal(chapterId, chapterTitle, topic) {
-    this.modalTopicTitle.textContent = 'Edit Topic';
-    this.inputTopicId.value = topic.id;
-    this.inputTopicChapterId.value = chapterId;
-    this.modalTopicChapterName.textContent = chapterTitle;
-    this.inputTopicTitle.value = topic.title;
-    this.inputTopicNotes.value = topic.notes || '';
-    this.selectTopicDifficulty.value = topic.difficulty || 'Medium';
-    this.inputTopicEstTime.value = topic.estHours || '2';
+  openEditItemModal(item) {
+    this.modalItemTitle.textContent = 'Edit Study Item';
+    this.inputItemId.value = item.id;
+    this.inputItemSubject.value = item.subject || '';
+    this.inputItemChapter.value = item.chapter || '';
+    this.inputItemTopic.value = item.topic || '';
+    
+    const colorRadio = document.querySelector(`input[name="itemColor"][value="${item.color || 'indigo'}"]`);
+    if (colorRadio) colorRadio.checked = true;
 
     const isFriend = this.currentAuthUser === 'friend';
     const profile = isFriend ? this.state.profiles.friend : this.state.profiles.user;
     this.labelInitialSelf.textContent = profile.name;
-    this.checkInitialUserLearned.checked = isFriend ? !!topic.friendLearned : !!topic.userLearned;
+    this.checkInitialUserLearned.checked = isFriend ? !!item.friendLearned : !!item.userLearned;
 
-    this.modalTopic.classList.remove('hidden');
-    this.inputTopicTitle.focus();
+    this.modalItem.classList.remove('hidden');
+    this.inputItemSubject.focus();
   }
 
-  handleSaveTopic(e) {
+  handleSaveItem(e) {
     e.preventDefault();
-    const chapterId = this.inputTopicChapterId.value;
-    const existingTopicId = this.inputTopicId.value;
-    const title = this.inputTopicTitle.value.trim();
-    const notes = this.inputTopicNotes.value.trim();
-    const difficulty = this.selectTopicDifficulty.value;
-    const estHours = parseFloat(this.inputTopicEstTime.value) || 1;
-
-    if (!title) return;
-
-    const chapter = this.state.chapters.find(c => c.id === chapterId);
-    if (!chapter) return;
+    const id = this.inputItemId.value;
+    const subject = this.inputItemSubject.value.trim();
+    const chapter = this.inputItemChapter.value.trim();
+    const topic = this.inputItemTopic.value.trim();
+    const color = document.querySelector('input[name="itemColor"]:checked')?.value || 'indigo';
+    
+    if (!subject) return;
 
     const isFriend = this.currentAuthUser === 'friend';
     const selfLearned = this.checkInitialUserLearned.checked;
 
-    if (existingTopicId) {
-      const topic = chapter.topics.find(t => t.id === existingTopicId);
-      if (topic) {
-        topic.title = title;
-        topic.notes = notes;
-        topic.difficulty = difficulty;
-        topic.estHours = estHours;
-        // Only update current user's learned status
-        if (isFriend) {
-          topic.friendLearned = selfLearned;
-        } else {
-          topic.userLearned = selfLearned;
-        }
-        this.showToast(`Updated topic "${title}"!`, 'success');
+    if (id) {
+      const item = this.state.items.find(i => i.id === id);
+      if (item) {
+        item.subject = subject;
+        item.chapter = chapter;
+        item.topic = topic;
+        item.color = color;
+        if (isFriend) item.friendLearned = selfLearned;
+        else item.userLearned = selfLearned;
+        this.showToast(`Item updated!`, 'success');
       }
     } else {
-      const newTopic = {
-        id: 'top-' + Date.now(),
-        title,
-        notes,
-        difficulty,
-        estHours,
+      const newItem = {
+        id: 'item-' + Date.now(),
+        subject,
+        chapter,
+        topic,
+        color,
         userLearned: !isFriend && selfLearned,
         friendLearned: isFriend && selfLearned
       };
-      chapter.topics.push(newTopic);
-      this.showToast(`Added topic "${title}"!`, 'success');
+      this.state.items.push(newItem);
+      this.showToast(`Item added!`, 'success');
     }
 
     this.saveState();
-    this.modalTopic.classList.add('hidden');
+    this.modalItem.classList.add('hidden');
   }
 
-  deleteTopic(chapterId, topicId) {
-    const chapter = this.state.chapters.find(c => c.id === chapterId);
-    if (!chapter) return;
-    const topic = chapter.topics.find(t => t.id === topicId);
-    if (!topic) return;
-
-    if (confirm(`Delete topic "${topic.title}"?`)) {
-      chapter.topics = chapter.topics.filter(t => t.id !== topicId);
+  deleteItem(id) {
+    if (confirm(`Delete this item?`)) {
+      this.state.items = this.state.items.filter(i => i.id !== id);
       this.saveState();
-      this.showToast(`Deleted "${topic.title}".`, 'info');
+      this.showToast(`Deleted item.`, 'info');
     }
   }
 
-  // ===================================================================
-  // Upstash Redis Cloud Sync (REST API & Vercel Proxy)
-  // ===================================================================
   loadUpstashConfig() {
     try {
-      const saved = localStorage.getItem(UPSTASH_STORAGE_KEY) || localStorage.getItem(LEGACY_UPSTASH_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {
-      console.warn('Failed to parse Upstash config:', e);
-    }
-    return {
-      url: '',
-      token: '',
-      roomId: 'study-duo-room-1',
-      autoSync: true,
-      pollInterval: 10000,
-      isConnected: false,
-      lastSyncedAt: null,
-      useServerProxy: false
-    };
+      const saved = localStorage.getItem(UPSTASH_STORAGE_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return { url: '', token: '', roomId: 'study-duo-room-1', autoSync: true, pollInterval: 10000, isConnected: false, lastSyncedAt: null, useServerProxy: false };
   }
 
   saveUpstashConfig() {
-    try {
-      localStorage.setItem(UPSTASH_STORAGE_KEY, JSON.stringify(this.upstash));
-    } catch (e) {
-      console.error('Failed to save Upstash config:', e);
-    }
+    try { localStorage.setItem(UPSTASH_STORAGE_KEY, JSON.stringify(this.upstash)); } catch (e) {}
   }
 
   initUpstash() {
     this.updateUpstashStatusUI();
-
-    // Check if Vercel serverless proxy is available
-    this.detectVercelAPI();
-
     if (this.upstash.isConnected) {
       this.startSyncPolling();
       this.pullFromUpstash(false);
     }
   }
 
-  async detectVercelAPI() {
-    try {
-      const res = await fetch('/api/sync?room=' + encodeURIComponent(this.upstash.roomId || 'study-duo-room-1'));
-      if (res.ok) {
-        const data = await res.json();
-        if (data.configured) {
-          this.upstash.useServerProxy = true;
-          this.upstash.isConnected = true;
-          this.upstash.lastSyncedAt = Date.now();
-          this.saveUpstashConfig();
-          this.startSyncPolling();
-          this.pullFromUpstash(false);
-          this.showToast('Connected to Upstash Cloud via Vercel proxy!', 'success');
-        }
-      }
-    } catch (e) {
-      // Offline or local
-    }
-  }
-
   updateUpstashStatusUI(syncState = null) {
     const isConn = !!this.upstash.isConnected;
-
-    if (this.cloudStatusDot) {
-      this.cloudStatusDot.className = 'cloud-status-indicator ' + 
-        (syncState === 'syncing' ? 'status-syncing' : (isConn ? 'status-connected' : 'status-offline'));
-    }
-    if (this.cloudStatusLabel) {
-      this.cloudStatusLabel.textContent = syncState === 'syncing' 
-        ? 'Syncing...' 
-        : (isConn ? 'Cloud Live 🟢' : 'Upstash Cloud');
-    }
-
-    if (this.upstashStatusBanner) {
-      this.upstashStatusBanner.className = 'cloud-status-banner ' + 
-        (isConn ? 'status-banner-connected' : 'status-banner-disconnected');
-    }
-    if (this.bannerStatusDot) {
-      this.bannerStatusDot.className = 'status-pulse-dot ' + (isConn ? 'dot-live' : '');
-    }
-    if (this.bannerStatusTitle) {
-      this.bannerStatusTitle.textContent = isConn 
-        ? `Connected to Room: ${this.upstash.roomId || 'default'}`
-        : 'Cloud Sync Disconnected';
-    }
-    if (this.bannerStatusSub) {
-      this.bannerStatusSub.textContent = isConn
-        ? 'Changes automatically sync across both devices in real-time.'
-        : 'Currently storing progress locally in your browser.';
-    }
-    if (this.bannerLastSyncText) {
-      this.bannerLastSyncText.textContent = this.upstash.lastSyncedAt
-        ? `Synced ${new Date(this.upstash.lastSyncedAt).toLocaleTimeString()}`
-        : '—';
-    }
+    if (this.cloudStatusDot) this.cloudStatusDot.className = 'cloud-status-indicator ' + (syncState === 'syncing' ? 'status-syncing' : (isConn ? 'status-connected' : 'status-offline'));
+    if (this.cloudStatusLabel) this.cloudStatusLabel.textContent = syncState === 'syncing' ? 'Syncing...' : (isConn ? 'Cloud Live 🟢' : 'Upstash Cloud');
+    if (this.upstashStatusBanner) this.upstashStatusBanner.className = 'cloud-status-banner ' + (isConn ? 'status-banner-connected' : 'status-banner-disconnected');
+    if (this.bannerStatusDot) this.bannerStatusDot.className = 'status-pulse-dot ' + (isConn ? 'dot-live' : '');
+    if (this.bannerStatusTitle) this.bannerStatusTitle.textContent = isConn ? `Connected to Room: ${this.upstash.roomId || 'default'}` : 'Cloud Sync Disconnected';
+    if (this.bannerStatusSub) this.bannerStatusSub.textContent = isConn ? 'Changes automatically sync across both devices in real-time.' : 'Currently storing progress locally in your browser.';
+    if (this.bannerLastSyncText) this.bannerLastSyncText.textContent = this.upstash.lastSyncedAt ? `Synced ${new Date(this.upstash.lastSyncedAt).toLocaleTimeString()}` : '—';
   }
 
   openUpstashModal() {
@@ -1639,31 +1264,14 @@ class AmanStudyTrackerApp {
     const pollInterval = this.selectSyncInterval.value === 'manual' ? 0 : parseInt(this.selectSyncInterval.value, 10);
     const autoSync = this.checkUpstashAutoSync.checked;
 
-    if (!url || !token) {
-      this.showToast('Please provide both Upstash URL and Token.', 'warning');
-      return;
-    }
-
+    if (!url || !token) { this.showToast('Please provide both Upstash URL and Token.', 'warning'); return; }
     this.showToast('Testing Upstash connection...', 'info');
 
     try {
-      const testRes = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(['PING'])
-      });
-
-      if (!testRes.ok) {
-        throw new Error(`Upstash returned HTTP ${testRes.status}`);
-      }
-
+      const testRes = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(['PING']) });
+      if (!testRes.ok) throw new Error(`Upstash returned HTTP ${testRes.status}`);
       const pingData = await testRes.json();
-      if (pingData.error) {
-        throw new Error(pingData.error);
-      }
+      if (pingData.error) throw new Error(pingData.error);
 
       this.upstash.url = url;
       this.upstash.token = token;
@@ -1681,7 +1289,6 @@ class AmanStudyTrackerApp {
       this.showToast('Successfully connected to Upstash Redis!', 'success');
       this.modalUpstash.classList.add('hidden');
     } catch (err) {
-      console.error('Upstash connection error:', err);
       this.showToast(`Connection failed: ${err.message}`, 'warning');
     }
   }
@@ -1697,136 +1304,61 @@ class AmanStudyTrackerApp {
 
   triggerAutoPush() {
     clearTimeout(this.autoPushTimer);
-    this.autoPushTimer = setTimeout(() => {
-      this.pushToUpstash(false);
-    }, 800);
+    this.autoPushTimer = setTimeout(() => this.pushToUpstash(false), 800);
   }
 
   async pushToUpstash(notify = true) {
-    if (!this.upstash.isConnected) {
-      if (notify) this.showToast('Connect Upstash first to sync to cloud.', 'info');
-      return;
-    }
-
+    if (!this.upstash.isConnected) { if (notify) this.showToast('Connect Upstash first.', 'info'); return; }
     this.updateUpstashStatusUI('syncing');
 
     try {
-      const payload = {
-        state: this.state,
-        updatedAt: Date.now(),
-        sender: this.state.profiles.user.name
-      };
+      const payload = { state: this.state, updatedAt: Date.now(), sender: this.state.profiles.user.name };
+      const res = await fetch(this.upstash.url, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${this.upstash.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(['SET', `aman_study_tracker:${this.upstash.roomId}`, JSON.stringify(payload)])
+      });
 
-      let res;
-      if (this.upstash.useServerProxy) {
-        res = await fetch('/api/sync', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ room: this.upstash.roomId, payload })
-        });
-      } else {
-        res = await fetch(this.upstash.url, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${this.upstash.token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(['SET', `aman_study_tracker:${this.upstash.roomId}`, JSON.stringify(payload)])
-        });
-      }
-
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       this.upstash.lastSyncedAt = Date.now();
       this.saveUpstashConfig();
       this.updateUpstashStatusUI();
-
-      if (notify) {
-        this.showToast('Saved latest study progress to Upstash!', 'success');
-      }
+      if (notify) this.showToast('Saved latest study progress to Upstash!', 'success');
     } catch (err) {
-      console.warn('Failed to push to Upstash', err);
       this.updateUpstashStatusUI();
-      if (notify) {
-        this.showToast('Failed to push to cloud: ' + err.message, 'info');
-      }
+      if (notify) this.showToast('Failed to push to cloud: ' + err.message, 'info');
     }
   }
 
   async pullFromUpstash(notify = true) {
-    if (!this.upstash.isConnected || this.isSyncing) {
-      return;
-    }
-
+    if (!this.upstash.isConnected || this.isSyncing) return;
     this.isSyncing = true;
-
     try {
-      let data;
-      if (this.upstash.useServerProxy) {
-        const res = await fetch('/api/sync?room=' + encodeURIComponent(this.upstash.roomId));
-        if (res.ok) {
-          data = await res.json();
-          if (data.result) {
-            data = { result: data.result };
+      const res = await fetch(this.upstash.url, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${this.upstash.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(['GET', `aman_study_tracker:${this.upstash.roomId}`])
+      });
+      if (res.ok) {
+        let data = await res.json();
+        if (data && data.result) {
+          const remote = JSON.parse(data.result);
+          if (remote && remote.state && remote.updatedAt > this.lastRemoteUpdatedAt) {
+            this.lastRemoteUpdatedAt = remote.updatedAt;
+            this.state = remote.state;
+            this.saveStateLocallyWithoutPush();
+            this.updateProfilesUI();
+            this.render();
+            if (notify) this.showToast('Pulled latest progress from cloud!', 'success');
           }
-        }
-      } else {
-        const res = await fetch(this.upstash.url, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${this.upstash.token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(['GET', `aman_study_tracker:${this.upstash.roomId}`])
-        });
-        if (res.ok) {
-          data = await res.json();
-          if (!data.result) {
-            const legRes = await fetch(this.upstash.url, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${this.upstash.token}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(['GET', `peertrack:${this.upstash.roomId}`])
-            });
-            if (legRes.ok) {
-              const legData = await legRes.json();
-              if (legData.result) data = legData;
-            }
-          }
+        } else if (data && !data.result) {
+          this.pushToUpstash(false);
         }
       }
-
-
-      if (data && data.result) {
-        const remote = JSON.parse(data.result);
-        if (remote && remote.state && remote.updatedAt > this.lastRemoteUpdatedAt) {
-          this.lastRemoteUpdatedAt = remote.updatedAt;
-
-          // Merge chapters and topics safely
-          this.state = remote.state;
-          this.saveStateLocallyWithoutPush();
-          this.updateProfilesUI();
-          this.render();
-
-          if (notify) {
-            this.showToast('Pulled latest progress from cloud!', 'success');
-          }
-        }
-      } else if (data && !data.result) {
-        // Cloud is empty, push our local state to initialize it
-        this.pushToUpstash(false);
-      }
-
       this.upstash.lastSyncedAt = Date.now();
       this.saveUpstashConfig();
       this.updateUpstashStatusUI();
-    } catch (err) {
-      console.warn('Pull from Upstash failed:', err);
-    } finally {
+    } catch (err) {} finally {
       this.isSyncing = false;
     }
   }
@@ -1834,42 +1366,23 @@ class AmanStudyTrackerApp {
   startSyncPolling() {
     this.stopSyncPolling();
     const interval = this.upstash.pollInterval || 10000;
-    if (interval > 0) {
-      this.syncPollTimer = setInterval(() => {
-        this.pullFromUpstash(false);
-      }, interval);
-    }
+    if (interval > 0) this.syncPollTimer = setInterval(() => this.pullFromUpstash(false), interval);
   }
 
   stopSyncPolling() {
-    if (this.syncPollTimer) {
-      clearInterval(this.syncPollTimer);
-      this.syncPollTimer = null;
-    }
+    if (this.syncPollTimer) { clearInterval(this.syncPollTimer); this.syncPollTimer = null; }
   }
 
   copyUpstashInviteLink() {
-    if (!this.upstash.roomId) {
-      this.showToast('Configure a room first.', 'warning');
-      return;
-    }
-
-    const payloadObj = {
-      room: this.upstash.roomId
-    };
+    if (!this.upstash.roomId) { this.showToast('Configure a room first.', 'warning'); return; }
+    const payloadObj = { room: this.upstash.roomId };
     if (!this.upstash.useServerProxy && this.upstash.url && this.upstash.token) {
       payloadObj.u = this.upstash.url;
       payloadObj.t = this.upstash.token;
     }
-
     const encoded = encodeURIComponent(JSON.stringify(payloadObj));
     const inviteUrl = `${window.location.origin}${window.location.pathname}#cloud=${encoded}`;
-
-    navigator.clipboard.writeText(inviteUrl).then(() => {
-      this.showToast('Partner invite link copied to clipboard!', 'success');
-    }).catch(() => {
-      prompt('Copy this invite link for your partner:', inviteUrl);
-    });
+    navigator.clipboard.writeText(inviteUrl).then(() => this.showToast('Partner invite link copied to clipboard!', 'success')).catch(() => prompt('Copy this invite link for your partner:', inviteUrl));
   }
 
   checkUrlForCloudPayload() {
@@ -1879,10 +1392,7 @@ class AmanStudyTrackerApp {
       const payload = JSON.parse(raw);
       if (payload.room) {
         this.upstash.roomId = payload.room;
-        if (payload.u && payload.t) {
-          this.upstash.url = payload.u;
-          this.upstash.token = payload.t;
-        }
+        if (payload.u && payload.t) { this.upstash.url = payload.u; this.upstash.token = payload.t; }
         this.upstash.isConnected = true;
         this.saveUpstashConfig();
         this.startSyncPolling();
@@ -1890,60 +1400,44 @@ class AmanStudyTrackerApp {
         this.showToast(`Joined shared cloud room: "${payload.room}"!`, 'success');
       }
       history.replaceState(null, '', window.location.pathname);
-    } catch (e) {
-      console.warn('Invalid cloud link:', e);
-    }
+    } catch (e) {}
   }
-
-  // ===================================================================
-  // Bulk CSV Import System
-  // ===================================================================
 
   openCsvModal() {
     this.openSettingsModal('settingsPanelCsv');
-    if (this.textCsvInput) {
-      this.updateCsvParsedPreview();
-      this.textCsvInput.focus();
-    }
+    if (this.textCsvInput) { this.updateCsvParsedPreview(); this.textCsvInput.focus(); }
   }
 
   handleCsvFileSelect(e) {
     const file = e.target.files && e.target.files[0];
-    if (file) {
-      this.readCsvFile(file);
-    }
+    if (file) this.readCsvFile(file);
   }
 
   readCsvFile(file) {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (evt) => {
-      const content = evt.target.result;
       if (this.textCsvInput) {
-        this.textCsvInput.value = content;
+        this.textCsvInput.value = evt.target.result;
         this.updateCsvParsedPreview();
         this.showToast(`Loaded ${file.name} successfully!`, 'success');
       }
     };
-    reader.onerror = () => {
-      this.showToast('Failed to read CSV file.', 'danger');
-    };
+    reader.onerror = () => this.showToast('Failed to read CSV file.', 'danger');
     reader.readAsText(file);
   }
 
   downloadCsvTemplate() {
     const csvContent = [
-      'Chapter,Topic,Difficulty,EstHours,Notes',
-      'Dynamic Programming,0/1 Knapsack,Medium,3,Standard 2D DP table memoization',
-      'Dynamic Programming,Longest Common Subsequence,Medium,2.5,Matrix diagonal transition',
-      'Dynamic Programming,Matrix Chain Multiplication,Hard,4,Interval DP with partition k',
-      'Graph Theory,Breadth First Search (BFS),Easy,1.5,Queue traversal with visited array',
-      'Graph Theory,Dijkstra Shortest Path,Medium,3,Priority Queue min-heap traversal',
-      'Binary Trees,Lowest Common Ancestor,Medium,2,Recursive tree path comparison',
-      'Operating Systems,Process Scheduling Algorithms,Easy,2,FCFS SJF Round Robin analysis',
-      'Operating Systems,Deadlock & Banker Algorithm,Hard,3.5,Resource allocation graph'
+      'Subject,Chapter,Topic',
+      'Algorithms,Dynamic Programming,0/1 Knapsack',
+      'Algorithms,Dynamic Programming,Longest Common Subsequence',
+      'Algorithms,Graph Theory,Breadth First Search',
+      'Algorithms,Graph Theory,Dijkstra Algorithm',
+      'Mathematics,Calculus,Derivatives',
+      'Mathematics,,',
+      'Physics,Mechanics,'
     ].join('\n');
-
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -1957,20 +1451,15 @@ class AmanStudyTrackerApp {
   }
 
   fillSampleCsvData() {
-    const sample = [
-      'Chapter,Topic,Difficulty,EstHours,Notes',
-      'Dynamic Programming,0/1 Knapsack,Medium,3,Standard 2D DP array',
-      'Dynamic Programming,Longest Common Subsequence,Medium,2.5,Matrix diagonal transition',
-      'Dynamic Programming,Coin Change Problem,Medium,2,Unbounded knapsack base case',
-      'Graph Theory,BFS & Shortest Path,Easy,1.5,Queue traversal with visited set',
-      'Graph Theory,Dijkstra Algorithm,Medium,3,Min-heap priority queue',
-      'Graph Theory,Topological Sort,Medium,2,Kahn algorithm and DFS ordering',
-      'System Design,Consistent Hashing,Medium,2.5,Virtual nodes distribution',
-      'System Design,Rate Limiting Algorithms,Hard,3,Token bucket and Leaky bucket'
-    ].join('\n');
-
     if (this.textCsvInput) {
-      this.textCsvInput.value = sample;
+      this.textCsvInput.value = [
+        'Subject,Chapter,Topic',
+        'Algorithms,Dynamic Programming,0/1 Knapsack',
+        'Algorithms,Dynamic Programming,Longest Common Subsequence',
+        'Algorithms,Graph Theory,BFS & Shortest Path',
+        'Mathematics,Linear Algebra,Matrices',
+        'Physics,Mechanics,'
+      ].join('\n');
       this.updateCsvParsedPreview();
       this.showToast('Sample syllabus pasted! Review and click Import.', 'info');
     }
@@ -1978,26 +1467,18 @@ class AmanStudyTrackerApp {
 
   parseCsvData(rawText) {
     if (!rawText || !rawText.trim()) return [];
-
-    // Robust CSV parser supporting quotes and standard separators
     const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
     if (lines.length === 0) return [];
 
-    // Parse a line into cells taking quotes into account
     const parseLine = (line) => {
       const cells = [];
       let current = '';
       let inQuotes = false;
       for (let i = 0; i < line.length; i++) {
         const char = line[i];
-        if (char === '"' || char === "'") {
-          inQuotes = !inQuotes;
-        } else if ((char === ',' || char === '\t' || char === ';') && !inQuotes) {
-          cells.push(current.trim());
-          current = '';
-        } else {
-          current += char;
-        }
+        if (char === '"' || char === "'") inQuotes = !inQuotes;
+        else if ((char === ',' || char === '	' || char === ';') && !inQuotes) { cells.push(current.trim()); current = ''; }
+        else current += char;
       }
       cells.push(current.trim());
       return cells.map(c => c.replace(/^["']|["']$/g, '').trim());
@@ -2005,22 +1486,17 @@ class AmanStudyTrackerApp {
 
     const firstCells = parseLine(lines[0]).map(c => c.toLowerCase());
     let startIndex = 0;
-    let colChapter = 0;
-    let colTopic = 1;
-    let colDifficulty = -1;
-    let colEstHours = -1;
-    let colNotes = -1;
+    let colSubject = 0;
+    let colChapter = 1;
+    let colTopic = 2;
 
-    // Check if first line is a header
-    const hasHeader = firstCells.some(c => c.includes('chap') || c.includes('topic') || c.includes('subject'));
+    const hasHeader = firstCells.some(c => c.includes('sub') || c.includes('chap') || c.includes('top'));
     if (hasHeader) {
       startIndex = 1;
       firstCells.forEach((c, idx) => {
-        if (c.includes('chap') || c.includes('subject') || c.includes('module')) colChapter = idx;
-        else if (c.includes('topic') || c.includes('subtopic') || c.includes('concept') || c.includes('title')) colTopic = idx;
-        else if (c.includes('diff') || c.includes('level')) colDifficulty = idx;
-        else if (c.includes('hour') || c.includes('time') || c.includes('est')) colEstHours = idx;
-        else if (c.includes('note') || c.includes('desc') || c.includes('formula')) colNotes = idx;
+        if (c.includes('sub') || c.includes('track')) colSubject = idx;
+        else if (c.includes('chap') || c.includes('mod')) colChapter = idx;
+        else if (c.includes('top') || c.includes('title')) colTopic = idx;
       });
     }
 
@@ -2029,183 +1505,87 @@ class AmanStudyTrackerApp {
       const cells = parseLine(lines[i]);
       if (cells.length < 1) continue;
 
-      const chapterName = cells[colChapter] || 'General Syllabus';
-      const topicName = cells[colTopic] || cells[0] || '';
-      if (!topicName || topicName.toLowerCase() === 'topic') continue;
+      const subject = cells[colSubject] || cells[0];
+      if (!subject || subject.toLowerCase() === 'subject') continue;
+      
+      const chapter = colChapter < cells.length ? cells[colChapter] : '';
+      const topic = colTopic < cells.length ? cells[colTopic] : '';
 
-      let difficulty = 'Medium';
-      if (colDifficulty >= 0 && cells[colDifficulty]) {
-        const diffVal = cells[colDifficulty].toLowerCase();
-        if (diffVal.startsWith('e')) difficulty = 'Easy';
-        else if (diffVal.startsWith('h')) difficulty = 'Hard';
-        else difficulty = 'Medium';
-      }
-
-      let estHours = 2;
-      if (colEstHours >= 0 && cells[colEstHours]) {
-        const parsed = parseFloat(cells[colEstHours]);
-        if (!isNaN(parsed) && parsed > 0) estHours = parsed;
-      }
-
-      const notes = (colNotes >= 0 && cells[colNotes]) ? cells[colNotes] : '';
-
-      rows.push({
-        chapter: chapterName,
-        topic: topicName,
-        difficulty,
-        estHours,
-        notes
-      });
+      rows.push({ subject, chapter, topic });
     }
-
     return rows;
   }
 
   updateCsvParsedPreview() {
     if (!this.textCsvInput || !this.csvParsedSummary || !this.csvSummaryText) return;
-
-    const raw = this.textCsvInput.value;
-    const rows = this.parseCsvData(raw);
-
-    if (rows.length === 0) {
-      this.csvParsedSummary.classList.add('hidden');
-      return;
-    }
-
-    const uniqueChapters = new Set(rows.map(r => r.chapter.toLowerCase()));
-    this.csvSummaryText.textContent = `Ready to import: ${uniqueChapters.size} Chapter(s) and ${rows.length} Total Subtopics!`;
+    const rows = this.parseCsvData(this.textCsvInput.value);
+    if (rows.length === 0) { this.csvParsedSummary.classList.add('hidden'); return; }
+    this.csvSummaryText.textContent = `Ready to import: ${rows.length} Total Items!`;
     this.csvParsedSummary.classList.remove('hidden');
   }
 
   executeCsvImport() {
     if (!this.textCsvInput) return;
-    const raw = this.textCsvInput.value;
-    const rows = this.parseCsvData(raw);
-
-    if (rows.length === 0) {
-      this.showToast('Please provide valid CSV rows (e.g. Chapter, Topic)', 'warning');
-      return;
-    }
+    const rows = this.parseCsvData(this.textCsvInput.value);
+    if (rows.length === 0) { this.showToast('Please provide valid CSV rows', 'warning'); return; }
 
     const importMode = document.querySelector('input[name="csvImportMode"]:checked')?.value || 'append';
-
-    // Group rows by chapter title
-    const grouped = {};
-    rows.forEach(r => {
-      const chapKey = r.chapter.trim();
-      if (!grouped[chapKey]) {
-        grouped[chapKey] = [];
-      }
-      grouped[chapKey].push(r);
-    });
+    if (importMode === 'replace') this.state.items = [];
 
     const colors = ['indigo', 'emerald', 'amber', 'rose', 'cyan', 'purple'];
-    let colorIdx = 0;
+    const subjColors = {};
+    this.state.items.forEach(i => subjColors[i.subject] = i.color);
 
-    if (importMode === 'replace') {
-      this.state.chapters = [];
-    }
+    rows.forEach(r => {
+      if (!subjColors[r.subject]) subjColors[r.subject] = colors[Object.keys(subjColors).length % colors.length];
+      
+      const existing = this.state.items.find(i => 
+        (i.subject || '').toLowerCase() === r.subject.toLowerCase() &&
+        (i.chapter || '').toLowerCase() === r.chapter.toLowerCase() &&
+        (i.topic || '').toLowerCase() === r.topic.toLowerCase()
+      );
 
-    let addedChapters = 0;
-    let addedTopics = 0;
-
-    Object.keys(grouped).forEach(chapTitle => {
-      // Find existing chapter by title or create new
-      let existingChap = this.state.chapters.find(c => c.title.trim().toLowerCase() === chapTitle.toLowerCase());
-
-      if (!existingChap) {
-        const newChapId = 'chap-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 6);
-        existingChap = {
-          id: newChapId,
-          title: chapTitle,
-          category: 'Syllabus',
-          description: `Imported chapters & subtopics for ${chapTitle}`,
-          color: colors[colorIdx % colors.length],
-          topics: []
-        };
-        colorIdx++;
-        this.state.chapters.push(existingChap);
-        addedChapters++;
+      if (!existing) {
+        this.state.items.push({
+          id: 'item-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 6),
+          subject: r.subject,
+          chapter: r.chapter,
+          topic: r.topic,
+          color: subjColors[r.subject],
+          userLearned: false,
+          friendLearned: false
+        });
       }
-
-      // Add topics under this chapter
-      grouped[chapTitle].forEach(item => {
-        const existingTopic = existingChap.topics.find(t => t.title.trim().toLowerCase() === item.topic.trim().toLowerCase());
-        if (!existingTopic) {
-          const newTopicId = 'top-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 6);
-          existingChap.topics.push({
-            id: newTopicId,
-            title: item.topic,
-            notes: item.notes || '',
-            difficulty: item.difficulty || 'Medium',
-            estHours: item.estHours || 2,
-            userLearned: false,
-            friendLearned: false
-          });
-          addedTopics++;
-        }
-      });
     });
 
     this.saveState();
     this.render();
 
-    // Sync to cloud if connected
-    if (this.upstash && this.upstash.isConnected) {
-      this.pushToUpstash(false);
-    }
-
-    if (this.modalImportCSV) {
-      this.modalImportCSV.classList.add('hidden');
-    }
-
-    // Reset textarea for next time
+    if (this.upstash && this.upstash.isConnected) this.pushToUpstash(false);
+    if (this.modalImportCSV) this.modalImportCSV.classList.add('hidden');
+    
     this.textCsvInput.value = '';
     if (this.csvParsedSummary) this.csvParsedSummary.classList.add('hidden');
-
-    this.showToast(`Imported ${addedChapters} new chapters and ${addedTopics} topics successfully!`, 'success');
+    this.showToast(`Imported items successfully!`, 'success');
   }
 
-  // ===================================================================
-  // Utility Functions
-  // ===================================================================
-  closeAllModals() {
-    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
-  }
-
+  closeAllModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden')); }
   showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
-
     this.toastContainer.appendChild(toast);
-
     setTimeout(() => {
       toast.style.opacity = '0';
       toast.style.transform = 'translateY(10px)';
       setTimeout(() => toast.remove(), 250);
     }, 2800);
   }
-
   escapeHtml(str) {
     if (!str) return '';
-    const map = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#039;'
-    };
-    return String(str).replace(/[&<>"']/g, m => map[m]);
+    return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
   }
-
-  inputTopicClean(str) {
-    return str.replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 40);
-  }
+  inputTopicClean(str) { return str.replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 40); }
 }
 
-// Initialize on DOM Ready
-document.addEventListener('DOMContentLoaded', () => {
-  window.app = new AmanStudyTrackerApp();
-});
-
+document.addEventListener('DOMContentLoaded', () => { window.app = new AmanStudyTrackerApp(); });
