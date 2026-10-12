@@ -56,6 +56,16 @@
 
       <!-- Header Right Action -->
       <div class="header-right">
+        <div class="lecture-cloud-bar">
+          <button type="button" class="cloud-pill-status" id="cloudStatusPill" title="Cloud sync status">
+            <span class="cloud-pill-dot"></span>
+            <span id="cloudStatusLabel">Cloud Live 🟢</span>
+          </button>
+          <button type="button" class="btn-cloud-sync-now" id="btnCloudSyncNow" title="Manually sync with Upstash Cloud">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            <span>Sync</span>
+          </button>
+        </div>
         <button type="button" class="btn btn-primary btn-icon-text" id="btnOpenAddLecture">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -317,6 +327,59 @@
           <button type="submit" class="btn btn-primary" id="btnSaveLecture">Save Lecture</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: EMBEDDED LECTURE THEATRE PLAYER ==================== -->
+  <div class="modal-overlay hidden" id="modalVideoPlayer" role="dialog" aria-modal="true" aria-labelledby="playerLectureTitle">
+    <div class="modal-card video-player-card">
+      <div class="modal-header video-player-header">
+        <div class="player-header-info">
+          <span class="player-subject-badge" id="playerSubjectBadge">Algorithms</span>
+          <h3 class="modal-title" id="playerLectureTitle">Lecture Title</h3>
+        </div>
+        <div class="player-header-actions">
+          <a href="#" id="playerExternalLink" target="_blank" rel="noopener noreferrer" class="btn-icon-subtle" title="Open portal link in new tab">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          </a>
+          <button type="button" class="btn-icon-subtle" id="btnCloseVideoPlayer" aria-label="Close theatre player">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- The Responsive 16:9 Video Theatre View -->
+      <div class="video-theatre-frame" id="videoTheatreContainer">
+        <!-- Dynamic iframe or video element injected here -->
+      </div>
+
+      <!-- Meta bar below player -->
+      <div class="player-meta-bar">
+        <div class="player-details">
+          <div class="player-meta-row">
+            <span class="player-meta-item" id="playerInstructor"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> <span id="playerInstructorText">Teacher</span></span>
+            <span class="player-meta-item" id="playerPlatform"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg> <span id="playerPlatformText">Platform</span></span>
+            <span class="player-meta-item" id="playerDuration">⏱️ <span id="playerDurationText">60 mins</span></span>
+            <span class="player-meta-item" id="playerExpiryTime">⏳ <span id="playerExpiryText">Time left</span></span>
+          </div>
+          <p class="player-notes" id="playerNotesText"></p>
+        </div>
+
+        <!-- Quick Watched completion controls directly inside player -->
+        <div class="player-completion-actions">
+          <button type="button" class="btn-duo-complete" id="playerToggleUserWatch">
+            <span id="playerUserWatchStatus">○ Watched</span>
+            <span style="opacity:0.75;" id="playerUserName">(Shahzeb)</span>
+          </button>
+          <button type="button" class="btn-duo-complete" id="playerToggleFriendWatch">
+            <span id="playerFriendWatchStatus">○ Watched</span>
+            <span style="opacity:0.75;" id="playerFriendName">(Aman)</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

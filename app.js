@@ -28,6 +28,7 @@ const SEED_DATA_DSA = {
 
 const STORAGE_KEY = 'aman_study_tracker_state_v3';
 const UPSTASH_STORAGE_KEY = 'aman_study_tracker_upstash_v3';
+const LECTURES_STORAGE_KEY = 'aman_study_tracker_lectures_v1';
 const AUTH_USER_KEY = 'aman_study_tracker_auth_user_v3';
 
 class AmanStudyTrackerApp {
@@ -88,6 +89,14 @@ class AmanStudyTrackerApp {
       };
     }
     if (!Array.isArray(state.deletedItemIds)) state.deletedItemIds = [];
+    if (!Array.isArray(state.deletedLectureIds)) state.deletedLectureIds = [];
+    if (!Array.isArray(state.lectures)) {
+      try {
+        const savedLecs = localStorage.getItem('aman_study_tracker_lectures_v1');
+        if (savedLecs) state.lectures = JSON.parse(savedLecs);
+      } catch (e) {}
+    }
+    if (!Array.isArray(state.lectures)) state.lectures = [];
     if (Array.isArray(state.items)) {
       state.items.forEach(i => { if (!i.updatedAt) i.updatedAt = Date.now(); });
     }
@@ -99,6 +108,9 @@ class AmanStudyTrackerApp {
     this.lastLocalUpdatedAt = Date.now();
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+      if (Array.isArray(this.state.lectures)) {
+        localStorage.setItem(LECTURES_STORAGE_KEY, JSON.stringify(this.state.lectures));
+      }
     } catch (e) {}
     this.render();
     if (this.upstash && this.upstash.isConnected && this.upstash.autoSync) {
@@ -109,6 +121,9 @@ class AmanStudyTrackerApp {
   saveStateLocallyWithoutPush() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+      if (Array.isArray(this.state.lectures)) {
+        localStorage.setItem(LECTURES_STORAGE_KEY, JSON.stringify(this.state.lectures));
+      }
     } catch (e) {}
     this.render();
   }
@@ -1910,6 +1925,46 @@ class AmanStudyTrackerApp {
           this.state.items.push(remoteItem);
         }
       });
+    }
+
+    // Merge deleted lecture IDs
+    const deletedLecSet = new Set(this.state.deletedLectureIds || []);
+    if (Array.isArray(remoteState.deletedLectureIds)) {
+      remoteState.deletedLectureIds.forEach(id => deletedLecSet.add(id));
+      this.state.deletedLectureIds = Array.from(deletedLecSet);
+    }
+
+    if (Array.isArray(this.state.lectures)) {
+      this.state.lectures = this.state.lectures.filter(l => !deletedLecSet.has(l.id));
+    } else {
+      this.state.lectures = [];
+    }
+
+    if (Array.isArray(remoteState.lectures)) {
+      const localLecMap = new Map();
+      this.state.lectures.forEach(l => localLecMap.set(l.id, l));
+
+      remoteState.lectures.forEach(remLec => {
+        if (deletedLecSet.has(remLec.id)) return;
+        const localLec = localLecMap.get(remLec.id);
+        if (localLec) {
+          const isCurrentFriend = this.currentAuthUser === 'friend';
+          if (isCurrentFriend) {
+            localLec.userWatched = !!remLec.userWatched;
+          } else {
+            localLec.friendWatched = !!remLec.friendWatched;
+          }
+          if ((remLec.updatedAt || 0) >= (localLec.updatedAt || 0)) {
+            Object.assign(localLec, remLec);
+          }
+        } else {
+          this.state.lectures.push(remLec);
+        }
+      });
+
+      try {
+        localStorage.setItem(LECTURES_STORAGE_KEY, JSON.stringify(this.state.lectures));
+      } catch (e) {}
     }
   }
 

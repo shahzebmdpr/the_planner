@@ -16,8 +16,8 @@ const SEED_LECTURES = [
     chapter: 'Dynamic Programming',
     title: 'Lecture 14: 0/1 Knapsack & Subset Sum Techniques',
     instructor: 'Prof. Striver / Abdul Bari',
-    platform: 'PW / Unacademy',
-    videoUrl: 'https://youtube.com',
+    platform: 'YouTube / Portal',
+    videoUrl: 'https://www.youtube.com/watch?v=nLmhmB6NzcM',
     durationMinutes: 78,
     postedAt: Date.now() - 24 * 3600 * 1000, // 1 day ago
     expiresAt: Date.now() + 2 * 24 * 3600 * 1000 + 5 * 3600 * 1000, // expires in 2 days 5 hours
@@ -33,7 +33,7 @@ const SEED_LECTURES = [
     title: 'Lecture 08: Dijkstra Algorithm & Priority Queue Implementation',
     instructor: 'Prof. Striver',
     platform: 'YouTube Live',
-    videoUrl: '',
+    videoUrl: 'https://www.youtube.com/watch?v=V6H1qAeB-l4',
     durationMinutes: 92,
     postedAt: Date.now() - 48 * 3600 * 1000,
     expiresAt: Date.now() + 18 * 3600 * 1000, // expires in 18 hours (Urgent!)
@@ -49,7 +49,7 @@ const SEED_LECTURES = [
     title: 'Lecture 03: Combinatorics, Permutations & Pigeonhole Principle',
     instructor: 'Gate Smashers',
     platform: 'Physics Wallah App',
-    videoUrl: '',
+    videoUrl: 'https://www.youtube.com/watch?v=Zc54gFhdpLA',
     durationMinutes: 65,
     postedAt: Date.now() - 12 * 3600 * 1000,
     expiresAt: Date.now() + 5 * 24 * 3600 * 1000, // expires in 5 days
@@ -63,6 +63,7 @@ const SEED_LECTURES = [
 class LecturesApp {
   constructor() {
     this.plannerState = this.loadPlannerState();
+    this.deletedLectureIds = this.loadDeletedLectureIds();
     this.lectures = this.loadLectures();
     this.currentAuthUser = localStorage.getItem(AUTH_USER_KEY) || 'user';
     this.isMasterUnlocked = false;
@@ -70,11 +71,21 @@ class LecturesApp {
     this.statusFilter = 'all'; // all | available | urgent | expired | watched
     this.searchQuery = '';
     this.clockInterval = null;
+    this.autoPushTimer = null;
+    this.syncPollTimer = null;
+    this.isSyncing = false;
+    this.lastRemoteUpdatedAt = 0;
+    this.activePlayerLecture = null;
+
+    this.upstash = this.loadUpstashConfig();
 
     this.initElements();
     this.attachEvents();
     this.updateProfilesUI();
     this.render();
+
+    // Initialize cloud synchronization
+    this.initUpstash();
 
     // Start live countdown refresh every 10 seconds
     this.clockInterval = setInterval(() => {
@@ -135,8 +146,18 @@ class LecturesApp {
         user: { id: 'user', name: 'Shahzeb', initials: 'SH' },
         friend: { id: 'friend', name: 'Aman', initials: 'AM' }
       },
-      items: []
+      items: [],
+      lectures: [],
+      deletedLectureIds: []
     };
+  }
+
+  loadDeletedLectureIds() {
+    try {
+      const saved = this.plannerState?.deletedLectureIds;
+      if (Array.isArray(saved)) return saved;
+    } catch (e) {}
+    return [];
   }
 
   loadLectures() {
@@ -144,18 +165,237 @@ class LecturesApp {
       const saved = localStorage.getItem(LECTURES_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const delSet = new Set(this.deletedLectureIds || []);
+          return parsed.filter(l => !delSet.has(l.id));
+        }
       }
     } catch (e) {}
     // Seed initial
     return JSON.parse(JSON.stringify(SEED_LECTURES));
   }
 
+  loadUpstashConfig() {
+    try {
+      const saved = localStorage.getItem(UPSTASH_STORAGE_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return { url: '', token: '', roomId: 'study-duo-room-1', autoSync: true, pollInterval: 10000, isConnected: false, lastSyncedAt: null, useServerProxy: false };
+  }
+
+  saveUpstashConfig() {
+    try { localStorage.setItem(UPSTASH_STORAGE_KEY, JSON.stringify(this.upstash)); } catch (e) {}
+  }
+
   saveLectures() {
+    this.saveLecturesLocallyWithoutPush();
+    this.triggerAutoPush();
+  }
+
+  saveLecturesLocallyWithoutPush() {
     try {
       localStorage.setItem(LECTURES_STORAGE_KEY, JSON.stringify(this.lectures));
+      this.plannerState.lectures = this.lectures;
+      this.plannerState.deletedLectureIds = this.deletedLectureIds;
+      localStorage.setItem(PLANNER_STORAGE_KEY, JSON.stringify(this.plannerState));
     } catch (e) {}
     this.render();
+  }
+
+  async initUpstash() {
+    this.updateCloudStatusUI();
+
+    // Auto-detect server proxy (/api/sync) when running on Vercel or local Node server
+    if (!this.upstash.isConnected || this.upstash.useServerProxy) {
+      try {
+        const room = encodeURIComponent(this.upstash.roomId || 'study-duo-room-1');
+        const res = await fetch(`/api/sync?room=${room}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.configured) {
+            this.upstash.useServerProxy = true;
+            this.upstash.isConnected = true;
+            this.saveUpstashConfig();
+            this.updateCloudStatusUI();
+            this.startSyncPolling();
+            this.pullFromUpstash(false);
+            return;
+          }
+        }
+      } catch (e) {}
+    }
+
+    if (this.upstash.isConnected) {
+      this.startSyncPolling();
+      this.pullFromUpstash(false);
+    }
+  }
+
+  updateCloudStatusUI(syncState = null) {
+    const isConn = !!this.upstash.isConnected;
+    if (this.cloudStatusPill) {
+      this.cloudStatusPill.className = 'cloud-pill-status ' + (syncState === 'syncing' ? 'syncing' : (isConn ? 'connected' : ''));
+    }
+    if (this.cloudStatusLabel) {
+      this.cloudStatusLabel.textContent = syncState === 'syncing' ? 'Syncing...' : (isConn ? 'Cloud Live 🟢' : 'Local Only ⚪');
+    }
+  }
+
+  triggerAutoPush() {
+    clearTimeout(this.autoPushTimer);
+    this.autoPushTimer = setTimeout(() => this.pushToUpstash(false), 800);
+  }
+
+  async pushToUpstash(notify = true) {
+    if (!this.upstash.isConnected) {
+      if (notify) this.showToast('Cloud sync is not configured.', 'info');
+      return;
+    }
+    this.updateCloudStatusUI('syncing');
+
+    try {
+      const isFriend = this.currentAuthUser === 'friend';
+      const senderName = isFriend ? (this.plannerState.profiles?.friend?.name || 'Aman') : (this.plannerState.profiles?.user?.name || 'Shahzeb');
+      
+      this.plannerState.lectures = this.lectures;
+      this.plannerState.deletedLectureIds = this.deletedLectureIds;
+
+      const payload = {
+        state: this.plannerState,
+        updatedAt: Date.now(),
+        sender: senderName
+      };
+
+      let res;
+      if (this.upstash.useServerProxy) {
+        res = await fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ room: this.upstash.roomId || 'study-duo-room-1', payload })
+        });
+      } else {
+        res = await fetch(this.upstash.url, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${this.upstash.token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(['SET', `aman_study_tracker:${this.upstash.roomId}`, JSON.stringify(payload)])
+        });
+      }
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      this.lastRemoteUpdatedAt = payload.updatedAt;
+      this.upstash.lastSyncedAt = Date.now();
+      this.saveUpstashConfig();
+      this.updateCloudStatusUI();
+      if (notify) this.showToast('All lectures synced to Upstash Cloud!', 'success');
+    } catch (err) {
+      this.updateCloudStatusUI();
+      if (notify) this.showToast('Cloud sync failed: ' + err.message, 'warning');
+    }
+  }
+
+  async pullFromUpstash(notify = true) {
+    if (!this.upstash.isConnected || this.isSyncing) return;
+    this.isSyncing = true;
+    try {
+      let res;
+      if (this.upstash.useServerProxy) {
+        const room = encodeURIComponent(this.upstash.roomId || 'study-duo-room-1');
+        res = await fetch(`/api/sync?room=${room}`);
+      } else {
+        res = await fetch(this.upstash.url, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${this.upstash.token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(['GET', `aman_study_tracker:${this.upstash.roomId}`])
+        });
+      }
+
+      if (res && res.ok) {
+        let data = await res.json();
+        if (data && data.result) {
+          const remote = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+          if (remote && remote.state && (notify || remote.updatedAt > (this.lastRemoteUpdatedAt || 0))) {
+            this.lastRemoteUpdatedAt = Math.max(this.lastRemoteUpdatedAt || 0, remote.updatedAt || 0);
+            this.mergeRemoteState(remote.state);
+            this.saveLecturesLocallyWithoutPush();
+            this.updateProfilesUI();
+            this.render();
+            if (notify) this.showToast('Synced latest lectures from cloud!', 'success');
+          } else if (notify) {
+            this.showToast('Already up-to-date with cloud!', 'info');
+          }
+        } else if (data && !data.result) {
+          this.pushToUpstash(false);
+          if (notify) this.showToast('Cloud was empty; uploaded local lectures.', 'info');
+        }
+      }
+      this.upstash.lastSyncedAt = Date.now();
+      this.saveUpstashConfig();
+      this.updateCloudStatusUI();
+    } catch (err) {
+    } finally {
+      this.isSyncing = false;
+    }
+  }
+
+  mergeRemoteState(remoteState) {
+    if (remoteState.profiles) {
+      this.plannerState.profiles = remoteState.profiles;
+    }
+    if (remoteState.permissions) {
+      this.plannerState.permissions = remoteState.permissions;
+    }
+    if (remoteState.auth) {
+      this.plannerState.auth = remoteState.auth;
+    }
+
+    const deletedSet = new Set(this.deletedLectureIds || []);
+    if (Array.isArray(remoteState.deletedLectureIds)) {
+      remoteState.deletedLectureIds.forEach(id => deletedSet.add(id));
+      this.deletedLectureIds = Array.from(deletedSet);
+      this.plannerState.deletedLectureIds = this.deletedLectureIds;
+    }
+
+    this.lectures = this.lectures.filter(l => !deletedSet.has(l.id));
+
+    if (Array.isArray(remoteState.lectures)) {
+      const localMap = new Map();
+      this.lectures.forEach(l => localMap.set(l.id, l));
+      const isCurrentFriend = this.currentAuthUser === 'friend';
+
+      remoteState.lectures.forEach(remLec => {
+        if (deletedSet.has(remLec.id)) return;
+        const localLec = localMap.get(remLec.id);
+        if (localLec) {
+          if (isCurrentFriend) {
+            localLec.userWatched = !!remLec.userWatched;
+          } else {
+            localLec.friendWatched = !!remLec.friendWatched;
+          }
+          if ((remLec.updatedAt || 0) >= (localLec.updatedAt || 0)) {
+            Object.assign(localLec, remLec);
+          }
+        } else {
+          this.lectures.push(remLec);
+        }
+      });
+    }
+
+    this.plannerState.lectures = this.lectures;
+  }
+
+  startSyncPolling() {
+    this.stopSyncPolling();
+    const interval = this.upstash.pollInterval || 10000;
+    if (interval > 0) {
+      this.syncPollTimer = setInterval(() => this.pullFromUpstash(false), interval);
+    }
+  }
+
+  stopSyncPolling() {
+    if (this.syncPollTimer) {
+      clearInterval(this.syncPollTimer);
+      this.syncPollTimer = null;
+    }
   }
 
   initElements() {
@@ -203,6 +443,30 @@ class LecturesApp {
 
     // Toast
     this.toastContainer = document.getElementById('toastContainer');
+
+    // Cloud Status
+    this.cloudStatusPill = document.getElementById('cloudStatusPill');
+    this.cloudStatusLabel = document.getElementById('cloudStatusLabel');
+    this.btnCloudSyncNow = document.getElementById('btnCloudSyncNow');
+
+    // Embedded Video Player Modal
+    this.modalVideoPlayer = document.getElementById('modalVideoPlayer');
+    this.playerSubjectBadge = document.getElementById('playerSubjectBadge');
+    this.playerLectureTitle = document.getElementById('playerLectureTitle');
+    this.playerExternalLink = document.getElementById('playerExternalLink');
+    this.btnCloseVideoPlayer = document.getElementById('btnCloseVideoPlayer');
+    this.videoTheatreContainer = document.getElementById('videoTheatreContainer');
+    this.playerInstructorText = document.getElementById('playerInstructorText');
+    this.playerPlatformText = document.getElementById('playerPlatformText');
+    this.playerDurationText = document.getElementById('playerDurationText');
+    this.playerExpiryText = document.getElementById('playerExpiryText');
+    this.playerNotesText = document.getElementById('playerNotesText');
+    this.playerToggleUserWatch = document.getElementById('playerToggleUserWatch');
+    this.playerUserWatchStatus = document.getElementById('playerUserWatchStatus');
+    this.playerUserName = document.getElementById('playerUserName');
+    this.playerToggleFriendWatch = document.getElementById('playerToggleFriendWatch');
+    this.playerFriendWatchStatus = document.getElementById('playerFriendWatchStatus');
+    this.playerFriendName = document.getElementById('playerFriendName');
   }
 
   attachEvents() {
@@ -218,6 +482,52 @@ class LecturesApp {
     if (this.modalLecture) {
       this.modalLecture.addEventListener('click', (e) => {
         if (e.target === this.modalLecture) this.closeModal();
+      });
+    }
+
+    // Cloud Sync click
+    if (this.btnCloudSyncNow) {
+      this.btnCloudSyncNow.addEventListener('click', async () => {
+        this.showToast('Syncing with Upstash Cloud...', 'info');
+        await this.pullFromUpstash(false);
+        await this.pushToUpstash(true);
+      });
+    }
+    if (this.cloudStatusPill) {
+      this.cloudStatusPill.addEventListener('click', () => {
+        this.pullFromUpstash(true);
+      });
+    }
+
+    // Video Player Close & Modal Outside Click
+    if (this.btnCloseVideoPlayer) {
+      this.btnCloseVideoPlayer.addEventListener('click', () => this.closeVideoPlayer());
+    }
+    if (this.modalVideoPlayer) {
+      this.modalVideoPlayer.addEventListener('click', (e) => {
+        if (e.target === this.modalVideoPlayer) this.closeVideoPlayer();
+      });
+    }
+
+    // Video Player Watch Toggles
+    if (this.playerToggleUserWatch) {
+      this.playerToggleUserWatch.addEventListener('click', () => {
+        if (!this.activePlayerLecture) return;
+        this.activePlayerLecture.userWatched = !this.activePlayerLecture.userWatched;
+        this.activePlayerLecture.updatedAt = Date.now();
+        this.saveLectures();
+        this.updatePlayerWatchButtons();
+        this.showToast('Watch status updated!', 'success');
+      });
+    }
+    if (this.playerToggleFriendWatch) {
+      this.playerToggleFriendWatch.addEventListener('click', () => {
+        if (!this.activePlayerLecture) return;
+        this.activePlayerLecture.friendWatched = !this.activePlayerLecture.friendWatched;
+        this.activePlayerLecture.updatedAt = Date.now();
+        this.saveLectures();
+        this.updatePlayerWatchButtons();
+        this.showToast('Watch status updated!', 'success');
       });
     }
 
@@ -258,7 +568,10 @@ class LecturesApp {
 
     // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') this.closeModal();
+      if (e.key === 'Escape') {
+        this.closeModal();
+        this.closeVideoPlayer();
+      }
     });
 
     // Cross-tab sync
@@ -622,12 +935,10 @@ class LecturesApp {
       </div>
 
       <div class="lecture-card-footer">
-        ${lec.videoUrl ? `
-          <a href="${this.escapeHtml(lec.videoUrl)}" target="_blank" rel="noopener noreferrer" class="lecture-link-btn">
-            <span>Play Lecture</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
-          </a>
-        ` : `<span style="font-size:0.75rem;color:var(--text-subtle);">Direct portal view</span>`}
+        <button type="button" class="lecture-link-btn btn-watch-lecture" data-lec-id="${lec.id}">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <span>${lec.videoUrl ? 'Watch Lecture' : 'Preview & Notes'}</span>
+        </button>
         
         <div class="lecture-card-actions">
           <button type="button" class="btn-icon-subtle btn-delete-lec" title="Delete lecture">
@@ -644,10 +955,20 @@ class LecturesApp {
         const target = btn.dataset.target;
         if (target === 'user') lec.userWatched = !lec.userWatched;
         if (target === 'friend') lec.friendWatched = !lec.friendWatched;
+        lec.updatedAt = Date.now();
         this.saveLectures();
         this.showToast('Updated watch progress!', 'success');
       });
     });
+
+    // Watch lecture embedded player click
+    const btnWatch = card.querySelector('.btn-watch-lecture');
+    if (btnWatch) {
+      btnWatch.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openVideoPlayer(lec);
+      });
+    }
 
     // Edit button click
     card.querySelector('.btn-edit-lec').addEventListener('click', (e) => {
@@ -801,6 +1122,7 @@ class LecturesApp {
         existing.notes = notes;
         existing.color = color;
         existing.expiresAt = expiresAt;
+        existing.updatedAt = Date.now();
         if (isFriend) existing.friendWatched = watchedState;
         else existing.userWatched = watchedState;
         this.showToast('Lecture updated successfully!', 'success');
@@ -820,11 +1142,12 @@ class LecturesApp {
         color,
         postedAt: Date.now(),
         expiresAt,
+        updatedAt: Date.now(),
         userWatched: !isFriend && watchedState,
         friendWatched: isFriend && watchedState
       };
       this.lectures.unshift(newLec);
-      this.showToast('New lecture added!', 'success');
+      this.showToast('New lecture added and synced!', 'success');
     }
 
     this.saveLectures();
@@ -837,10 +1160,162 @@ class LecturesApp {
     }
 
     if (confirm(`Are you sure you want to remove "${title}" from lectures?`)) {
+      if (!this.deletedLectureIds.includes(id)) {
+        this.deletedLectureIds.push(id);
+      }
       this.lectures = this.lectures.filter(l => l.id !== id);
       this.saveLectures();
-      this.showToast('Lecture removed.', 'info');
+      this.showToast('Lecture removed and synced with cloud.', 'info');
     }
+  }
+
+  parseVideoEmbed(rawUrl) {
+    if (!rawUrl || !rawUrl.trim()) return null;
+    const url = rawUrl.trim();
+
+    // YouTube regex (supports youtu.be, youtube.com/watch?v=, /embed/, /shorts/, /live/)
+    const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/|live\/))([\w-]{11})/);
+    if (ytMatch && ytMatch[1]) {
+      const videoId = ytMatch[1];
+      let startParam = '';
+      const tMatch = url.match(/[?&]t=(\d+)/);
+      if (tMatch && tMatch[1]) startParam = `&start=${tMatch[1]}`;
+      return {
+        type: 'youtube',
+        embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1${startParam}`,
+        directUrl: url
+      };
+    }
+
+    // Vimeo regex
+    const vimeoMatch = url.match(/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)/);
+    if (vimeoMatch && vimeoMatch[1]) {
+      return {
+        type: 'vimeo',
+        embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`,
+        directUrl: url
+      };
+    }
+
+    // Direct video file
+    if (/\.(mp4|webm|ogg|m4v)(\?.*)?$/i.test(url)) {
+      return {
+        type: 'video',
+        embedUrl: url,
+        directUrl: url
+      };
+    }
+
+    // Generic web preview
+    return {
+      type: 'web',
+      embedUrl: url,
+      directUrl: url
+    };
+  }
+
+  openVideoPlayer(lec) {
+    if (!this.modalVideoPlayer) return;
+    this.activePlayerLecture = lec;
+
+    const { user, friend } = this.plannerState.profiles || { user: { name: 'Shahzeb' }, friend: { name: 'Aman' } };
+
+    if (this.playerSubjectBadge) this.playerSubjectBadge.textContent = lec.subject || 'Lecture';
+    if (this.playerLectureTitle) this.playerLectureTitle.textContent = lec.title || 'Lecture Video';
+    if (this.playerExternalLink) {
+      this.playerExternalLink.href = lec.videoUrl || '#';
+      this.playerExternalLink.style.display = lec.videoUrl ? 'inline-flex' : 'none';
+    }
+    if (this.playerInstructorText) this.playerInstructorText.textContent = lec.instructor || 'Instructor';
+    if (this.playerPlatformText) this.playerPlatformText.textContent = lec.platform || 'Online Portal';
+    if (this.playerDurationText) this.playerDurationText.textContent = `${lec.durationMinutes || 60} mins`;
+    
+    const expiry = this.computeExpiryInfo(lec.expiresAt, lec.postedAt);
+    if (this.playerExpiryText) this.playerExpiryText.textContent = expiry.text;
+    if (this.playerNotesText) {
+      this.playerNotesText.textContent = lec.notes ? `📝 ${lec.notes}` : '';
+      this.playerNotesText.style.display = lec.notes ? 'block' : 'none';
+    }
+
+    this.updatePlayerWatchButtons();
+
+    const container = this.videoTheatreContainer;
+    container.innerHTML = '';
+
+    const embed = this.parseVideoEmbed(lec.videoUrl);
+    if (!embed) {
+      container.innerHTML = `
+        <div class="theatre-fallback-prompt">
+          <div style="font-size:2.5rem;">🎬</div>
+          <h4 style="color:#fff;margin:0;font-size:1.15rem;">No Direct Video URL Attached</h4>
+          <p>This lecture was scheduled for platform countdown tracking. You can edit this lecture to add its YouTube video or website class link anytime.</p>
+          <button type="button" class="btn btn-primary btn-sm btn-edit-from-theatre">Edit & Add URL</button>
+        </div>
+      `;
+      container.querySelector('.btn-edit-from-theatre')?.addEventListener('click', () => {
+        this.closeVideoPlayer();
+        this.openEditModal(lec);
+      });
+    } else if (embed.type === 'youtube' || embed.type === 'vimeo') {
+      const iframe = document.createElement('iframe');
+      iframe.className = 'theatre-iframe';
+      iframe.src = embed.embedUrl;
+      iframe.title = lec.title;
+      iframe.frameBorder = '0';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.allowFullscreen = true;
+      container.appendChild(iframe);
+    } else if (embed.type === 'video') {
+      const video = document.createElement('video');
+      video.className = 'theatre-video';
+      video.controls = true;
+      video.autoplay = true;
+      video.playsInline = true;
+      const src = document.createElement('source');
+      src.src = embed.embedUrl;
+      video.appendChild(src);
+      container.appendChild(video);
+    } else {
+      const iframe = document.createElement('iframe');
+      iframe.className = 'theatre-iframe';
+      iframe.src = embed.embedUrl;
+      iframe.title = lec.title;
+      iframe.allow = 'autoplay; fullscreen';
+      container.appendChild(iframe);
+    }
+
+    this.modalVideoPlayer.classList.remove('hidden');
+  }
+
+  updatePlayerWatchButtons() {
+    if (!this.activePlayerLecture) return;
+    const lec = this.activePlayerLecture;
+    const { user, friend } = this.plannerState.profiles || { user: { name: 'Shahzeb' }, friend: { name: 'Aman' } };
+
+    if (this.playerUserWatchStatus) {
+      this.playerUserWatchStatus.textContent = lec.userWatched ? '✓ Watched' : '○ Mark Watched';
+    }
+    if (this.playerUserName) this.playerUserName.textContent = `(${user.name})`;
+    if (this.playerToggleUserWatch) {
+      this.playerToggleUserWatch.className = `btn-duo-complete user-complete ${lec.userWatched ? 'completed' : ''}`;
+    }
+
+    if (this.playerFriendWatchStatus) {
+      this.playerFriendWatchStatus.textContent = lec.friendWatched ? '✓ Watched' : '○ Mark Watched';
+    }
+    if (this.playerFriendName) this.playerFriendName.textContent = `(${friend.name})`;
+    if (this.playerToggleFriendWatch) {
+      this.playerToggleFriendWatch.className = `btn-duo-complete friend-complete ${lec.friendWatched ? 'completed' : ''}`;
+    }
+  }
+
+  closeVideoPlayer() {
+    if (!this.modalVideoPlayer) return;
+    if (this.videoTheatreContainer) {
+      this.videoTheatreContainer.innerHTML = '';
+    }
+    this.activePlayerLecture = null;
+    this.modalVideoPlayer.classList.add('hidden');
   }
 
   showToast(message, type = 'info') {
