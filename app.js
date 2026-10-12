@@ -821,13 +821,6 @@ class AmanStudyTrackerApp {
 
     this.updateStatsUI();
     this.renderItems();
-
-    if (this.selectedAnalyzerSubject !== 'all') {
-      const targetCard = this.chaptersContainer.querySelector('.subject-card');
-      if (targetCard) {
-        targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }
   }
 
   updateProfilesUI() {
