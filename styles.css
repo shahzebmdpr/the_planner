@@ -1002,6 +1002,31 @@ body {
   border-color: var(--user-border);
 }
 
+.subject-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-delete-subject {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+}
+
+.chapter-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-add-chapter-item,
+.btn-delete-chapter {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+}
+
 .subject-body {
   padding: 0;
   display: flex;
@@ -2268,8 +2293,16 @@ body {
 
   .subject-dual-progress { width: 100%; min-width: 0; }
 
-  .btn-add-subject-item {
+  .subject-actions-row {
     width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .subject-actions-row .btn-add-subject-item {
+    flex: 1;
+    width: auto;
     justify-content: center;
   }
 
@@ -2287,6 +2320,14 @@ body {
   }
 
   .chapter-dual-progress { width: 100%; }
+
+  .chapter-actions-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.45rem;
+    padding-top: 0.2rem;
+  }
 
   /* Topic Row Mobile */
   .topic-row {

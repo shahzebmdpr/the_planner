@@ -10,12 +10,13 @@ const SEED_DATA_DSA = {
   auth: {
     masterKey: 'thekey'
   },
+  deletedItemIds: [],
   items: [
-    { id: 'item-1', subject: 'Algorithms', chapter: 'Dynamic Programming', topic: '0/1 Knapsack Problem', color: 'indigo', userLearned: true, friendLearned: false },
-    { id: 'item-2', subject: 'Algorithms', chapter: 'Dynamic Programming', topic: 'Longest Common Subsequence', color: 'indigo', userLearned: false, friendLearned: true },
-    { id: 'item-3', subject: 'Algorithms', chapter: 'Graph Theory', topic: 'BFS & Shortest Path', color: 'emerald', userLearned: true, friendLearned: true },
-    { id: 'item-4', subject: 'Algorithms', chapter: 'Graph Theory', topic: 'Dijkstra Algorithm', color: 'emerald', userLearned: true, friendLearned: false },
-    { id: 'item-5', subject: 'Mathematics', chapter: '', topic: 'Discrete Math Basics', color: 'amber', userLearned: false, friendLearned: false }
+    { id: 'item-1', subject: 'Algorithms', chapter: 'Dynamic Programming', topic: '0/1 Knapsack Problem', color: 'indigo', userLearned: true, friendLearned: false, updatedAt: 1700000000000 },
+    { id: 'item-2', subject: 'Algorithms', chapter: 'Dynamic Programming', topic: 'Longest Common Subsequence', color: 'indigo', userLearned: false, friendLearned: true, updatedAt: 1700000000000 },
+    { id: 'item-3', subject: 'Algorithms', chapter: 'Graph Theory', topic: 'BFS & Shortest Path', color: 'emerald', userLearned: true, friendLearned: true, updatedAt: 1700000000000 },
+    { id: 'item-4', subject: 'Algorithms', chapter: 'Graph Theory', topic: 'Dijkstra Algorithm', color: 'emerald', userLearned: true, friendLearned: false, updatedAt: 1700000000000 },
+    { id: 'item-5', subject: 'Mathematics', chapter: '', topic: 'Discrete Math Basics', color: 'amber', userLearned: false, friendLearned: false, updatedAt: 1700000000000 }
   ]
 };
 
@@ -71,6 +72,10 @@ class AmanStudyTrackerApp {
     if (!state.profiles.friend) state.profiles.friend = { id: 'friend', name: 'Aman', initials: 'AM', pin: '1234' };
 
     if (!state.auth) state.auth = { masterKey: 'thekey' };
+    if (!Array.isArray(state.deletedItemIds)) state.deletedItemIds = [];
+    if (Array.isArray(state.items)) {
+      state.items.forEach(i => { if (!i.updatedAt) i.updatedAt = Date.now(); });
+    }
 
     return state;
   }
@@ -929,10 +934,15 @@ class AmanStudyTrackerApp {
                 <span class="subject-prog-pct">${subjFriendPct}%</span>
               </div>
             </div>
-            <button type="button" class="btn btn-secondary btn-sm btn-icon-text btn-add-subject-item" title="Add item to ${this.escapeHtml(subjName)}">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              <span>+ Add</span>
-            </button>
+            <div class="subject-actions-row">
+              <button type="button" class="btn btn-secondary btn-sm btn-icon-text btn-add-subject-item" title="Add item to ${this.escapeHtml(subjName)}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>+ Add</span>
+              </button>
+              <button type="button" class="btn-icon-subtle btn-delete btn-delete-subject" title="Delete entire subject ${this.escapeHtml(subjName)}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
           </div>
         </div>
         <div class="subject-body"></div>
@@ -941,6 +951,11 @@ class AmanStudyTrackerApp {
       subjCard.querySelector('.btn-add-subject-item').addEventListener('click', (e) => {
         e.stopPropagation();
         this.openAddItemModal(subjName, subjData.color);
+      });
+
+      subjCard.querySelector('.btn-delete-subject').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.deleteSubject(subjName);
       });
 
       const body = subjCard.querySelector('.subject-body');
@@ -955,7 +970,7 @@ class AmanStudyTrackerApp {
           });
           body.appendChild(directContainer);
         } else {
-          const directCard = this.createGroupCard('Core Topics', subjData.color, subjData.directItems, subjName + '::__direct__');
+          const directCard = this.createGroupCard('Core Topics', subjData.color, subjData.directItems, subjName + '::__direct__', subjName);
           body.appendChild(directCard);
         }
       }
@@ -963,7 +978,7 @@ class AmanStudyTrackerApp {
       // 2. Chapters
       for (const [chapName, items] of Object.entries(subjData.chapters)) {
         const chapterId = subjName + '::' + chapName;
-        const chapterCard = this.createGroupCard(chapName, subjData.color, items, chapterId);
+        const chapterCard = this.createGroupCard(chapName, subjData.color, items, chapterId, subjName);
         body.appendChild(chapterCard);
       }
 
@@ -992,7 +1007,7 @@ class AmanStudyTrackerApp {
     });
   }
 
-  createGroupCard(chapterName, color, items, chapterId) {
+  createGroupCard(chapterName, color, items, chapterId, subjectName = '') {
     const isCollapsed = this.collapsedChapters.has(chapterId);
     const { user, friend } = this.state.profiles;
 
@@ -1038,6 +1053,14 @@ class AmanStudyTrackerApp {
               <span class="mini-percent">${friendPercent}%</span>
             </div>
           </div>
+          <div class="chapter-actions-group">
+            <button type="button" class="btn-icon-subtle btn-add-chapter-item" title="Add topic to ${this.escapeHtml(chapterName)}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+            <button type="button" class="btn-icon-subtle btn-delete btn-delete-chapter" title="Delete chapter ${this.escapeHtml(chapterName)}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="topics-list ${isCollapsed ? 'hidden' : ''}"></div>
@@ -1048,9 +1071,25 @@ class AmanStudyTrackerApp {
       list.appendChild(this.createItemRow(item, color));
     });
 
+    const btnAddChap = card.querySelector('.btn-add-chapter-item');
+    if (btnAddChap) {
+      btnAddChap.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openAddItemModal(subjectName, color, chapterName === 'Core Topics' ? '' : chapterName);
+      });
+    }
+
+    const btnDelChap = card.querySelector('.btn-delete-chapter');
+    if (btnDelChap) {
+      btnDelChap.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.deleteChapter(subjectName, chapterName);
+      });
+    }
+
     card.querySelector('[data-action="toggle-chapter"]').addEventListener('click', (e) => {
       if (e.target.closest('.chapter-actions-group') || e.target.closest('.btn-collapse')) {
-        // Toggle click
+        return;
       }
       if (this.collapsedChapters.has(chapterId)) this.collapsedChapters.delete(chapterId);
       else this.collapsedChapters.add(chapterId);
@@ -1172,11 +1211,11 @@ class AmanStudyTrackerApp {
     if (isDone) this.showToast(`Marked completed by ${learnerName}!`, 'success');
   }
 
-  openAddItemModal(defaultSubject = '', defaultColor = 'indigo') {
+  openAddItemModal(defaultSubject = '', defaultColor = 'indigo', defaultChapter = '') {
     this.modalItemTitle.textContent = defaultSubject ? `Add Item to ${defaultSubject}` : 'Add Study Item';
     this.inputItemId.value = '';
     this.inputItemSubject.value = defaultSubject;
-    this.inputItemChapter.value = '';
+    this.inputItemChapter.value = defaultChapter || '';
     this.inputItemTopic.value = '';
 
     const colorRadio = document.querySelector(`input[name="itemColor"][value="${defaultColor}"]`);
@@ -1188,7 +1227,9 @@ class AmanStudyTrackerApp {
     this.checkInitialUserLearned.checked = false;
 
     this.modalItem.classList.remove('hidden');
-    if (defaultSubject) {
+    if (defaultChapter) {
+      this.inputItemTopic.focus();
+    } else if (defaultSubject) {
       this.inputItemChapter.focus();
     } else {
       this.inputItemSubject.focus();
@@ -1234,19 +1275,21 @@ class AmanStudyTrackerApp {
         item.chapter = chapter;
         item.topic = topic;
         item.color = color;
+        item.updatedAt = Date.now();
         if (isFriend) item.friendLearned = selfLearned;
         else item.userLearned = selfLearned;
         this.showToast(`Item updated!`, 'success');
       }
     } else {
       const newItem = {
-        id: 'item-' + Date.now(),
+        id: 'item-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 6),
         subject,
         chapter,
         topic,
         color,
         userLearned: !isFriend && selfLearned,
-        friendLearned: isFriend && selfLearned
+        friendLearned: isFriend && selfLearned,
+        updatedAt: Date.now()
       };
       this.state.items.push(newItem);
       this.showToast(`Item added!`, 'success');
@@ -1260,9 +1303,65 @@ class AmanStudyTrackerApp {
     const item = this.state.items.find(i => i.id === id);
     const title = item ? (item.topic || item.chapter || item.subject) : 'this item';
     if (confirm(`Are you sure you want to delete "${title}"?`)) {
+      if (!Array.isArray(this.state.deletedItemIds)) this.state.deletedItemIds = [];
+      if (!this.state.deletedItemIds.includes(id)) {
+        this.state.deletedItemIds.push(id);
+      }
       this.state.items = this.state.items.filter(i => i.id !== id);
       this.saveState();
+      if (this.upstash && this.upstash.isConnected) {
+        this.pushToUpstash(false);
+      }
       this.showToast(`Deleted "${title}".`, 'info');
+    }
+  }
+
+  deleteChapter(subjName, chapName) {
+    const isDirect = chapName === 'Core Topics';
+    const matching = this.state.items.filter(i => {
+      const s = (i.subject || 'General').trim();
+      const c = (i.chapter || '').trim();
+      if (s !== subjName) return false;
+      return isDirect ? (c === '' || c === 'Core Topics') : (c === chapName);
+    });
+
+    const count = matching.length;
+    const displayName = isDirect ? 'Core Topics' : `chapter "${chapName}"`;
+    if (confirm(`Are you sure you want to delete ${displayName} and all ${count} topic${count === 1 ? '' : 's'} inside it?`)) {
+      if (!Array.isArray(this.state.deletedItemIds)) this.state.deletedItemIds = [];
+      matching.forEach(i => {
+        if (!this.state.deletedItemIds.includes(i.id)) {
+          this.state.deletedItemIds.push(i.id);
+        }
+      });
+      const matchingIds = new Set(matching.map(i => i.id));
+      this.state.items = this.state.items.filter(i => !matchingIds.has(i.id));
+      this.collapsedChapters.delete(subjName + '::' + chapName);
+      this.saveState();
+      if (this.upstash && this.upstash.isConnected) {
+        this.pushToUpstash(false);
+      }
+      this.showToast(`Deleted ${displayName}.`, 'info');
+    }
+  }
+
+  deleteSubject(subjName) {
+    const matching = this.state.items.filter(i => (i.subject || 'General').trim() === subjName);
+    const count = matching.length;
+    if (confirm(`Are you sure you want to delete the entire subject "${subjName}" and all ${count} item${count === 1 ? '' : 's'}?`)) {
+      if (!Array.isArray(this.state.deletedItemIds)) this.state.deletedItemIds = [];
+      matching.forEach(i => {
+        if (!this.state.deletedItemIds.includes(i.id)) {
+          this.state.deletedItemIds.push(i.id);
+        }
+      });
+      const matchingIds = new Set(matching.map(i => i.id));
+      this.state.items = this.state.items.filter(i => !matchingIds.has(i.id));
+      this.saveState();
+      if (this.upstash && this.upstash.isConnected) {
+        this.pushToUpstash(false);
+      }
+      this.showToast(`Deleted subject "${subjName}".`, 'info');
     }
   }
 
@@ -1336,10 +1435,29 @@ class AmanStudyTrackerApp {
     const pollInterval = this.selectSyncInterval.value === 'manual' ? 0 : parseInt(this.selectSyncInterval.value, 10);
     const autoSync = this.checkUpstashAutoSync.checked;
 
-    if (!url || !token) { this.showToast('Please provide both Upstash URL and Token.', 'warning'); return; }
-    this.showToast('Testing Upstash connection...', 'info');
+    if (!this.upstash.useServerProxy && (!url || !token)) {
+      this.showToast('Please provide both Upstash URL and Token.', 'warning');
+      return;
+    }
+
+    this.showToast('Connecting to Upstash...', 'info');
 
     try {
+      if (this.upstash.useServerProxy && (!url || !token)) {
+        // Connected via serverless proxy
+        this.upstash.roomId = roomId;
+        this.upstash.pollInterval = pollInterval;
+        this.upstash.autoSync = autoSync;
+        this.upstash.isConnected = true;
+        this.saveUpstashConfig();
+        this.startSyncPolling();
+        await this.pullFromUpstash(false);
+        this.updateUpstashStatusUI();
+        this.showToast('Updated cloud settings via server proxy!', 'success');
+        this.modalUpstash.classList.add('hidden');
+        return;
+      }
+
       const testRes = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(['PING']) });
       if (!testRes.ok) throw new Error(`Upstash returned HTTP ${testRes.status}`);
       const pingData = await testRes.json();
@@ -1408,6 +1526,7 @@ class AmanStudyTrackerApp {
       }
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      this.lastRemoteUpdatedAt = payload.updatedAt;
       this.upstash.lastSyncedAt = Date.now();
       this.saveUpstashConfig();
       this.updateUpstashStatusUI();
@@ -1438,16 +1557,19 @@ class AmanStudyTrackerApp {
         let data = await res.json();
         if (data && data.result) {
           const remote = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
-          if (remote && remote.state && remote.updatedAt > this.lastRemoteUpdatedAt) {
-            this.lastRemoteUpdatedAt = remote.updatedAt;
+          if (remote && remote.state && (notify || remote.updatedAt > this.lastRemoteUpdatedAt)) {
+            this.lastRemoteUpdatedAt = Math.max(this.lastRemoteUpdatedAt, remote.updatedAt || 0);
             this.mergeRemoteState(remote.state);
             this.saveStateLocallyWithoutPush();
             this.updateProfilesUI();
             this.render();
             if (notify) this.showToast('Pulled latest progress from cloud!', 'success');
+          } else if (notify) {
+            this.showToast('Already synced with cloud!', 'info');
           }
         } else if (data && !data.result) {
           this.pushToUpstash(false);
+          if (notify) this.showToast('Cloud was empty; initialized with local state.', 'info');
         }
       }
       this.upstash.lastSyncedAt = Date.now();
@@ -1462,15 +1584,27 @@ class AmanStudyTrackerApp {
   mergeRemoteState(remoteState) {
     if (!remoteState) return;
 
+    if (!Array.isArray(this.state.deletedItemIds)) this.state.deletedItemIds = [];
+    const remoteDeleted = Array.isArray(remoteState.deletedItemIds) ? remoteState.deletedItemIds : [];
+    
+    // Combine tombstones across peers
+    const deletedSet = new Set([...this.state.deletedItemIds, ...remoteDeleted]);
+    this.state.deletedItemIds = Array.from(deletedSet).slice(-1000);
+
+    // Purge any locally tracked items that have been deleted anywhere
+    this.state.items = this.state.items.filter(i => !deletedSet.has(i.id));
+
     if (remoteState.profiles) {
       if (remoteState.profiles.user) {
         this.state.profiles.user.name = remoteState.profiles.user.name || this.state.profiles.user.name;
         this.state.profiles.user.pin = remoteState.profiles.user.pin || this.state.profiles.user.pin;
+        this.state.profiles.user.initials = (this.state.profiles.user.name || 'SH').slice(0, 2).toUpperCase();
         if (remoteState.profiles.user.avatarUrl) this.state.profiles.user.avatarUrl = remoteState.profiles.user.avatarUrl;
       }
       if (remoteState.profiles.friend) {
         this.state.profiles.friend.name = remoteState.profiles.friend.name || this.state.profiles.friend.name;
         this.state.profiles.friend.pin = remoteState.profiles.friend.pin || this.state.profiles.friend.pin;
+        this.state.profiles.friend.initials = (this.state.profiles.friend.name || 'AM').slice(0, 2).toUpperCase();
         if (remoteState.profiles.friend.avatarUrl) this.state.profiles.friend.avatarUrl = remoteState.profiles.friend.avatarUrl;
       }
     }
@@ -1486,6 +1620,9 @@ class AmanStudyTrackerApp {
       const isCurrentFriend = this.currentAuthUser === 'friend';
 
       remoteState.items.forEach(remoteItem => {
+        // DO NOT RESURRECT DELETED ITEMS
+        if (deletedSet.has(remoteItem.id)) return;
+
         const localItem = localMap.get(remoteItem.id) || this.state.items.find(i => 
           (i.subject || '').toLowerCase() === (remoteItem.subject || '').toLowerCase() &&
           (i.chapter || '').toLowerCase() === (remoteItem.chapter || '').toLowerCase() &&
@@ -1493,15 +1630,21 @@ class AmanStudyTrackerApp {
         );
 
         if (localItem) {
+          if (deletedSet.has(localItem.id)) return;
           if (isCurrentFriend) {
             localItem.userLearned = !!remoteItem.userLearned;
           } else {
             localItem.friendLearned = !!remoteItem.friendLearned;
           }
-          if (remoteItem.subject) localItem.subject = remoteItem.subject;
-          if (remoteItem.chapter !== undefined) localItem.chapter = remoteItem.chapter;
-          if (remoteItem.topic !== undefined) localItem.topic = remoteItem.topic;
-          if (remoteItem.color) localItem.color = remoteItem.color;
+          const remoteTime = remoteItem.updatedAt || 0;
+          const localTime = localItem.updatedAt || 0;
+          if (remoteTime >= localTime) {
+            if (remoteItem.subject) localItem.subject = remoteItem.subject;
+            if (remoteItem.chapter !== undefined) localItem.chapter = remoteItem.chapter;
+            if (remoteItem.topic !== undefined) localItem.topic = remoteItem.topic;
+            if (remoteItem.color) localItem.color = remoteItem.color;
+            localItem.updatedAt = remoteTime;
+          }
         } else {
           this.state.items.push(remoteItem);
         }
@@ -1632,7 +1775,13 @@ class AmanStudyTrackerApp {
         }
       }
       cells.push(current.trim());
-      return cells.map(c => c.replace(/^["']|["']$/g, '').trim());
+      return cells.map(c => {
+        let trimmed = c.trim();
+        if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+          trimmed = trimmed.slice(1, -1).trim();
+        }
+        return trimmed;
+      });
     };
 
     const firstCells = parseLine(lines[0]).map(c => c.toLowerCase());
@@ -1661,8 +1810,8 @@ class AmanStudyTrackerApp {
         colChapter = 1;
         colTopic = 2;
       } else if (numCols === 2) {
-        colChapter = 1;
-        colTopic = -1;
+        colChapter = -1;
+        colTopic = 1;
       }
     } else if (colTopic === -1 && numCols >= 2 && colChapter !== 1) {
       colTopic = numCols >= 3 ? 2 : 1;
@@ -1698,7 +1847,15 @@ class AmanStudyTrackerApp {
     if (rows.length === 0) { this.showToast('Please provide valid CSV rows', 'warning'); return; }
 
     const importMode = document.querySelector('input[name="csvImportMode"]:checked')?.value || 'append';
-    if (importMode === 'replace') this.state.items = [];
+    if (importMode === 'replace') {
+      if (!Array.isArray(this.state.deletedItemIds)) this.state.deletedItemIds = [];
+      this.state.items.forEach(i => {
+        if (!this.state.deletedItemIds.includes(i.id)) {
+          this.state.deletedItemIds.push(i.id);
+        }
+      });
+      this.state.items = [];
+    }
 
     const colors = ['indigo', 'emerald', 'amber', 'rose', 'cyan', 'purple'];
     const subjColors = {};
@@ -1721,7 +1878,8 @@ class AmanStudyTrackerApp {
           topic: r.topic,
           color: subjColors[r.subject],
           userLearned: false,
-          friendLearned: false
+          friendLearned: false,
+          updatedAt: Date.now()
         });
       }
     });

@@ -111,7 +111,7 @@ const server = http.createServer(async (req, res) => {
       req.on('data', chunk => { bodyStr += chunk; });
       req.on('end', async () => {
         try {
-          const body = JSON.parse(bodyStr);
+          const body = JSON.parse(bodyStr || '{}');
           const room = body.room || body.roomId || 'study-duo-room-1';
           const payload = body.payload;
 

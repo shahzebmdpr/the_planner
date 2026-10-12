@@ -65,7 +65,7 @@ export default async function handler(req, res) {
 
     // POST — Push state to Redis
     if (req.method === 'POST') {
-      let body = req.body;
+      let body = req.body || {};
       if (typeof body === 'string') {
         try { body = JSON.parse(body); } catch (e) { body = {}; }
       }
