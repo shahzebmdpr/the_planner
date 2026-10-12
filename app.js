@@ -10,6 +10,12 @@ const SEED_DATA_DSA = {
   auth: {
     masterKey: 'thekey'
   },
+  permissions: {
+    addTopic: 'both',
+    deleteTopic: 'both',
+    addLecture: 'both',
+    deleteLecture: 'both'
+  },
   deletedItemIds: [],
   items: [
     { id: 'item-1', subject: 'Algorithms', chapter: 'Dynamic Programming', topic: '0/1 Knapsack Problem', color: 'indigo', userLearned: true, friendLearned: false, updatedAt: 1700000000000 },
@@ -73,6 +79,14 @@ class AmanStudyTrackerApp {
     if (!state.profiles.friend) state.profiles.friend = { id: 'friend', name: 'Aman', initials: 'AM', pin: '1234' };
 
     if (!state.auth) state.auth = { masterKey: 'thekey' };
+    if (!state.permissions) {
+      state.permissions = {
+        addTopic: 'both',
+        deleteTopic: 'both',
+        addLecture: 'both',
+        deleteLecture: 'both'
+      };
+    }
     if (!Array.isArray(state.deletedItemIds)) state.deletedItemIds = [];
     if (Array.isArray(state.items)) {
       state.items.forEach(i => { if (!i.updatedAt) i.updatedAt = Date.now(); });
@@ -213,6 +227,11 @@ class AmanStudyTrackerApp {
     this.adminInputFriendAvatarFile = document.getElementById('adminInputFriendAvatarFile');
     this.adminInputMasterKey = document.getElementById('adminInputMasterKey');
     this.btnCloseMasterAdmin = document.getElementById('btnCloseMasterAdmin');
+
+    this.permSelectAddTopic = document.getElementById('permSelectAddTopic');
+    this.permSelectDeleteTopic = document.getElementById('permSelectDeleteTopic');
+    this.permSelectAddLecture = document.getElementById('permSelectAddLecture');
+    this.permSelectDeleteLecture = document.getElementById('permSelectDeleteLecture');
 
     this.cloudStatusDot = document.getElementById('cloudStatusDot');
     this.cloudStatusLabel = document.getElementById('cloudStatusLabel');
@@ -633,9 +652,12 @@ class AmanStudyTrackerApp {
   }
 
   populateMasterKeyAdmin() {
-    this.adminInputUserName.value = this.state.profiles.user.name;
+    const uName = this.state.profiles.user.name;
+    const fName = this.state.profiles.friend.name;
+
+    this.adminInputUserName.value = uName;
     this.adminInputUserPin.value = this.state.profiles.user.pin || '1234';
-    this.adminInputFriendName.value = this.state.profiles.friend.name;
+    this.adminInputFriendName.value = fName;
     this.adminInputFriendPin.value = this.state.profiles.friend.pin || '1234';
     this.adminInputMasterKey.value = this.state.auth?.masterKey || 'thekey';
 
@@ -650,6 +672,72 @@ class AmanStudyTrackerApp {
     } else {
       this.adminAvatarFriend.textContent = this.state.profiles.friend.initials || 'AM';
     }
+
+    // Role Permissions options
+    const perms = this.state.permissions || {
+      addTopic: 'both',
+      deleteTopic: 'both',
+      addLecture: 'both',
+      deleteLecture: 'both'
+    };
+
+    const setSelectOptions = (sel, selectedVal) => {
+      if (!sel) return;
+      sel.innerHTML = `
+        <option value="both">Both (${this.escapeHtml(uName)} & ${this.escapeHtml(fName)})</option>
+        <option value="user">${this.escapeHtml(uName)} Only</option>
+        <option value="friend">${this.escapeHtml(fName)} Only</option>
+        <option value="master">Master Key Only</option>
+      `;
+      sel.value = selectedVal || 'both';
+    };
+
+    setSelectOptions(this.permSelectAddTopic, perms.addTopic);
+    setSelectOptions(this.permSelectDeleteTopic, perms.deleteTopic);
+    setSelectOptions(this.permSelectAddLecture, perms.addLecture);
+    setSelectOptions(this.permSelectDeleteLecture, perms.deleteLecture);
+  }
+
+  canPerformAction(action) {
+    if (this.isMasterUnlocked) return true;
+    const perms = this.state.permissions || {
+      addTopic: 'both',
+      deleteTopic: 'both',
+      addLecture: 'both',
+      deleteLecture: 'both'
+    };
+    const rule = perms[action] || 'both';
+    if (rule === 'both') return true;
+    if (rule === 'master') return false;
+    if (rule === 'user') return this.currentAuthUser === 'user';
+    if (rule === 'friend') return this.currentAuthUser === 'friend';
+    return true;
+  }
+
+  checkPermissionOrPrompt(action, description) {
+    if (this.canPerformAction(action)) return true;
+
+    const perms = this.state.permissions || {};
+    const rule = perms[action] || 'both';
+    const uName = this.state.profiles.user?.name || 'Shahzeb';
+    const fName = this.state.profiles.friend?.name || 'Aman';
+
+    let allowedText = 'Master Key holder only';
+    if (rule === 'user') allowedText = `${uName} only`;
+    if (rule === 'friend') allowedText = `${fName} only`;
+
+    const enteredKey = prompt(`🔒 Action Restricted by Owner\n\nPermission to ${description} is restricted to ${allowedText}.\n\nEnter Master Key to authorize this action:`);
+    if (enteredKey !== null) {
+      const expected = this.state.auth?.masterKey || 'thekey';
+      if (enteredKey.trim() === expected) {
+        this.isMasterUnlocked = true;
+        this.showToast('Master Key authorized! Proceeding...', 'success');
+        return true;
+      } else {
+        this.showToast('Incorrect Master Key.', 'warning');
+      }
+    }
+    return false;
   }
 
   handleSaveUsersAdmin(e) {
@@ -676,6 +764,12 @@ class AmanStudyTrackerApp {
     if (!this.state.auth) this.state.auth = {};
     this.state.auth.masterKey = mKey;
 
+    if (!this.state.permissions) this.state.permissions = {};
+    this.state.permissions.addTopic = this.permSelectAddTopic?.value || 'both';
+    this.state.permissions.deleteTopic = this.permSelectDeleteTopic?.value || 'both';
+    this.state.permissions.addLecture = this.permSelectAddLecture?.value || 'both';
+    this.state.permissions.deleteLecture = this.permSelectDeleteLecture?.value || 'both';
+
     const uAvatarFile = this.adminInputUserAvatarFile?.files?.[0];
     const fAvatarFile = this.adminInputFriendAvatarFile?.files?.[0];
 
@@ -691,9 +785,13 @@ class AmanStudyTrackerApp {
     processAvatars().then(() => {
       this.saveState();
       this.modalMasterKeyAdmin.classList.add('hidden');
-      this.renderLoginScreen();
-      if (this.currentAuthUser) this.updateAuthUI();
-      this.showToast('Users & Master Key updated and saved!', 'success');
+      if (this.currentAuthUser) {
+        this.updateAuthUI();
+        this.render();
+      } else {
+        this.renderLoginScreen();
+      }
+      this.showToast('Permissions & User Settings updated and saved!', 'success');
     });
   }
 
@@ -1146,6 +1244,9 @@ class AmanStudyTrackerApp {
     const card = document.createElement('article');
     card.className = `chapter-card theme-${color}`;
 
+    const isCore = chapterName === 'Core Topics';
+    const badgeText = isCore ? 'CORE' : 'CHAPTER';
+
     card.innerHTML = `
       <div class="chapter-header" data-action="toggle-chapter">
         <div class="chapter-title-group">
@@ -1156,6 +1257,10 @@ class AmanStudyTrackerApp {
           </button>
           <div class="chapter-meta">
             <div class="chapter-title-line">
+              <span class="chapter-badge-label">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                ${badgeText}
+              </span>
               <h3 class="chapter-title">${this.escapeHtml(chapterName)}</h3>
               <span class="topic-count-tag">${total} topic${total === 1 ? '' : 's'}</span>
               <span class="chapter-open-pill">${isCollapsed ? 'Open Topics ▾' : 'Collapse ▴'}</span>
@@ -1252,6 +1357,7 @@ class AmanStudyTrackerApp {
     row.innerHTML = `
       <div class="topic-details">
         <div class="topic-title-line">
+          <span class="topic-badge-label">Topic</span>
           <span class="topic-bullet theme-${color}"></span>
           <span class="topic-title">${this.escapeHtml(displayTitle)}</span>
           ${gapBadgeHtml}
@@ -1334,6 +1440,10 @@ class AmanStudyTrackerApp {
   }
 
   openAddItemModal(defaultSubject = '', defaultColor = 'indigo', defaultChapter = '') {
+    if (!this.checkPermissionOrPrompt('addTopic', 'add new study topics')) {
+      return;
+    }
+
     if (!defaultSubject && this.selectedAnalyzerSubject && this.selectedAnalyzerSubject !== 'all') {
       defaultSubject = this.selectedAnalyzerSubject;
       const existing = this.state.items.find(i => (i.subject || '').trim() === defaultSubject.trim());
@@ -1365,6 +1475,10 @@ class AmanStudyTrackerApp {
   }
 
   openEditItemModal(item) {
+    if (!this.checkPermissionOrPrompt('addTopic', 'edit study topics')) {
+      return;
+    }
+
     this.modalItemTitle.textContent = 'Edit Study Item';
     this.inputItemId.value = item.id;
     this.inputItemSubject.value = item.subject || '';
@@ -1428,6 +1542,10 @@ class AmanStudyTrackerApp {
   }
 
   deleteItem(id) {
+    if (!this.checkPermissionOrPrompt('deleteTopic', 'delete study items')) {
+      return;
+    }
+
     const item = this.state.items.find(i => i.id === id);
     const title = item ? (item.topic || item.chapter || item.subject) : 'this item';
     if (confirm(`Are you sure you want to delete "${title}"?`)) {
@@ -1445,6 +1563,10 @@ class AmanStudyTrackerApp {
   }
 
   deleteChapter(subjName, chapName) {
+    if (!this.checkPermissionOrPrompt('deleteTopic', 'delete chapters')) {
+      return;
+    }
+
     const isDirect = chapName === 'Core Topics';
     const matching = this.state.items.filter(i => {
       const s = (i.subject || 'General').trim();
@@ -1474,6 +1596,10 @@ class AmanStudyTrackerApp {
   }
 
   deleteSubject(subjName) {
+    if (!this.checkPermissionOrPrompt('deleteTopic', 'delete subjects')) {
+      return;
+    }
+
     const matching = this.state.items.filter(i => (i.subject || 'General').trim() === subjName);
     const count = matching.length;
     if (confirm(`Are you sure you want to delete the entire subject "${subjName}" and all ${count} item${count === 1 ? '' : 's'}?`)) {
@@ -1743,6 +1869,10 @@ class AmanStudyTrackerApp {
     if (remoteState.auth?.masterKey) {
       if (!this.state.auth) this.state.auth = {};
       this.state.auth.masterKey = remoteState.auth.masterKey;
+    }
+
+    if (remoteState.permissions) {
+      this.state.permissions = Object.assign({}, this.state.permissions, remoteState.permissions);
     }
 
     if (Array.isArray(remoteState.items)) {
