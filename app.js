@@ -254,25 +254,36 @@ class AmanStudyTrackerApp {
       }
     });
 
-    this.formLogin.addEventListener('submit', (e) => this.handleLoginSubmit(e));
+    if (this.formLogin) this.formLogin.addEventListener('submit', (e) => this.handleLoginSubmit(e));
 
-    this.cardSelectUser.addEventListener('click', () => {
-      this.cardSelectUser.classList.add('selected');
-      this.cardSelectFriend.classList.remove('selected');
-    });
+    if (this.cardSelectUser) {
+      this.cardSelectUser.addEventListener('click', () => {
+        this.cardSelectUser.classList.add('selected');
+        if (this.cardSelectFriend) this.cardSelectFriend.classList.remove('selected');
+        const r = this.cardSelectUser.querySelector('input[type="radio"]');
+        if (r) r.checked = true;
+      });
+    }
 
-    this.cardSelectFriend.addEventListener('click', () => {
-      this.cardSelectFriend.classList.add('selected');
-      this.cardSelectUser.classList.remove('selected');
-    });
+    if (this.cardSelectFriend) {
+      this.cardSelectFriend.addEventListener('click', () => {
+        this.cardSelectFriend.classList.add('selected');
+        if (this.cardSelectUser) this.cardSelectUser.classList.remove('selected');
+        const r = this.cardSelectFriend.querySelector('input[type="radio"]');
+        if (r) r.checked = true;
+      });
+    }
 
-    this.btnToggleLoginPin.addEventListener('click', () => {
-      const isPass = this.inputLoginPin.type === 'password';
-      this.inputLoginPin.type = isPass ? 'text' : 'password';
-      this.btnToggleLoginPin.textContent = isPass ? 'Hide' : 'Show';
-    });
+    if (this.btnToggleLoginPin) {
+      this.btnToggleLoginPin.addEventListener('click', () => {
+        if (!this.inputLoginPin) return;
+        const isPass = this.inputLoginPin.type === 'password';
+        this.inputLoginPin.type = isPass ? 'text' : 'password';
+        this.btnToggleLoginPin.textContent = isPass ? 'Hide' : 'Show';
+      });
+    }
 
-    this.btnTriggerMasterFromLogin.addEventListener('click', () => this.openMasterKeyModal());
+    if (this.btnTriggerMasterFromLogin) this.btnTriggerMasterFromLogin.addEventListener('click', () => this.openMasterKeyModal());
 
     if (this.btnOpenSettingsModal) this.btnOpenSettingsModal.addEventListener('click', () => this.openSettingsModal('settingsPanelCloud'));
     if (this.loggedUserBar) this.loggedUserBar.addEventListener('click', () => this.openSettingsModal('settingsPanelAccount'));
@@ -294,56 +305,67 @@ class AmanStudyTrackerApp {
     if (this.formVerifyMasterKey) this.formVerifyMasterKey.addEventListener('submit', (e) => this.handleVerifyMasterKey(e));
     if (this.formSaveUsersAdmin) this.formSaveUsersAdmin.addEventListener('submit', (e) => this.handleSaveUsersAdmin(e));
 
-    this.btnToggleMasterVerifyKey.addEventListener('click', () => {
-      const isPass = this.inputMasterKeyVerify.type === 'password';
-      this.inputMasterKeyVerify.type = isPass ? 'text' : 'password';
-      this.btnToggleMasterVerifyKey.textContent = isPass ? 'Hide' : 'Show';
-    });
+    if (this.btnToggleMasterVerifyKey) {
+      this.btnToggleMasterVerifyKey.addEventListener('click', () => {
+        if (!this.inputMasterKeyVerify) return;
+        const isPass = this.inputMasterKeyVerify.type === 'password';
+        this.inputMasterKeyVerify.type = isPass ? 'text' : 'password';
+        this.btnToggleMasterVerifyKey.textContent = isPass ? 'Hide' : 'Show';
+      });
+    }
 
-    this.cardFilterFriendAhead.addEventListener('click', () => this.setFilter('friend-only'));
-    this.cardFilterUserAhead.addEventListener('click', () => this.setFilter('user-only'));
-    this.cardFilterBothMastered.addEventListener('click', () => this.setFilter('both-done'));
+    if (this.cardFilterFriendAhead) this.cardFilterFriendAhead.addEventListener('click', () => this.setFilter(this.activeFilter === 'friend-only' ? 'all' : 'friend-only'));
+    if (this.cardFilterUserAhead) this.cardFilterUserAhead.addEventListener('click', () => this.setFilter(this.activeFilter === 'user-only' ? 'all' : 'user-only'));
+    if (this.cardFilterBothMastered) this.cardFilterBothMastered.addEventListener('click', () => this.setFilter(this.activeFilter === 'both-done' ? 'all' : 'both-done'));
 
-    this.topicSearchInput.addEventListener('input', (e) => {
-      this.searchQuery = e.target.value.trim().toLowerCase();
-      this.btnClearSearch.classList.toggle('hidden', !this.searchQuery);
-      this.renderItems();
-    });
+    if (this.topicSearchInput) {
+      this.topicSearchInput.addEventListener('input', (e) => {
+        this.searchQuery = e.target.value.trim().toLowerCase();
+        if (this.btnClearSearch) this.btnClearSearch.classList.toggle('hidden', !this.searchQuery);
+        this.renderItems();
+      });
+    }
 
-    this.btnClearSearch.addEventListener('click', () => {
-      this.topicSearchInput.value = '';
-      this.searchQuery = '';
-      this.btnClearSearch.classList.add('hidden');
-      this.renderItems();
-    });
+    if (this.btnClearSearch) {
+      this.btnClearSearch.addEventListener('click', () => {
+        if (this.topicSearchInput) this.topicSearchInput.value = '';
+        this.searchQuery = '';
+        this.btnClearSearch.classList.add('hidden');
+        this.renderItems();
+      });
+    }
 
     window.addEventListener('keydown', (e) => {
-      if (e.key === '/' && document.activeElement !== this.topicSearchInput && !document.querySelector('.modal-overlay:not(.hidden)')) {
+      if (e.key === '/' && this.topicSearchInput && document.activeElement !== this.topicSearchInput && !document.querySelector('.modal-overlay:not(.hidden)')) {
         e.preventDefault();
         this.topicSearchInput.focus();
       }
       if (e.key === 'Escape') this.closeAllModals();
     });
 
-    this.filterPillsContainer.addEventListener('click', (e) => {
-      const pill = e.target.closest('.filter-pill');
-      if (!pill) return;
-      this.setFilter(pill.getAttribute('data-filter'));
-    });
+    if (this.filterPillsContainer) {
+      this.filterPillsContainer.addEventListener('click', (e) => {
+        const pill = e.target.closest('.filter-pill');
+        if (!pill) return;
+        this.setFilter(pill.getAttribute('data-filter'));
+      });
+    }
 
-    this.btnResetFilter.addEventListener('click', () => this.setFilter('all'));
+    if (this.btnResetFilter) this.btnResetFilter.addEventListener('click', () => this.setFilter('all'));
 
-    this.btnToggleAllChapters.addEventListener('click', () => {
-      const allChapterIds = this.getUniqueChapterIds();
-      if (this.collapsedChapters.size >= allChapterIds.length && allChapterIds.length > 0) {
-        this.collapsedChapters.clear();
-        this.btnToggleAllText.textContent = 'Collapse All';
-      } else {
-        allChapterIds.forEach(id => this.collapsedChapters.add(id));
-        this.btnToggleAllText.textContent = 'Expand All';
-      }
-      this.renderItems();
-    });
+    if (this.btnToggleAllChapters) {
+      this.btnToggleAllChapters.addEventListener('click', () => {
+        const allChapterIds = this.getUniqueChapterIds();
+        if (this.collapsedChapters.size >= allChapterIds.length && allChapterIds.length > 0) {
+          this.collapsedChapters.clear();
+          if (this.btnToggleAllText) this.btnToggleAllText.textContent = 'Collapse All';
+        } else {
+          allChapterIds.forEach(id => this.collapsedChapters.add(id));
+          if (this.btnToggleAllText) this.btnToggleAllText.textContent = 'Expand All';
+        }
+        this.renderItems();
+      });
+    }
 
     if (this.btnEmptyAddItem) this.btnEmptyAddItem.addEventListener('click', () => this.openAddItemModal());
     if (this.btnOpenAddItem) this.btnOpenAddItem.addEventListener('click', () => this.openAddItemModal());
@@ -396,19 +418,18 @@ class AmanStudyTrackerApp {
 
     if (this.quickAvatarUpload) {
       this.quickAvatarUpload.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
+        const file = e.target.files?.[0];
         if (!file || !this.currentAuthUser) return;
         try {
-          const reader = new FileReader();
-          reader.onload = () => {
-            this.state.profiles[this.currentAuthUser].avatarUrl = reader.result;
-            this.saveState();
-            this.updateAuthUI();
-            this.render();
-            this.showToast('Profile picture updated!', 'success');
-          };
-          reader.readAsDataURL(file);
-        } catch (error) {}
+          const compressed = await this.compressImageFile(file);
+          this.state.profiles[this.currentAuthUser].avatarUrl = compressed;
+          this.saveState();
+          this.updateAuthUI();
+          this.render();
+          this.showToast('Profile picture updated!', 'success');
+        } catch (error) {
+          this.showToast('Failed to process image: ' + error.message, 'warning');
+        }
       });
     }
 
@@ -416,6 +437,36 @@ class AmanStudyTrackerApp {
       overlay.addEventListener('click', (e) => {
         if (e.target === overlay) overlay.classList.add('hidden');
       });
+    });
+  }
+
+  compressImageFile(file, maxWidth = 160, maxHeight = 160, quality = 0.85) {
+    return new Promise((resolve, reject) => {
+      if (!file || !file.type.startsWith('image/')) {
+        return reject(new Error('Please select a valid image file.'));
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const width = img.width;
+          const height = img.height;
+          const minDim = Math.min(width, height);
+          const sx = (width - minDim) / 2;
+          const sy = (height - minDim) / 2;
+
+          canvas.width = maxWidth;
+          canvas.height = maxHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, maxWidth, maxHeight);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => reject(new Error('Image decoding failed.'));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error('File reading error.'));
+      reader.readAsDataURL(file);
     });
   }
 
@@ -615,22 +666,15 @@ class AmanStudyTrackerApp {
     if (!this.state.auth) this.state.auth = {};
     this.state.auth.masterKey = mKey;
 
-    const fileToDataURL = (file) => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-
     const uAvatarFile = this.adminInputUserAvatarFile?.files?.[0];
     const fAvatarFile = this.adminInputFriendAvatarFile?.files?.[0];
 
     const processAvatars = async () => {
       if (uAvatarFile) {
-        try { this.state.profiles.user.avatarUrl = await fileToDataURL(uAvatarFile); } catch (e) {}
+        try { this.state.profiles.user.avatarUrl = await this.compressImageFile(uAvatarFile); } catch (e) {}
       }
       if (fAvatarFile) {
-        try { this.state.profiles.friend.avatarUrl = await fileToDataURL(fAvatarFile); } catch (e) {}
+        try { this.state.profiles.friend.avatarUrl = await this.compressImageFile(fAvatarFile); } catch (e) {}
       }
     };
 
@@ -748,9 +792,15 @@ class AmanStudyTrackerApp {
 
   setFilter(filterName) {
     this.activeFilter = filterName;
-    this.filterPillsContainer.querySelectorAll('.filter-pill').forEach(pill => {
-      pill.classList.toggle('active', pill.getAttribute('data-filter') === filterName);
-    });
+    if (this.filterPillsContainer) {
+      this.filterPillsContainer.querySelectorAll('.filter-pill').forEach(pill => {
+        pill.classList.toggle('active', pill.getAttribute('data-filter') === filterName);
+      });
+    }
+
+    if (this.cardFilterFriendAhead) this.cardFilterFriendAhead.classList.toggle('active', filterName === 'friend-only');
+    if (this.cardFilterUserAhead) this.cardFilterUserAhead.classList.toggle('active', filterName === 'user-only');
+    if (this.cardFilterBothMastered) this.cardFilterBothMastered.classList.toggle('active', filterName === 'both-done');
 
     if (filterName === 'all') {
       this.filterNoticeBanner.classList.add('hidden');
@@ -1207,10 +1257,12 @@ class AmanStudyTrackerApp {
   }
 
   deleteItem(id) {
-    if (confirm(`Delete this item?`)) {
+    const item = this.state.items.find(i => i.id === id);
+    const title = item ? (item.topic || item.chapter || item.subject) : 'this item';
+    if (confirm(`Are you sure you want to delete "${title}"?`)) {
       this.state.items = this.state.items.filter(i => i.id !== id);
       this.saveState();
-      this.showToast(`Deleted item.`, 'info');
+      this.showToast(`Deleted "${title}".`, 'info');
     }
   }
 
@@ -1226,8 +1278,29 @@ class AmanStudyTrackerApp {
     try { localStorage.setItem(UPSTASH_STORAGE_KEY, JSON.stringify(this.upstash)); } catch (e) {}
   }
 
-  initUpstash() {
+  async initUpstash() {
     this.updateUpstashStatusUI();
+
+    // Auto-detect server proxy (/api/sync) when running on Vercel or local Node server
+    if (!this.upstash.isConnected || this.upstash.useServerProxy) {
+      try {
+        const room = encodeURIComponent(this.upstash.roomId || 'study-duo-room-1');
+        const res = await fetch(`/api/sync?room=${room}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.configured) {
+            this.upstash.useServerProxy = true;
+            this.upstash.isConnected = true;
+            this.saveUpstashConfig();
+            this.updateUpstashStatusUI();
+            this.startSyncPolling();
+            this.pullFromUpstash(false);
+            return;
+          }
+        }
+      } catch (e) {}
+    }
+
     if (this.upstash.isConnected) {
       this.startSyncPolling();
       this.pullFromUpstash(false);
@@ -1311,12 +1384,28 @@ class AmanStudyTrackerApp {
     this.updateUpstashStatusUI('syncing');
 
     try {
-      const payload = { state: this.state, updatedAt: Date.now(), sender: this.state.profiles.user.name };
-      const res = await fetch(this.upstash.url, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${this.upstash.token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(['SET', `aman_study_tracker:${this.upstash.roomId}`, JSON.stringify(payload)])
-      });
+      const isFriend = this.currentAuthUser === 'friend';
+      const senderName = isFriend ? this.state.profiles.friend.name : this.state.profiles.user.name;
+      const payload = {
+        state: this.state,
+        updatedAt: Date.now(),
+        sender: senderName
+      };
+
+      let res;
+      if (this.upstash.useServerProxy) {
+        res = await fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ room: this.upstash.roomId || 'study-duo-room-1', payload })
+        });
+      } else {
+        res = await fetch(this.upstash.url, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${this.upstash.token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(['SET', `aman_study_tracker:${this.upstash.roomId}`, JSON.stringify(payload)])
+        });
+      }
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       this.upstash.lastSyncedAt = Date.now();
@@ -1325,7 +1414,7 @@ class AmanStudyTrackerApp {
       if (notify) this.showToast('Saved latest study progress to Upstash!', 'success');
     } catch (err) {
       this.updateUpstashStatusUI();
-      if (notify) this.showToast('Failed to push to cloud: ' + err.message, 'info');
+      if (notify) this.showToast('Failed to push to cloud: ' + err.message, 'warning');
     }
   }
 
@@ -1333,18 +1422,25 @@ class AmanStudyTrackerApp {
     if (!this.upstash.isConnected || this.isSyncing) return;
     this.isSyncing = true;
     try {
-      const res = await fetch(this.upstash.url, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${this.upstash.token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(['GET', `aman_study_tracker:${this.upstash.roomId}`])
-      });
-      if (res.ok) {
+      let res;
+      if (this.upstash.useServerProxy) {
+        const room = encodeURIComponent(this.upstash.roomId || 'study-duo-room-1');
+        res = await fetch(`/api/sync?room=${room}`);
+      } else {
+        res = await fetch(this.upstash.url, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${this.upstash.token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(['GET', `aman_study_tracker:${this.upstash.roomId}`])
+        });
+      }
+
+      if (res && res.ok) {
         let data = await res.json();
         if (data && data.result) {
-          const remote = JSON.parse(data.result);
+          const remote = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
           if (remote && remote.state && remote.updatedAt > this.lastRemoteUpdatedAt) {
             this.lastRemoteUpdatedAt = remote.updatedAt;
-            this.state = remote.state;
+            this.mergeRemoteState(remote.state);
             this.saveStateLocallyWithoutPush();
             this.updateProfilesUI();
             this.render();
@@ -1357,8 +1453,59 @@ class AmanStudyTrackerApp {
       this.upstash.lastSyncedAt = Date.now();
       this.saveUpstashConfig();
       this.updateUpstashStatusUI();
-    } catch (err) {} finally {
+    } catch (err) {
+    } finally {
       this.isSyncing = false;
+    }
+  }
+
+  mergeRemoteState(remoteState) {
+    if (!remoteState) return;
+
+    if (remoteState.profiles) {
+      if (remoteState.profiles.user) {
+        this.state.profiles.user.name = remoteState.profiles.user.name || this.state.profiles.user.name;
+        this.state.profiles.user.pin = remoteState.profiles.user.pin || this.state.profiles.user.pin;
+        if (remoteState.profiles.user.avatarUrl) this.state.profiles.user.avatarUrl = remoteState.profiles.user.avatarUrl;
+      }
+      if (remoteState.profiles.friend) {
+        this.state.profiles.friend.name = remoteState.profiles.friend.name || this.state.profiles.friend.name;
+        this.state.profiles.friend.pin = remoteState.profiles.friend.pin || this.state.profiles.friend.pin;
+        if (remoteState.profiles.friend.avatarUrl) this.state.profiles.friend.avatarUrl = remoteState.profiles.friend.avatarUrl;
+      }
+    }
+
+    if (remoteState.auth?.masterKey) {
+      if (!this.state.auth) this.state.auth = {};
+      this.state.auth.masterKey = remoteState.auth.masterKey;
+    }
+
+    if (Array.isArray(remoteState.items)) {
+      const localMap = new Map();
+      this.state.items.forEach(i => localMap.set(i.id, i));
+      const isCurrentFriend = this.currentAuthUser === 'friend';
+
+      remoteState.items.forEach(remoteItem => {
+        const localItem = localMap.get(remoteItem.id) || this.state.items.find(i => 
+          (i.subject || '').toLowerCase() === (remoteItem.subject || '').toLowerCase() &&
+          (i.chapter || '').toLowerCase() === (remoteItem.chapter || '').toLowerCase() &&
+          (i.topic || '').toLowerCase() === (remoteItem.topic || '').toLowerCase()
+        );
+
+        if (localItem) {
+          if (isCurrentFriend) {
+            localItem.userLearned = !!remoteItem.userLearned;
+          } else {
+            localItem.friendLearned = !!remoteItem.friendLearned;
+          }
+          if (remoteItem.subject) localItem.subject = remoteItem.subject;
+          if (remoteItem.chapter !== undefined) localItem.chapter = remoteItem.chapter;
+          if (remoteItem.topic !== undefined) localItem.topic = remoteItem.topic;
+          if (remoteItem.color) localItem.color = remoteItem.color;
+        } else {
+          this.state.items.push(remoteItem);
+        }
+      });
     }
   }
 
@@ -1475,9 +1622,14 @@ class AmanStudyTrackerApp {
       let inQuotes = false;
       for (let i = 0; i < line.length; i++) {
         const char = line[i];
-        if (char === '"' || char === "'") inQuotes = !inQuotes;
-        else if ((char === ',' || char === '	' || char === ';') && !inQuotes) { cells.push(current.trim()); current = ''; }
-        else current += char;
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if ((char === ',' || char === '\t' || char === ';') && !inQuotes) {
+          cells.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
       }
       cells.push(current.trim());
       return cells.map(c => c.replace(/^["']|["']$/g, '').trim());
@@ -1485,18 +1637,35 @@ class AmanStudyTrackerApp {
 
     const firstCells = parseLine(lines[0]).map(c => c.toLowerCase());
     let startIndex = 0;
-    let colSubject = 0;
-    let colChapter = 1;
-    let colTopic = 2;
+    let colSubject = -1;
+    let colChapter = -1;
+    let colTopic = -1;
 
-    const hasHeader = firstCells.some(c => c.includes('sub') || c.includes('chap') || c.includes('top'));
+    const hasHeader = firstCells.some(c => c.includes('sub') || c.includes('chap') || c.includes('top') || c.includes('mod') || c.includes('title'));
     if (hasHeader) {
       startIndex = 1;
       firstCells.forEach((c, idx) => {
-        if (c.includes('sub') || c.includes('track')) colSubject = idx;
-        else if (c.includes('chap') || c.includes('mod')) colChapter = idx;
-        else if (c.includes('top') || c.includes('title')) colTopic = idx;
+        if (c.includes('sub') || c.includes('track') || c.includes('course')) colSubject = idx;
+        else if (c.includes('chap') || c.includes('mod') || c.includes('unit')) colChapter = idx;
+        else if (c.includes('top') || c.includes('title') || c.includes('lesson')) colTopic = idx;
       });
+    }
+
+    // Determine smart column fallback based on sample line width
+    const sampleCells = parseLine(lines[startIndex < lines.length ? startIndex : 0]);
+    const numCols = sampleCells.length;
+
+    if (colSubject === -1) colSubject = 0;
+    if (colChapter === -1 && colTopic === -1) {
+      if (numCols >= 3) {
+        colChapter = 1;
+        colTopic = 2;
+      } else if (numCols === 2) {
+        colChapter = 1;
+        colTopic = -1;
+      }
+    } else if (colTopic === -1 && numCols >= 2 && colChapter !== 1) {
+      colTopic = numCols >= 3 ? 2 : 1;
     }
 
     const rows = [];
@@ -1504,11 +1673,11 @@ class AmanStudyTrackerApp {
       const cells = parseLine(lines[i]);
       if (cells.length < 1) continue;
 
-      const subject = cells[colSubject] || cells[0];
+      const subject = (colSubject >= 0 && colSubject < cells.length ? cells[colSubject] : cells[0]) || '';
       if (!subject || subject.toLowerCase() === 'subject') continue;
       
-      const chapter = colChapter < cells.length ? cells[colChapter] : '';
-      const topic = colTopic < cells.length ? cells[colTopic] : '';
+      const chapter = (colChapter >= 0 && colChapter < cells.length) ? cells[colChapter] : '';
+      const topic = (colTopic >= 0 && colTopic < cells.length) ? cells[colTopic] : '';
 
       rows.push({ subject, chapter, topic });
     }

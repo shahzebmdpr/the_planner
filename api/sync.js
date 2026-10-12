@@ -65,8 +65,13 @@ export default async function handler(req, res) {
 
     // POST — Push state to Redis
     if (req.method === 'POST') {
-      const { room, payload } = req.body;
-      const roomId = room || 'study-duo-room-1';
+      let body = req.body;
+      if (typeof body === 'string') {
+        try { body = JSON.parse(body); } catch (e) { body = {}; }
+      }
+      const room = body?.room || body?.roomId || 'study-duo-room-1';
+      const payload = body?.payload;
+      const roomId = room;
 
       const response = await fetch(UPSTASH_URL, {
         method: 'POST',
