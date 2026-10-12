@@ -180,6 +180,11 @@ class LecturesApp {
       const saved = localStorage.getItem(UPSTASH_STORAGE_KEY);
       if (saved) return JSON.parse(saved);
     } catch (e) {}
+    if (this.plannerState && this.plannerState.upstash) {
+      try {
+        return JSON.parse(JSON.stringify(this.plannerState.upstash));
+      } catch (e) {}
+    }
     return { url: '', token: '', roomId: 'study-duo-room-1', autoSync: true, pollInterval: 10000, isConnected: false, lastSyncedAt: null, useServerProxy: false };
   }
 
@@ -449,6 +454,22 @@ class LecturesApp {
     this.cloudStatusLabel = document.getElementById('cloudStatusLabel');
     this.btnCloudSyncNow = document.getElementById('btnCloudSyncNow');
 
+    // Persona Switcher
+    this.headerProfileBadge = document.getElementById('headerProfileBadge');
+
+    // Smart Instant URL Auto-Fetch Section
+    this.formSmartFetch = document.getElementById('formSmartFetch');
+    this.inputSmartVideoUrl = document.getElementById('inputSmartVideoUrl');
+    this.btnSmartSubmit = document.getElementById('btnSmartSubmit');
+    this.spinnerSmartFetch = document.getElementById('spinnerSmartFetch');
+    this.btnSmartSubmitText = document.getElementById('btnSmartSubmitText');
+
+    // Modal Smart Auto-Fetch
+    this.inputModalAutoUrl = document.getElementById('inputModalAutoUrl');
+    this.btnModalAutoFetch = document.getElementById('btnModalAutoFetch');
+    this.spinnerModalAutoFetch = document.getElementById('spinnerModalAutoFetch');
+    this.btnModalAutoFetchText = document.getElementById('btnModalAutoFetchText');
+
     // Embedded Video Player Modal
     this.modalVideoPlayer = document.getElementById('modalVideoPlayer');
     this.playerSubjectBadge = document.getElementById('playerSubjectBadge');
@@ -470,6 +491,55 @@ class LecturesApp {
   }
 
   attachEvents() {
+    // Header Persona Switcher Click (easily switch active user profile)
+    if (this.headerProfileBadge) {
+      this.headerProfileBadge.style.cursor = 'pointer';
+      this.headerProfileBadge.title = 'Click to switch active user persona';
+      this.headerProfileBadge.addEventListener('click', () => {
+        const nextUser = this.currentAuthUser === 'user' ? 'friend' : 'user';
+        this.currentAuthUser = nextUser;
+        localStorage.setItem(AUTH_USER_KEY, nextUser);
+        this.updateProfilesUI();
+        this.render();
+        const pName = nextUser === 'friend' ? (this.plannerState.profiles?.friend?.name || 'Aman') : (this.plannerState.profiles?.user?.name || 'Shahzeb');
+        this.showToast(`Active profile switched to ${pName}!`, 'info');
+      });
+    }
+
+    // Top Instant Smart URL Fetch & Add
+    if (this.formSmartFetch) {
+      this.formSmartFetch.addEventListener('submit', (e) => this.handleSmartFetchAndAdd(e));
+    }
+    if (this.inputSmartVideoUrl) {
+      this.inputSmartVideoUrl.addEventListener('paste', () => {
+        setTimeout(() => {
+          if (this.inputSmartVideoUrl.value.trim().length > 10) {
+            this.handleSmartFetchAndAdd();
+          }
+        }, 120);
+      });
+    }
+
+    // Modal Smart Auto-Fetch
+    if (this.btnModalAutoFetch) {
+      this.btnModalAutoFetch.addEventListener('click', () => this.handleModalAutoFetch());
+    }
+    if (this.inputModalAutoUrl) {
+      this.inputModalAutoUrl.addEventListener('paste', () => {
+        setTimeout(() => {
+          if (this.inputModalAutoUrl.value.trim().length > 10) {
+            this.handleModalAutoFetch();
+          }
+        }, 120);
+      });
+      this.inputModalAutoUrl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.handleModalAutoFetch();
+        }
+      });
+    }
+
     // Open Add Modal
     const openAdd = () => this.openAddModal();
     if (this.btnOpenAddLecture) this.btnOpenAddLecture.addEventListener('click', openAdd);
@@ -509,25 +579,39 @@ class LecturesApp {
       });
     }
 
-    // Video Player Watch Toggles
+    // Video Player Watch Toggles (Strictly locked to active authenticated user + immediate cloud sync)
     if (this.playerToggleUserWatch) {
       this.playerToggleUserWatch.addEventListener('click', () => {
         if (!this.activePlayerLecture) return;
+        const uName = this.plannerState.profiles?.user?.name || 'Shahzeb';
+        if (this.currentAuthUser !== 'user') {
+          this.showToast(`🔒 Locked: Only ${uName} can mark their own completion!`, 'warning');
+          return;
+        }
         this.activePlayerLecture.userWatched = !this.activePlayerLecture.userWatched;
         this.activePlayerLecture.updatedAt = Date.now();
         this.saveLectures();
+        this.pushToUpstash(false);
         this.updatePlayerWatchButtons();
-        this.showToast('Watch status updated!', 'success');
+        this.renderCards();
+        this.showToast(`Watch status updated & synced!`, 'success');
       });
     }
     if (this.playerToggleFriendWatch) {
       this.playerToggleFriendWatch.addEventListener('click', () => {
         if (!this.activePlayerLecture) return;
+        const fName = this.plannerState.profiles?.friend?.name || 'Aman';
+        if (this.currentAuthUser !== 'friend') {
+          this.showToast(`🔒 Locked: Only ${fName} can mark their own completion!`, 'warning');
+          return;
+        }
         this.activePlayerLecture.friendWatched = !this.activePlayerLecture.friendWatched;
         this.activePlayerLecture.updatedAt = Date.now();
         this.saveLectures();
+        this.pushToUpstash(false);
         this.updatePlayerWatchButtons();
-        this.showToast('Watch status updated!', 'success');
+        this.renderCards();
+        this.showToast(`Watch status updated & synced!`, 'success');
       });
     }
 
@@ -885,6 +969,8 @@ class LecturesApp {
     card.setAttribute('data-id', lec.id);
 
     const formattedDuration = lec.durationMinutes ? `${lec.durationMinutes} mins` : 'Unspecified duration';
+    const canEditUser = this.currentAuthUser === 'user';
+    const canEditFriend = this.currentAuthUser === 'friend';
 
     card.innerHTML = `
       <div class="lecture-card-status-bar"></div>
@@ -906,6 +992,9 @@ class LecturesApp {
           ${lec.instructor ? `<span class="meta-chip" title="Instructor">👨‍🏫 ${this.escapeHtml(lec.instructor)}</span>` : ''}
         </div>
 
+        <!-- In-Card Video Preview Box directly on the page -->
+        <div class="lecture-card-preview-box" data-lec-id="${lec.id}"></div>
+
         <!-- Platform Expiry Countdown -->
         <div class="lecture-expiry-section">
           <div class="expiry-badge-row">
@@ -921,15 +1010,15 @@ class LecturesApp {
 
         ${lec.notes ? `<p class="lecture-notes" style="font-size:0.78rem;color:var(--text-muted);margin:0;line-height:1.4;">📝 ${this.escapeHtml(lec.notes)}</p>` : ''}
 
-        <!-- Duo Study Watch Progress -->
+        <!-- Duo Study Watch Progress (Locked to Authenticated User) -->
         <div class="lecture-duo-watch">
-          <button type="button" class="duo-watch-btn user-btn ${lec.userWatched ? 'completed' : ''}" data-target="user" title="Toggle Shahzeb watched state">
-            <span>${lec.userWatched ? '✓ Watched' : '○ Pending'}</span>
-            <span style="opacity:0.75;">(${this.escapeHtml(user.name)})</span>
+          <button type="button" class="duo-watch-btn user-btn ${lec.userWatched ? 'completed' : ''} ${!canEditUser ? 'locked' : ''}" data-target="user" title="${canEditUser ? 'Toggle your completion' : '🔒 Locked: Only ' + this.escapeHtml(user.name) + ' can mark completion'}">
+            <span>${lec.userWatched ? '✓ Watched' : '○ Pending'} ${!canEditUser ? '<span class="lock-icon-tag">🔒</span>' : ''}</span>
+            <span style="opacity:0.8;">(${this.escapeHtml(user.name)})</span>
           </button>
-          <button type="button" class="duo-watch-btn friend-btn ${lec.friendWatched ? 'completed' : ''}" data-target="friend" title="Toggle Aman watched state">
-            <span>${lec.friendWatched ? '✓ Watched' : '○ Pending'}</span>
-            <span style="opacity:0.75;">(${this.escapeHtml(friend.name)})</span>
+          <button type="button" class="duo-watch-btn friend-btn ${lec.friendWatched ? 'completed' : ''} ${!canEditFriend ? 'locked' : ''}" data-target="friend" title="${canEditFriend ? 'Toggle your completion' : '🔒 Locked: Only ' + this.escapeHtml(friend.name) + ' can mark completion'}">
+            <span>${lec.friendWatched ? '✓ Watched' : '○ Pending'} ${!canEditFriend ? '<span class="lock-icon-tag">🔒</span>' : ''}</span>
+            <span style="opacity:0.8;">(${this.escapeHtml(friend.name)})</span>
           </button>
         </div>
       </div>
@@ -937,7 +1026,7 @@ class LecturesApp {
       <div class="lecture-card-footer">
         <button type="button" class="lecture-link-btn btn-watch-lecture" data-lec-id="${lec.id}">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          <span>${lec.videoUrl ? 'Watch Lecture' : 'Preview & Notes'}</span>
+          <span>${lec.videoUrl ? 'Watch in Box' : 'Preview & Notes'}</span>
         </button>
         
         <div class="lecture-card-actions">
@@ -948,25 +1037,49 @@ class LecturesApp {
       </div>
     `;
 
-    // Watch status clicks
+    // Render In-Card Video Preview
+    const previewBox = card.querySelector('.lecture-card-preview-box');
+    if (previewBox) {
+      this.renderCardPreview(previewBox, lec);
+    }
+
+    // Watch status clicks with strict auth locking & immediate cloud sync
     card.querySelectorAll('.duo-watch-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const target = btn.dataset.target;
+        if (this.currentAuthUser !== target) {
+          const allowedName = target === 'user' ? user.name : friend.name;
+          this.showToast(`🔒 Locked: Only ${allowedName} can mark their own completion!`, 'warning');
+          return;
+        }
+
         if (target === 'user') lec.userWatched = !lec.userWatched;
         if (target === 'friend') lec.friendWatched = !lec.friendWatched;
         lec.updatedAt = Date.now();
         this.saveLectures();
-        this.showToast('Updated watch progress!', 'success');
+        this.pushToUpstash(false);
+        this.render();
+
+        const selfName = target === 'user' ? user.name : friend.name;
+        const isDone = target === 'user' ? lec.userWatched : lec.friendWatched;
+        this.showToast(`Marked ${isDone ? 'watched' : 'pending'} by ${selfName}! Synced to cloud.`, 'success');
       });
     });
 
-    // Watch lecture embedded player click
+    // Watch lecture button (plays directly in page preview box)
     const btnWatch = card.querySelector('.btn-watch-lecture');
     if (btnWatch) {
       btnWatch.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.openVideoPlayer(lec);
+        const box = card.querySelector('.lecture-card-preview-box');
+        const embed = this.parseVideoEmbed(lec.videoUrl);
+        if (embed && box) {
+          this.playInCard(box, lec, embed);
+          card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          this.openVideoPlayer(lec);
+        }
       });
     }
 
@@ -1020,6 +1133,7 @@ class LecturesApp {
     this.inputLecPlatform.value = 'Physics Wallah / Course Portal';
     this.inputLecUrl.value = '';
     this.inputLecNotes.value = '';
+    if (this.inputModalAutoUrl) this.inputModalAutoUrl.value = '';
 
     // Default expiry: 48 hours from now
     const defaultExpiry = new Date(Date.now() + 48 * 3600 * 1000);
@@ -1058,6 +1172,7 @@ class LecturesApp {
     this.inputLecPlatform.value = lec.platform || '';
     this.inputLecUrl.value = lec.videoUrl || '';
     this.inputLecNotes.value = lec.notes || '';
+    if (this.inputModalAutoUrl) this.inputModalAutoUrl.value = lec.videoUrl || '';
 
     if (lec.expiresAt) {
       this.setDateTimePicker(new Date(lec.expiresAt));
@@ -1108,6 +1223,15 @@ class LecturesApp {
     const isFriend = this.currentAuthUser === 'friend';
     const watchedState = this.checkInitialWatched.checked;
 
+    // Detect thumbnail if YouTube link provided
+    let autoThumbnail = '';
+    if (videoUrl) {
+      const ytMatch = videoUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/|live\/))([\w-]{11})/i);
+      if (ytMatch && ytMatch[1]) {
+        autoThumbnail = `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
+      }
+    }
+
     if (id) {
       // Edit
       const existing = this.lectures.find(l => l.id === id);
@@ -1119,6 +1243,7 @@ class LecturesApp {
         existing.instructor = instructor;
         existing.platform = platform;
         existing.videoUrl = videoUrl;
+        if (autoThumbnail) existing.thumbnail = autoThumbnail;
         existing.notes = notes;
         existing.color = color;
         existing.expiresAt = expiresAt;
@@ -1138,6 +1263,7 @@ class LecturesApp {
         instructor,
         platform,
         videoUrl,
+        thumbnail: autoThumbnail,
         notes,
         color,
         postedAt: Date.now(),
@@ -1151,6 +1277,7 @@ class LecturesApp {
     }
 
     this.saveLectures();
+    this.pushToUpstash(false);
     this.closeModal();
   }
 
@@ -1165,6 +1292,7 @@ class LecturesApp {
       }
       this.lectures = this.lectures.filter(l => l.id !== id);
       this.saveLectures();
+      this.pushToUpstash(false);
       this.showToast('Lecture removed and synced with cloud.', 'info');
     }
   }
@@ -1174,7 +1302,7 @@ class LecturesApp {
     const url = rawUrl.trim();
 
     // YouTube regex (supports youtu.be, youtube.com/watch?v=, /embed/, /shorts/, /live/)
-    const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/|live\/))([\w-]{11})/);
+    const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/|live\/))([\w-]{11})/i);
     if (ytMatch && ytMatch[1]) {
       const videoId = ytMatch[1];
       let startParam = '';
@@ -1182,16 +1310,20 @@ class LecturesApp {
       if (tMatch && tMatch[1]) startParam = `&start=${tMatch[1]}`;
       return {
         type: 'youtube',
+        videoId: videoId,
+        thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
         embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1${startParam}`,
         directUrl: url
       };
     }
 
     // Vimeo regex
-    const vimeoMatch = url.match(/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)/);
+    const vimeoMatch = url.match(/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)/i);
     if (vimeoMatch && vimeoMatch[1]) {
       return {
         type: 'vimeo',
+        videoId: vimeoMatch[1],
+        thumbnailUrl: '',
         embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`,
         directUrl: url
       };
@@ -1201,6 +1333,8 @@ class LecturesApp {
     if (/\.(mp4|webm|ogg|m4v)(\?.*)?$/i.test(url)) {
       return {
         type: 'video',
+        videoId: null,
+        thumbnailUrl: '',
         embedUrl: url,
         directUrl: url
       };
@@ -1209,9 +1343,328 @@ class LecturesApp {
     // Generic web preview
     return {
       type: 'web',
+      videoId: null,
+      thumbnailUrl: '',
       embedUrl: url,
       directUrl: url
     };
+  }
+
+  // Render the responsive preview layer inside a lecture card
+  renderCardPreview(box, lec) {
+    if (!box) return;
+    box.innerHTML = '';
+
+    const embed = this.parseVideoEmbed(lec.videoUrl);
+    let thumb = lec.thumbnail;
+    if (!thumb && embed && embed.thumbnailUrl) {
+      thumb = embed.thumbnailUrl;
+    }
+
+    if (embed) {
+      const thumbLayer = document.createElement('div');
+      thumbLayer.className = 'preview-thumb-layer';
+      if (thumb) {
+        thumbLayer.style.backgroundImage = `url('${thumb}')`;
+      } else {
+        thumbLayer.style.background = 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)';
+      }
+
+      thumbLayer.setAttribute('title', 'Click to play video directly in this box');
+      thumbLayer.innerHTML = `
+        <div class="preview-play-btn-circle" title="Play Video in Card">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="6 3 20 12 6 21 6 3"></polygon>
+          </svg>
+        </div>
+        <div class="preview-badges-row">
+          <span class="preview-badge-pill">📺 ${this.escapeHtml(lec.platform || 'Online Video')}</span>
+          <span class="preview-play-tag">▶ Play in Page</span>
+        </div>
+      `;
+
+      thumbLayer.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.playInCard(box, lec, embed);
+      });
+
+      box.appendChild(thumbLayer);
+    } else {
+      const emptyLayer = document.createElement('div');
+      emptyLayer.className = 'preview-thumb-layer';
+      emptyLayer.style.background = 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)';
+      emptyLayer.style.cursor = 'default';
+      emptyLayer.innerHTML = `
+        <div style="text-align: center; color: #94a3b8; font-size: 0.82rem; padding: 1rem; position: relative; z-index: 2;">
+          <div style="font-size: 1.8rem; margin-bottom: 0.25rem;">🎬</div>
+          <div style="font-weight: 600; color: #cbd5e1;">Platform Countdown Only</div>
+          <div style="font-size: 0.72rem; opacity: 0.8; margin-top: 0.2rem;">Click "Edit" to add video URL</div>
+        </div>
+      `;
+      box.appendChild(emptyLayer);
+    }
+  }
+
+  // Play video directly inside the card preview box without popup or leaving page
+  playInCard(box, lec, embed) {
+    if (!box || !embed) return;
+    box.innerHTML = `
+      <div class="card-inline-player-wrap">
+        <div class="card-inline-controls">
+          <button type="button" class="btn-inline-ctrl btn-close-inline" title="Close Video Preview">✕ Close</button>
+          <button type="button" class="btn-inline-ctrl btn-theatre-inline" title="Expand to Theatre Modal">⛶ Theatre</button>
+        </div>
+        <iframe class="card-inline-iframe" src="${embed.embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen title="${this.escapeHtml(lec.title)}"></iframe>
+      </div>
+    `;
+
+    box.querySelector('.btn-close-inline')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.renderCardPreview(box, lec);
+    });
+
+    box.querySelector('.btn-theatre-inline')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.openVideoPlayer(lec);
+    });
+  }
+
+  // Smart metadata fetcher from video URL (YouTube, Vimeo, etc.) with zero typing required
+  async fetchVideoMetadata(rawUrl) {
+    if (!rawUrl || !rawUrl.trim()) return null;
+    const url = rawUrl.trim();
+
+    const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/|live\/))([\w-]{11})/i);
+    const videoId = ytMatch ? ytMatch[1] : null;
+
+    let metadata = {
+      title: '',
+      instructor: '',
+      platform: 'Online Portal',
+      thumbnail: '',
+      durationMinutes: 60,
+      subject: '',
+      chapter: '',
+      videoUrl: url,
+      color: 'indigo'
+    };
+
+    if (videoId) {
+      metadata.platform = 'YouTube';
+      metadata.thumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    } else if (/vimeo\.com/i.test(url)) {
+      metadata.platform = 'Vimeo';
+    } else if (/physicswallah|pw\.live/i.test(url)) {
+      metadata.platform = 'Physics Wallah';
+    } else if (/unacademy\.com/i.test(url)) {
+      metadata.platform = 'Unacademy';
+    }
+
+    // 1. Fetch via noembed.com (CORS enabled)
+    try {
+      const noembedRes = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`);
+      if (noembedRes.ok) {
+        const data = await noembedRes.json();
+        if (data && !data.error) {
+          if (data.title) metadata.title = data.title;
+          if (data.author_name) metadata.instructor = data.author_name;
+          if (data.provider_name) metadata.platform = data.provider_name;
+          if (data.thumbnail_url) metadata.thumbnail = data.thumbnail_url;
+        }
+      }
+    } catch (e) {
+      // Fallback: YouTube oEmbed
+      if (videoId) {
+        try {
+          const ytRes = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+          if (ytRes.ok) {
+            const ytData = await ytRes.json();
+            if (ytData.title) metadata.title = ytData.title;
+            if (ytData.author_name) metadata.instructor = ytData.author_name;
+            if (ytData.thumbnail_url) metadata.thumbnail = ytData.thumbnail_url;
+          }
+        } catch (err) {}
+      }
+    }
+
+    // Friendly fallback title if not resolved
+    if (!metadata.title) {
+      if (videoId) {
+        metadata.title = `YouTube Class Video (${videoId})`;
+      } else {
+        try {
+          const parsed = new URL(url);
+          metadata.title = `Lecture from ${parsed.hostname}`;
+        } catch (e) {
+          metadata.title = 'Class Lecture Video';
+        }
+      }
+    }
+
+    // Smart Subject & Color detection from title and instructor
+    const textPool = (metadata.title + ' ' + (metadata.instructor || '')).toLowerCase();
+    
+    // Check user's existing subjects from state
+    const existingSubjects = this.plannerState?.subjects || [];
+    let matchedSubj = existingSubjects.find(s => s && s.name && textPool.includes(s.name.toLowerCase()));
+    
+    if (matchedSubj) {
+      metadata.subject = matchedSubj.name;
+      metadata.color = matchedSubj.color || 'indigo';
+    } else {
+      const subjectKeywords = [
+        { name: 'Physics', color: 'indigo', words: ['physics', 'physic', 'mechanics', 'optics', 'thermo', 'electro', 'kinematics'] },
+        { name: 'Chemistry', color: 'teal', words: ['chemistry', 'chemical', 'organic', 'inorganic', 'physical chem', 'reaction'] },
+        { name: 'Mathematics', color: 'amber', words: ['math', 'mathematics', 'calculus', 'algebra', 'trigonometry', 'integral', 'matrices'] },
+        { name: 'Biology', color: 'emerald', words: ['biology', 'botany', 'zoology', 'genetics', 'cell', 'human physiology'] },
+        { name: 'Computer Science', color: 'purple', words: ['computer', 'cs', 'coding', 'python', 'java', 'programming', 'dsa'] },
+        { name: 'English', color: 'rose', words: ['english', 'grammar', 'literature'] }
+      ];
+      for (const sk of subjectKeywords) {
+        if (sk.words.some(w => textPool.includes(w))) {
+          metadata.subject = sk.name;
+          metadata.color = sk.color;
+          break;
+        }
+      }
+    }
+
+    if (!metadata.subject) {
+      if (existingSubjects.length > 0 && existingSubjects[0].name) {
+        metadata.subject = existingSubjects[0].name;
+        metadata.color = existingSubjects[0].color || 'indigo';
+      } else {
+        metadata.subject = 'Physics';
+        metadata.color = 'indigo';
+      }
+    }
+
+    // Detect Chapter / Topic from title
+    const chMatch = metadata.title.match(/(?:chapter|ch\.?|unit|module)\s*(\d+|[ivxlcdm]+)[\s:|-]*([^|\n-]+)?/i);
+    if (chMatch) {
+      metadata.chapter = chMatch[0].trim();
+    } else {
+      const partMatch = metadata.title.match(/^([^:-|]+)[-:|]/);
+      if (partMatch && partMatch[1].length < 35) {
+        metadata.chapter = partMatch[1].trim();
+      }
+    }
+
+    // Detect Duration from title if mentioned
+    const hourMatch = metadata.title.match(/(\d+(?:\.\d+)?)\s*(?:hrs?|hours?)/i);
+    const minMatch = metadata.title.match(/(\d+)\s*(?:mins?|minutes?)/i);
+    if (hourMatch) {
+      metadata.durationMinutes = Math.round(parseFloat(hourMatch[1]) * 60);
+    } else if (minMatch) {
+      metadata.durationMinutes = parseInt(minMatch[1], 10);
+    } else {
+      metadata.durationMinutes = 60; // 1 hr default
+    }
+
+    return metadata;
+  }
+
+  // Handle Instant Top Smart URL Add (zero typing needed)
+  async handleSmartFetchAndAdd(e) {
+    if (e) e.preventDefault();
+    if (!this.inputSmartVideoUrl) return;
+    const url = this.inputSmartVideoUrl.value.trim();
+    if (!url) {
+      this.showToast('Please enter a video URL first', 'warning');
+      return;
+    }
+
+    if (!this.checkPermissionOrPrompt('addLecture', 'auto-fetch and add lectures')) {
+      return;
+    }
+
+    if (this.spinnerSmartFetch) this.spinnerSmartFetch.classList.remove('hidden');
+    if (this.btnSmartSubmitText) this.btnSmartSubmitText.textContent = 'Fetching details...';
+    if (this.btnSmartSubmit) this.btnSmartSubmit.disabled = true;
+
+    try {
+      const meta = await this.fetchVideoMetadata(url);
+      if (!meta || !meta.title) {
+        throw new Error('Could not fetch details from link');
+      }
+
+      const isFriend = this.currentAuthUser === 'friend';
+      // Default expiry 7 days from now
+      const expiresAt = Date.now() + 7 * 24 * 3600 * 1000;
+
+      const newLec = {
+        id: 'lec-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 6),
+        subject: meta.subject || 'Physics',
+        chapter: meta.chapter || '',
+        title: meta.title,
+        durationMinutes: meta.durationMinutes || 60,
+        instructor: meta.instructor || '',
+        platform: meta.platform || 'YouTube',
+        videoUrl: meta.videoUrl || url,
+        thumbnail: meta.thumbnail || '',
+        notes: `Auto-fetched from ${meta.platform || 'video'}`,
+        color: meta.color || 'indigo',
+        postedAt: Date.now(),
+        expiresAt: expiresAt,
+        updatedAt: Date.now(),
+        userWatched: false,
+        friendWatched: false
+      };
+
+      this.lectures.unshift(newLec);
+      this.saveLectures();
+      this.pushToUpstash(false);
+
+      this.inputSmartVideoUrl.value = '';
+      this.showToast(`🎉 Auto-Added: "${newLec.title}"!`, 'success');
+      this.render();
+    } catch (err) {
+      this.showToast(`Error fetching video: ${err.message || 'Please verify link'}`, 'warning');
+    } finally {
+      if (this.spinnerSmartFetch) this.spinnerSmartFetch.classList.add('hidden');
+      if (this.btnSmartSubmitText) this.btnSmartSubmitText.textContent = '⚡ Auto-Fetch & Add';
+      if (this.btnSmartSubmit) this.btnSmartSubmit.disabled = false;
+    }
+  }
+
+  // Handle Modal Auto-Fetch (auto-populates add/edit modal form)
+  async handleModalAutoFetch() {
+    if (!this.inputModalAutoUrl) return;
+    const url = this.inputModalAutoUrl.value.trim();
+    if (!url) {
+      this.showToast('Paste a video link into the auto-fill field first', 'warning');
+      return;
+    }
+
+    if (this.spinnerModalAutoFetch) this.spinnerModalAutoFetch.classList.remove('hidden');
+    if (this.btnModalAutoFetchText) this.btnModalAutoFetchText.textContent = 'Fetching...';
+    if (this.btnModalAutoFetch) this.btnModalAutoFetch.disabled = true;
+
+    try {
+      const meta = await this.fetchVideoMetadata(url);
+      if (!meta) throw new Error('Could not fetch details');
+
+      if (meta.title && this.inputLecTitle) this.inputLecTitle.value = meta.title;
+      if (meta.subject && this.inputLecSubject) this.inputLecSubject.value = meta.subject;
+      if (meta.chapter && this.inputLecChapter) this.inputLecChapter.value = meta.chapter;
+      if (meta.instructor && this.inputLecInstructor) this.inputLecInstructor.value = meta.instructor;
+      if (meta.platform && this.inputLecPlatform) this.inputLecPlatform.value = meta.platform;
+      if (meta.durationMinutes && this.inputLecDuration) this.inputLecDuration.value = meta.durationMinutes;
+      if (meta.videoUrl && this.inputLecUrl) this.inputLecUrl.value = meta.videoUrl;
+
+      if (meta.color) {
+        const colorRadio = document.querySelector(`input[name="lecColor"][value="${meta.color}"]`);
+        if (colorRadio) colorRadio.checked = true;
+      }
+
+      this.showToast(`⚡ Details auto-filled for "${meta.title}"!`, 'success');
+    } catch (err) {
+      this.showToast(`Auto-fill error: ${err.message || 'Please check URL'}`, 'warning');
+    } finally {
+      if (this.spinnerModalAutoFetch) this.spinnerModalAutoFetch.classList.add('hidden');
+      if (this.btnModalAutoFetchText) this.btnModalAutoFetchText.textContent = '⚡ Auto-Fill';
+      if (this.btnModalAutoFetch) this.btnModalAutoFetch.disabled = false;
+    }
   }
 
   openVideoPlayer(lec) {
@@ -1291,21 +1744,25 @@ class LecturesApp {
     if (!this.activePlayerLecture) return;
     const lec = this.activePlayerLecture;
     const { user, friend } = this.plannerState.profiles || { user: { name: 'Shahzeb' }, friend: { name: 'Aman' } };
+    const canEditUser = this.currentAuthUser === 'user';
+    const canEditFriend = this.currentAuthUser === 'friend';
 
     if (this.playerUserWatchStatus) {
-      this.playerUserWatchStatus.textContent = lec.userWatched ? '✓ Watched' : '○ Mark Watched';
+      this.playerUserWatchStatus.textContent = (lec.userWatched ? '✓ Watched' : '○ Mark Watched') + (!canEditUser ? ' 🔒' : '');
     }
     if (this.playerUserName) this.playerUserName.textContent = `(${user.name})`;
     if (this.playerToggleUserWatch) {
-      this.playerToggleUserWatch.className = `btn-duo-complete user-complete ${lec.userWatched ? 'completed' : ''}`;
+      this.playerToggleUserWatch.className = `btn-duo-complete user-complete ${lec.userWatched ? 'completed' : ''} ${!canEditUser ? 'locked' : ''}`;
+      this.playerToggleUserWatch.title = canEditUser ? 'Toggle your completion' : `🔒 Locked: Only ${user.name} can mark completion`;
     }
 
     if (this.playerFriendWatchStatus) {
-      this.playerFriendWatchStatus.textContent = lec.friendWatched ? '✓ Watched' : '○ Mark Watched';
+      this.playerFriendWatchStatus.textContent = (lec.friendWatched ? '✓ Watched' : '○ Mark Watched') + (!canEditFriend ? ' 🔒' : '');
     }
     if (this.playerFriendName) this.playerFriendName.textContent = `(${friend.name})`;
     if (this.playerToggleFriendWatch) {
-      this.playerToggleFriendWatch.className = `btn-duo-complete friend-complete ${lec.friendWatched ? 'completed' : ''}`;
+      this.playerToggleFriendWatch.className = `btn-duo-complete friend-complete ${lec.friendWatched ? 'completed' : ''} ${!canEditFriend ? 'locked' : ''}`;
+      this.playerToggleFriendWatch.title = canEditFriend ? 'Toggle your completion' : `🔒 Locked: Only ${friend.name} can mark completion`;
     }
   }
 

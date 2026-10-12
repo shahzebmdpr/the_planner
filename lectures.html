@@ -104,6 +104,30 @@
           </button>
         </div>
       </section>
+ 
+      <!-- Smart Instant URL Auto-Fetch Section -->
+      <section class="smart-url-card" aria-label="Auto Fetch Lecture via URL">
+        <div class="smart-url-header">
+          <div class="smart-url-icon-badge">⚡</div>
+          <div class="smart-url-titles">
+            <span class="smart-url-main-title">Instant Smart URL Add</span>
+            <span class="smart-url-subtitle">Paste any YouTube or class video link — title, instructor, platform, duration & subject are fetched automatically with zero typing!</span>
+          </div>
+        </div>
+        <form id="formSmartFetch" class="smart-url-form">
+          <div class="smart-input-wrapper">
+            <svg class="smart-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+            <input type="url" id="inputSmartVideoUrl" placeholder="Paste YouTube link (e.g. https://www.youtube.com/watch?v=...) to auto-fetch all details..." required autocomplete="off">
+            <button type="submit" class="btn btn-primary btn-smart-submit" id="btnSmartSubmit">
+              <span class="btn-spinner hidden" id="spinnerSmartFetch"></span>
+              <span id="btnSmartSubmitText">⚡ Auto-Fetch & Add</span>
+            </button>
+          </div>
+        </form>
+      </section>
 
       <!-- Statistical Overview -->
       <section class="lecture-stats-grid" aria-label="Lectures Summary">
@@ -211,6 +235,21 @@
 
       <form id="formLecture" class="modal-form">
         <input type="hidden" id="inputLecId" value="">
+
+        <!-- Smart Auto-Fetch inside Modal -->
+        <div class="modal-smart-autofetch-box">
+          <label for="inputModalAutoUrl" class="modal-autofetch-label">
+            <span>⚡ Paste Video URL to Auto-Fill Everything:</span>
+          </label>
+          <div class="modal-autofetch-row">
+            <input type="url" id="inputModalAutoUrl" placeholder="Paste YouTube link to auto-fetch title, teacher, duration..." autocomplete="off">
+            <button type="button" class="btn btn-secondary btn-sm" id="btnModalAutoFetch">
+              <span class="btn-spinner hidden" id="spinnerModalAutoFetch"></span>
+              <span id="btnModalAutoFetchText">⚡ Auto-Fill</span>
+            </button>
+          </div>
+          <span class="field-hint">Automatically populates title, subject, teacher, platform & duration from YouTube!</span>
+        </div>
 
         <!-- Subject & Chapter row -->
         <div class="form-row">
