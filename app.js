@@ -33,6 +33,7 @@ class AmanStudyTrackerApp {
     this.activeFilter = 'all';
     this.searchQuery = '';
     this.collapsedChapters = new Set();
+    this.selectedAnalyzerSubject = 'all';
     this.upstash = this.loadUpstashConfig();
     this.syncPollTimer = null;
     this.autoPushTimer = null;
@@ -119,6 +120,10 @@ class AmanStudyTrackerApp {
     this.btnOpenMasterKeyModal = document.getElementById('btnOpenMasterKeyModal');
     this.btnOpenUpstashModal = document.getElementById('btnOpenUpstashModal');
     this.btnOpenAddItem = document.getElementById('btnOpenAddItem');
+
+    this.analyzerScopeBadge = document.getElementById('analyzerScopeBadge');
+    this.analyzerScopeSubtitle = document.getElementById('analyzerScopeSubtitle');
+    this.analyzerSubjectTabs = document.getElementById('analyzerSubjectTabs');
 
     this.dashAvatarUser = document.getElementById('dashAvatarUser');
     this.dashTagUser = document.getElementById('dashTagUser');
@@ -692,7 +697,12 @@ class AmanStudyTrackerApp {
     });
   }
 
-  getStats() {
+  getStats(subjectFilter = null) {
+    const filterSubject = subjectFilter !== null ? subjectFilter : this.selectedAnalyzerSubject;
+    const targetItems = (!filterSubject || filterSubject === 'all')
+      ? this.state.items
+      : this.state.items.filter(item => (item.subject || 'General').trim() === filterSubject.trim());
+
     let totalTopics = 0;
     let userCount = 0;
     let friendCount = 0;
@@ -701,7 +711,7 @@ class AmanStudyTrackerApp {
     let bothCount = 0;
     let neitherCount = 0;
 
-    this.state.items.forEach(t => {
+    targetItems.forEach(t => {
       totalTopics++;
       if (t.userLearned) userCount++;
       if (t.friendLearned) friendCount++;
@@ -722,13 +732,102 @@ class AmanStudyTrackerApp {
     const userLead = Math.max(0, userCount - friendCount);
     const friendLead = Math.max(0, friendCount - userCount);
 
-    return { totalTopics, userCount, friendCount, userPercent, friendPercent, friendOnlyCount, userOnlyCount, bothCount, neitherCount, userLead, friendLead };
+    return { totalTopics, userCount, friendCount, userPercent, friendPercent, friendOnlyCount, userOnlyCount, bothCount, neitherCount, userLead, friendLead, filterSubject };
   }
 
   render() {
     this.updateProfilesUI();
+    this.renderSubjectAnalyzerTabs();
     this.updateStatsUI();
     this.renderItems();
+  }
+
+  renderSubjectAnalyzerTabs() {
+    if (!this.analyzerSubjectTabs) return;
+
+    // Collect distinct subjects with their topic count and assigned color
+    const subjectsMap = new Map();
+    this.state.items.forEach(item => {
+      const subj = (item.subject || 'General').trim();
+      if (!subjectsMap.has(subj)) {
+        subjectsMap.set(subj, { count: 0, color: item.color || 'indigo' });
+      }
+      subjectsMap.get(subj).count++;
+    });
+
+    const totalAll = this.state.items.length;
+    const subjects = Array.from(subjectsMap.entries()).map(([name, data]) => ({
+      name,
+      count: data.count,
+      color: data.color
+    }));
+
+    // If currently selected subject no longer exists, reset to 'all'
+    if (this.selectedAnalyzerSubject !== 'all' && !subjectsMap.has(this.selectedAnalyzerSubject)) {
+      this.selectedAnalyzerSubject = 'all';
+    }
+
+    let tabsHtml = `
+      <button type="button" 
+        class="analyzer-tab-btn ${this.selectedAnalyzerSubject === 'all' ? 'active' : ''}" 
+        data-subject="all" 
+        role="tab" 
+        aria-selected="${this.selectedAnalyzerSubject === 'all'}"
+        title="View Overall Analyzer across all subjects">
+        <span class="tab-icon">🌐</span>
+        <span class="tab-label">Overall Analyzer</span>
+        <span class="tab-count">${totalAll}</span>
+      </button>
+    `;
+
+    subjects.forEach(subj => {
+      const isActive = this.selectedAnalyzerSubject === subj.name;
+      tabsHtml += `
+        <button type="button" 
+          class="analyzer-tab-btn theme-${subj.color} ${isActive ? 'active' : ''}" 
+          data-subject="${this.escapeHtml(subj.name)}" 
+          role="tab" 
+          aria-selected="${isActive}"
+          title="Switch analyzer to ${this.escapeHtml(subj.name)}">
+          <span class="tab-dot dot-${subj.color}"></span>
+          <span class="tab-label">${this.escapeHtml(subj.name)}</span>
+          <span class="tab-count">${subj.count}</span>
+        </button>
+      `;
+    });
+
+    this.analyzerSubjectTabs.innerHTML = tabsHtml;
+
+    this.analyzerSubjectTabs.querySelectorAll('.analyzer-tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetSubj = btn.getAttribute('data-subject');
+        this.selectAnalyzerSubject(targetSubj);
+      });
+    });
+  }
+
+  selectAnalyzerSubject(subjectName) {
+    this.selectedAnalyzerSubject = subjectName || 'all';
+    
+    // Update active tab styles immediately
+    if (this.analyzerSubjectTabs) {
+      this.analyzerSubjectTabs.querySelectorAll('.analyzer-tab-btn').forEach(btn => {
+        const isMatch = btn.getAttribute('data-subject') === this.selectedAnalyzerSubject;
+        btn.classList.toggle('active', isMatch);
+        btn.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+      });
+    }
+
+    this.updateStatsUI();
+    this.renderItems();
+
+    if (this.selectedAnalyzerSubject !== 'all') {
+      const targetCard = this.chaptersContainer.querySelector('.subject-card');
+      if (targetCard) {
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
   }
 
   updateProfilesUI() {
@@ -793,6 +892,27 @@ class AmanStudyTrackerApp {
     this.pillCountUserOnly.textContent = selfOnlyDone;
     this.pillCountBoth.textContent = stats.bothCount;
     this.pillCountNeither.textContent = stats.neitherCount;
+
+    // Update Scope Badge & Subtitle
+    if (this.analyzerScopeBadge) {
+      if (this.selectedAnalyzerSubject === 'all') {
+        this.analyzerScopeBadge.innerHTML = `
+          <span class="scope-icon-wrap scope-all">🌐</span>
+          <span>Overall Analyzer</span>
+        `;
+        if (this.analyzerScopeSubtitle) {
+          this.analyzerScopeSubtitle.textContent = `Comparing all ${stats.totalTopics} topics across all subjects combined`;
+        }
+      } else {
+        this.analyzerScopeBadge.innerHTML = `
+          <span class="scope-icon-wrap scope-subject">📊</span>
+          <span>${this.escapeHtml(this.selectedAnalyzerSubject)} Analyzer</span>
+        `;
+        if (this.analyzerScopeSubtitle) {
+          this.analyzerScopeSubtitle.textContent = `Focused on ${stats.totalTopics} topics in ${this.escapeHtml(this.selectedAnalyzerSubject)} • Switch to Overall for full syllabus`;
+        }
+      }
+    }
   }
 
   setFilter(filterName) {
@@ -950,7 +1070,7 @@ class AmanStudyTrackerApp {
 
       subjCard.querySelector('.btn-add-subject-item').addEventListener('click', (e) => {
         e.stopPropagation();
-        this.openAddItemModal(subjName, subjData.color);
+        this.openAddItemModal(subjName, subjData.color, '');
       });
 
       subjCard.querySelector('.btn-delete-subject').addEventListener('click', (e) => {
@@ -975,7 +1095,7 @@ class AmanStudyTrackerApp {
         }
       }
 
-      // 2. Chapters
+      // 2. Chapters (directly displayed with accordion expansion)
       for (const [chapName, items] of Object.entries(subjData.chapters)) {
         const chapterId = subjName + '::' + chapName;
         const chapterCard = this.createGroupCard(chapName, subjData.color, items, chapterId, subjName);
@@ -988,6 +1108,13 @@ class AmanStudyTrackerApp {
 
   getFilteredItems() {
     return this.state.items.filter(item => {
+      // 1. Filter by active Analyzer Subject
+      if (this.selectedAnalyzerSubject && this.selectedAnalyzerSubject !== 'all') {
+        const itemSubj = (item.subject || 'General').trim();
+        if (itemSubj !== this.selectedAnalyzerSubject.trim()) return false;
+      }
+
+      // 2. Search query filter
       if (this.searchQuery) {
         const inTopic = (item.topic || '').toLowerCase().includes(this.searchQuery);
         const inChap = (item.chapter || '').toLowerCase().includes(this.searchQuery);
@@ -995,6 +1122,7 @@ class AmanStudyTrackerApp {
         if (!inTopic && !inChap && !inSubj) return false;
       }
 
+      // 3. Learning status filter
       const isFriend = this.currentAuthUser === 'friend';
       const partnerLearned = isFriend ? item.userLearned : item.friendLearned;
       const selfLearned = isFriend ? item.friendLearned : item.userLearned;
@@ -1037,6 +1165,7 @@ class AmanStudyTrackerApp {
             <div class="chapter-title-line">
               <h3 class="chapter-title">${this.escapeHtml(chapterName)}</h3>
               <span class="topic-count-tag">${total} topic${total === 1 ? '' : 's'}</span>
+              <span class="chapter-open-pill">${isCollapsed ? 'Open Topics ▾' : 'Collapse ▴'}</span>
             </div>
           </div>
         </div>
@@ -1088,7 +1217,7 @@ class AmanStudyTrackerApp {
     }
 
     card.querySelector('[data-action="toggle-chapter"]').addEventListener('click', (e) => {
-      if (e.target.closest('.chapter-actions-group') || e.target.closest('.btn-collapse')) {
+      if (e.target.closest('.chapter-actions-group')) {
         return;
       }
       if (this.collapsedChapters.has(chapterId)) this.collapsedChapters.delete(chapterId);
@@ -1212,6 +1341,12 @@ class AmanStudyTrackerApp {
   }
 
   openAddItemModal(defaultSubject = '', defaultColor = 'indigo', defaultChapter = '') {
+    if (!defaultSubject && this.selectedAnalyzerSubject && this.selectedAnalyzerSubject !== 'all') {
+      defaultSubject = this.selectedAnalyzerSubject;
+      const existing = this.state.items.find(i => (i.subject || '').trim() === defaultSubject.trim());
+      if (existing && existing.color) defaultColor = existing.color;
+    }
+
     this.modalItemTitle.textContent = defaultSubject ? `Add Item to ${defaultSubject}` : 'Add Study Item';
     this.inputItemId.value = '';
     this.inputItemSubject.value = defaultSubject;
@@ -1357,6 +1492,9 @@ class AmanStudyTrackerApp {
       });
       const matchingIds = new Set(matching.map(i => i.id));
       this.state.items = this.state.items.filter(i => !matchingIds.has(i.id));
+      if (this.selectedAnalyzerSubject === subjName) {
+        this.selectedAnalyzerSubject = 'all';
+      }
       this.saveState();
       if (this.upstash && this.upstash.isConnected) {
         this.pushToUpstash(false);
