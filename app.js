@@ -859,7 +859,6 @@ class AmanStudyTrackerApp {
             <div class="subject-info">
               <div class="subject-title-line">
                 <h2 class="subject-title">${this.escapeHtml(subjName)}</h2>
-                <span class="subject-badge theme-${subjData.color}">${this.escapeHtml(subjName)}</span>
               </div>
               <div class="subject-meta-chips">
                 ${totalChapters > 0 ? `<span class="subject-chip">📚 ${totalChapters} Chapter${totalChapters === 1 ? '' : 's'}</span>` : ''}
@@ -1014,17 +1013,16 @@ class AmanStudyTrackerApp {
   createItemRow(item, color = 'indigo') {
     const { user, friend } = this.state.profiles;
     const row = document.createElement('div');
-    row.className = 'topic-row';
+    const isUserDone = !!item.userLearned;
+    const isFriendDone = !!item.friendLearned;
+    
+    row.className = `topic-row ${isUserDone ? 'is-user-done' : ''} ${isFriendDone ? 'is-friend-done' : ''} ${isUserDone && isFriendDone ? 'is-both-done' : ''}`;
 
     let gapBadgeHtml = '';
     if (item.friendLearned && !item.userLearned) {
-      gapBadgeHtml = `<span class="gap-tag tag-friend-only"><span class="gap-dot friend-dot"></span>💡 ${this.escapeHtml(friend.name)} Mastered</span>`;
+      gapBadgeHtml = `<span class="gap-tag tag-friend-only" title="${this.escapeHtml(friend.name)} mastered this topic"><span class="gap-dot friend-dot"></span>💡 ${this.escapeHtml(friend.name)} ahead</span>`;
     } else if (item.userLearned && !item.friendLearned) {
-      gapBadgeHtml = `<span class="gap-tag tag-user-only"><span class="gap-dot user-dot"></span>🚀 ${this.escapeHtml(user.name)} Mastered</span>`;
-    } else if (item.userLearned && item.friendLearned) {
-      gapBadgeHtml = `<span class="gap-tag tag-both"><span class="gap-dot both-dot"></span>✨ Both Understood</span>`;
-    } else {
-      gapBadgeHtml = `<span class="gap-tag tag-neither"><span class="gap-dot neither-dot"></span>⏳ Both Pending</span>`;
+      gapBadgeHtml = `<span class="gap-tag tag-user-only" title="You mastered this topic"><span class="gap-dot user-dot"></span>🚀 You lead</span>`;
     }
 
     const isUserActive = this.currentAuthUser === 'user';
@@ -1034,8 +1032,9 @@ class AmanStudyTrackerApp {
 
     const displayTitle = item.topic || item.chapter || item.subject;
 
+    // Only show chapter breadcrumb if currently filtering by search, to eliminate redundant labels
     let breadcrumbHtml = '';
-    if (item.chapter && item.topic) {
+    if (this.searchQuery && item.chapter && item.topic) {
       breadcrumbHtml = `<span class="topic-breadcrumb">${this.escapeHtml(item.chapter)}</span>`;
     }
 
